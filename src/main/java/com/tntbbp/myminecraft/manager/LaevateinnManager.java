@@ -72,6 +72,10 @@ public class LaevateinnManager {
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ATTRIBUTES);
         meta.addEnchant(Enchantment.FIRE_ASPECT, 2, true);
+        int modelData = plugin.getConfig().getInt("laevateinn.model-data", 0);
+        if (modelData != 0) {
+            meta.setCustomModelData(modelData);
+        }
         item.setItemMeta(meta);
         return item;
     }
