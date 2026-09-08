@@ -57,7 +57,14 @@ mvn clean package
 
 ```
 resource-pack=https://raw.githubusercontent.com/tntbbp123-wq/my-Minecraft/main/MyMinecraft-ResourcePack.zip
-resource-pack-sha1=<zip 파일의 SHA-1 해시>
+resource-pack-sha1=ac1ff2ce53cc13f4f867710377c09d303c66d9e1
+```
+
+`resource-pack-prompt`를 함께 쓴다면 반드시 JSON 형식이어야 합니다 (일반 텍스트를 그대로 넣으면
+서버 시작 시 파싱 에러가 발생합니다):
+
+```
+resource-pack-prompt={"text":"이 서버는 필수 리소스팩이 있습니다. 다운로드 후 입장해주세요."}
 ```
 
 해시는 `sha1sum MyMinecraft-ResourcePack.zip` 로 확인할 수 있습니다. 서버를 재시작하면
