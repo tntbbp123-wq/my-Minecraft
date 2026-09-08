@@ -8,6 +8,7 @@ import com.tntbbp.myminecraft.manager.HomeManager;
 import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
 import com.tntbbp.myminecraft.manager.StockManager;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -16,6 +17,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
@@ -51,6 +54,29 @@ public class GUIListener implements Listener {
             handleStockClick((Player) event.getWhoClicked(), stockHolder, event.getSlot(), event.getClick());
         } else if (holder instanceof EnhanceHolder) {
             handleEnhanceClick(event);
+        }
+    }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        InventoryHolder holder = event.getInventory().getHolder();
+        int topSize = event.getInventory().getSize();
+
+        if (holder instanceof MenuHolder || holder instanceof HomeHolder || holder instanceof StockHolder) {
+            for (int slot : event.getRawSlots()) {
+                if (slot < topSize) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        } else if (holder instanceof EnhanceHolder) {
+            for (int slot : event.getRawSlots()) {
+                if (slot < topSize && slot != EnhanceGUI.INPUT_SLOT && slot != EnhanceGUI.MATERIAL_SLOT) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            Bukkit.getScheduler().runTask(plugin, () -> EnhanceGUI.refreshProgress(plugin, event.getInventory()));
         }
     }
 
@@ -159,15 +185,19 @@ public class GUIListener implements Listener {
     }
 
     private void handleEnhanceClick(InventoryClickEvent event) {
-        int slot = event.getRawSlot();
+        Inventory topInventory = event.getInventory();
         boolean isTopInventory = event.getClickedInventory() != null
-                && event.getClickedInventory() == event.getInventory();
+                && event.getClickedInventory() == topInventory;
 
         if (!isTopInventory) {
+            // 플레이어 인벤토리에서 쉬프트클릭으로 넣는 경우: 입력/재료 칸에 들어갈 수 있으므로 갱신만 예약한다.
+            Bukkit.getScheduler().runTask(plugin, () -> EnhanceGUI.refreshProgress(plugin, topInventory));
             return;
         }
 
+        int slot = event.getRawSlot();
         if (slot == EnhanceGUI.INPUT_SLOT || slot == EnhanceGUI.MATERIAL_SLOT) {
+            Bukkit.getScheduler().runTask(plugin, () -> EnhanceGUI.refreshProgress(plugin, topInventory));
             return;
         }
 
@@ -220,5 +250,6 @@ public class GUIListener implements Listener {
         } else {
             player.sendMessage(ChatColor.RED + "강화 실패... 재료와 " + economyManager.currencyName() + "가 소모되었습니다.");
         }
+        EnhanceGUI.refreshProgress(plugin, event.getInventory());
     }
 }
