@@ -50,27 +50,33 @@ stock:
 enhance:
   # 강화석 아이콘 재질 (전용 아이템이며, /enhanceitem stone <player> 로 지급)
   material: AMETHYST_SHARD
+  # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 기본 아이콘으로 보임)
+  model-data: 500001
   # 확률 강화 두루마리 등급 목록 (전용 아이템이며, /enhanceitem scroll:<id> <player> 로 지급)
   scrolls:
     - id: common
       name: "일반등급 두루마리"
       material: PAPER
       color: f
+      model-data: 500010
       bonus-percent: 10.0
     - id: rare
       name: "레어등급 두루마리"
       material: PAPER
       color: 9
+      model-data: 500011
       bonus-percent: 20.0
     - id: epic
       name: "에픽등급 두루마리"
       material: PAPER
       color: 5
+      model-data: 500012
       bonus-percent: 30.0
     - id: legendary
       name: "레전더리등급 두루마리"
       material: PAPER
       color: 6
+      model-data: 500013
       bonus-percent: 45.0
   base-success-percent: 100.0
   decrease-per-level: 8.0

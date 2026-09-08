@@ -35,3 +35,25 @@ mvn clean package
 
 관리자 권한(`myminecraft.admin`, 기본 op)이 있는 플레이어만 `/spawn set`, `/lobby set`을
 사용할 수 있습니다.
+
+## 리소스팩 (강화석 / 두루마리 커스텀 텍스처)
+
+`resourcepack/` 폴더(및 루트의 `MyMinecraft-ResourcePack.zip`)는 강화석과 두루마리 4등급이
+전용 픽셀아트 아이콘으로 보이도록 만든 클라이언트 리소스팩입니다. `CustomModelData`로
+동작하므로 리소스팩을 적용하지 않은 플레이어에게는 원래 아이콘(강화석→자수정 조각,
+두루마리→종이)으로만 보이고 기능에는 영향이 없습니다.
+
+**적용 방법**
+1. `MyMinecraft-ResourcePack.zip`을 플레이어가 접근 가능한 URL로 업로드합니다.
+   (자체 웹호스팅, 또는 이 저장소를 사용 중이라면
+   `https://raw.githubusercontent.com/<owner>/<repo>/<branch>/MyMinecraft-ResourcePack.zip`)
+2. `server.properties`에 아래 두 값을 설정합니다.
+   ```
+   resource-pack=<위에서 올린 zip의 URL>
+   resource-pack-sha1=<zip 파일의 SHA-1 해시>
+   ```
+   해시는 `sha1sum MyMinecraft-ResourcePack.zip` 로 확인할 수 있습니다.
+3. 서버를 재시작하면 접속하는 플레이어에게 리소스팩 적용 여부를 묻는 창이 뜹니다.
+
+리소스팩 zip 파일을 수정한 뒤에는 반드시 해시를 다시 계산해 `resource-pack-sha1`도
+갱신해야 합니다. (zip 내용이 바뀌면 해시가 달라집니다.)

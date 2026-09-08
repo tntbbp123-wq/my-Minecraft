@@ -1,0 +1,24 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "item/paper"
+  },
+  "overrides": [
+    {
+      "predicate": { "custom_model_data": 500010 },
+      "model": "item/scroll_common"
+    },
+    {
+      "predicate": { "custom_model_data": 500011 },
+      "model": "item/scroll_rare"
+    },
+    {
+      "predicate": { "custom_model_data": 500012 },
+      "model": "item/scroll_epic"
+    },
+    {
+      "predicate": { "custom_model_data": 500013 },
+      "model": "item/scroll_legendary"
+    }
+  ]
+}

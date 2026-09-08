@@ -16,8 +16,8 @@ import java.util.Map;
 /** 대장간 강화 시스템의 계산/적용 로직 및 전용 아이템(강화석, 등급별 확률 강화 두루마리) 정의. */
 public class EnhanceManager {
 
-    /** 확률 강화 두루마리의 등급 정의 (id, 표시 이름, 아이콘, 색상 코드, 성공 확률 보너스%). */
-    public record ScrollGrade(String id, String displayName, Material material, String colorCode, double bonusPercent) {
+    /** 확률 강화 두루마리의 등급 정의 (id, 표시 이름, 아이콘, 색상 코드, CustomModelData, 성공 확률 보너스%). */
+    public record ScrollGrade(String id, String displayName, Material material, String colorCode, int modelData, double bonusPercent) {
     }
 
     private final MyMinecraftPlugin plugin;
@@ -45,10 +45,11 @@ public class EnhanceManager {
             }
             double bonus = raw.get("bonus-percent") instanceof Number n ? n.doubleValue() : 10.0;
             String color = raw.get("color") != null ? String.valueOf(raw.get("color")) : "f";
-            scrollGrades.add(new ScrollGrade(id, name, material, color, bonus));
+            int modelData = raw.get("model-data") instanceof Number n ? n.intValue() : 0;
+            scrollGrades.add(new ScrollGrade(id, name, material, color, modelData, bonus));
         }
         if (scrollGrades.isEmpty()) {
-            scrollGrades.add(new ScrollGrade("common", "일반등급 두루마리", Material.PAPER, "f", 10.0));
+            scrollGrades.add(new ScrollGrade("common", "일반등급 두루마리", Material.PAPER, "f", 500010, 10.0));
         }
     }
 
@@ -57,6 +58,10 @@ public class EnhanceManager {
     public Material stoneIconMaterial() {
         Material material = Material.matchMaterial(plugin.getConfig().getString("enhance.material", "AMETHYST_SHARD"));
         return material != null ? material : Material.AMETHYST_SHARD;
+    }
+
+    public int stoneModelData() {
+        return plugin.getConfig().getInt("enhance.model-data", 0);
     }
 
     public ItemStack createEnhanceStone(int amount) {
@@ -70,6 +75,10 @@ public class EnhanceManager {
                 .build();
         ItemMeta meta = item.getItemMeta();
         meta.getPersistentDataContainer().set(stoneKey, PersistentDataType.BYTE, (byte) 1);
+        int modelData = stoneModelData();
+        if (modelData != 0) {
+            meta.setCustomModelData(modelData);
+        }
         item.setItemMeta(meta);
         return item;
     }
@@ -114,6 +123,9 @@ public class EnhanceManager {
                 .build();
         ItemMeta meta = item.getItemMeta();
         meta.getPersistentDataContainer().set(scrollGradeKey, PersistentDataType.STRING, grade.id());
+        if (grade.modelData() != 0) {
+            meta.setCustomModelData(grade.modelData());
+        }
         item.setItemMeta(meta);
         return item;
     }
