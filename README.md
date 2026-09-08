@@ -51,16 +51,22 @@ mvn clean package
 두루마리→종이, 레바테인→네더라이트 검)으로만 보이고 기능에는 영향이 없습니다.
 
 **적용 방법**
-1. `MyMinecraft-ResourcePack.zip`을 플레이어가 접근 가능한 URL로 업로드합니다.
-   (자체 웹호스팅, 또는 이 저장소를 사용 중이라면
-   `https://raw.githubusercontent.com/<owner>/<repo>/<branch>/MyMinecraft-ResourcePack.zip`)
-2. `server.properties`에 아래 두 값을 설정합니다.
-   ```
-   resource-pack=<위에서 올린 zip의 URL>
-   resource-pack-sha1=<zip 파일의 SHA-1 해시>
-   ```
-   해시는 `sha1sum MyMinecraft-ResourcePack.zip` 로 확인할 수 있습니다.
-3. 서버를 재시작하면 접속하는 플레이어에게 리소스팩 적용 여부를 묻는 창이 뜹니다.
+
+이 저장소가 **공개(public)** 상태라면, GitHub가 그대로 리소스팩을 호스팅해줍니다.
+`server.properties`에 아래 두 값을 설정하세요.
+
+```
+resource-pack=https://raw.githubusercontent.com/tntbbp123-wq/my-Minecraft/claude/minecraft-plugin-dev-2rt9ws/MyMinecraft-ResourcePack.zip
+resource-pack-sha1=<zip 파일의 SHA-1 해시>
+```
+
+해시는 `sha1sum MyMinecraft-ResourcePack.zip` 로 확인할 수 있습니다. 서버를 재시작하면
+접속하는 플레이어에게 리소스팩 적용 여부를 묻는 창이 뜹니다.
+
+저장소가 비공개(private)라면 위 raw 링크는 서버가 접근할 수 없으니, zip을 직접
+다른 곳(자체 웹호스팅 등)에 올리고 그 URL을 `resource-pack`에 넣어주세요.
 
 리소스팩 zip 파일을 수정한 뒤에는 반드시 해시를 다시 계산해 `resource-pack-sha1`도
-갱신해야 합니다. (zip 내용이 바뀌면 해시가 달라집니다.)
+갱신해야 합니다. (zip 내용이 바뀌면 해시가 달라집니다.) 또한 이 링크는 `claude/minecraft-plugin-dev-2rt9ws`
+브랜치를 가리키므로, 나중에 이 브랜치를 병합하거나 삭제하면 URL의 브랜치 부분을
+(예: 기본 브랜치명으로) 함께 바꿔줘야 합니다.
