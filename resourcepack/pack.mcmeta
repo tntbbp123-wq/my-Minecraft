@@ -3,7 +3,7 @@
     "pack_format": 34,
     "supported_formats": {
       "min_inclusive": 22,
-      "max_inclusive": 46
+      "max_inclusive": 999
     },
     "description": "MyMinecraft 강화석 / 확률 강화 두루마리 커스텀 텍스처"
   }
