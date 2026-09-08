@@ -84,3 +84,24 @@ enhance:
   max-level: 10
   base-cost: 100.0
   cost-per-level: 50.0
+
+# 신화 등급 무기 '레바테인' (/laevateinn <player> 로 지급)
+laevateinn:
+  # 지옥의 화상 상태에서 치유 효과 감소율(%)
+  heal-reduction-percent: 50.0
+  # 이 시간(틱, 20틱=1초) 이상 연속으로 물에 젖어 있으면 지옥의 화상이 해제됩니다.
+  water-extinguish-ticks: 60
+  # 공격 적중 시 부여되는 지옥의 화상
+  onhit:
+    burn-duration-seconds: 6
+    burn-damage-per-second: 3.0
+  # 라그나로크의 숨결 (F키 발동)
+  ability:
+    cooldown-seconds: 120
+    range: 8.0
+    cone-angle-degrees: 80.0
+    damage: 20.0
+    launch-power: 1.0
+    burn-duration-seconds: 10
+    burn-damage-per-second: 4.0
+    magma-duration-seconds: 8

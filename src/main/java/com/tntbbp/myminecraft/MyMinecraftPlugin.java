@@ -3,15 +3,19 @@ package com.tntbbp.myminecraft;
 import com.tntbbp.myminecraft.command.EcCommand;
 import com.tntbbp.myminecraft.command.EnhanceItemCommand;
 import com.tntbbp.myminecraft.command.HomeCommand;
+import com.tntbbp.myminecraft.command.LaevateinnCommand;
 import com.tntbbp.myminecraft.command.LobbyCommand;
 import com.tntbbp.myminecraft.command.MenuCommand;
 import com.tntbbp.myminecraft.command.RtCommand;
 import com.tntbbp.myminecraft.command.SpawnCommand;
 import com.tntbbp.myminecraft.command.TpaCommand;
 import com.tntbbp.myminecraft.listener.GUIListener;
+import com.tntbbp.myminecraft.listener.LaevateinnListener;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.HomeManager;
+import com.tntbbp.myminecraft.manager.InfernalBurnManager;
+import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
 import com.tntbbp.myminecraft.manager.StockManager;
@@ -27,6 +31,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private StockManager stockManager;
     private RandomTeleportManager randomTeleportManager;
     private EnhanceManager enhanceManager;
+    private InfernalBurnManager infernalBurnManager;
+    private LaevateinnManager laevateinnManager;
 
     @Override
     public void onEnable() {
@@ -39,8 +45,11 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.stockManager = new StockManager(this, economyManager);
         this.randomTeleportManager = new RandomTeleportManager(this);
         this.enhanceManager = new EnhanceManager(this);
+        this.infernalBurnManager = new InfernalBurnManager(this);
+        this.laevateinnManager = new LaevateinnManager(this);
 
         stockManager.startFluctuationTask();
+        infernalBurnManager.start();
 
         TpaCommand tpaCommand = new TpaCommand(this);
         getCommand("tpa").setExecutor(tpaCommand);
@@ -58,8 +67,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getCommand("spawn").setExecutor(new SpawnCommand(this));
         getCommand("rt").setExecutor(new RtCommand(this));
         getCommand("enhanceitem").setExecutor(new EnhanceItemCommand(this));
+        getCommand("laevateinn").setExecutor(new LaevateinnCommand(this));
 
         getServer().getPluginManager().registerEvents(new GUIListener(this), this);
+        getServer().getPluginManager().registerEvents(new LaevateinnListener(this), this);
 
         getLogger().info("MyMinecraft 플러그인이 활성화되었습니다.");
     }
@@ -68,6 +79,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
     public void onDisable() {
         if (stockManager != null) {
             stockManager.stopFluctuationTask();
+        }
+        if (infernalBurnManager != null) {
+            infernalBurnManager.stop();
         }
         getLogger().info("MyMinecraft 플러그인이 비활성화되었습니다.");
     }
@@ -98,5 +112,13 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public EnhanceManager getEnhanceManager() {
         return enhanceManager;
+    }
+
+    public InfernalBurnManager getInfernalBurnManager() {
+        return infernalBurnManager;
+    }
+
+    public LaevateinnManager getLaevateinnManager() {
+        return laevateinnManager;
     }
 }
