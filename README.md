@@ -56,7 +56,7 @@ mvn clean package
 `server.properties`에 아래 두 값을 설정하세요.
 
 ```
-resource-pack=https://raw.githubusercontent.com/tntbbp123-wq/my-Minecraft/claude/minecraft-plugin-dev-2rt9ws/MyMinecraft-ResourcePack.zip
+resource-pack=https://raw.githubusercontent.com/tntbbp123-wq/my-Minecraft/main/MyMinecraft-ResourcePack.zip
 resource-pack-sha1=<zip 파일의 SHA-1 해시>
 ```
 
@@ -67,6 +67,6 @@ resource-pack-sha1=<zip 파일의 SHA-1 해시>
 다른 곳(자체 웹호스팅 등)에 올리고 그 URL을 `resource-pack`에 넣어주세요.
 
 리소스팩 zip 파일을 수정한 뒤에는 반드시 해시를 다시 계산해 `resource-pack-sha1`도
-갱신해야 합니다. (zip 내용이 바뀌면 해시가 달라집니다.) 또한 이 링크는 `claude/minecraft-plugin-dev-2rt9ws`
-브랜치를 가리키므로, 나중에 이 브랜치를 병합하거나 삭제하면 URL의 브랜치 부분을
-(예: 기본 브랜치명으로) 함께 바꿔줘야 합니다.
+갱신해야 합니다. (zip 내용이 바뀌면 해시가 달라집니다.) 이 링크는 `main` 브랜치를
+가리키므로, `main`에 반영되지 않은 변경사항(개발 브랜치에만 있는 커밋)은 이 URL에
+아직 나타나지 않습니다.
