@@ -57,8 +57,14 @@ mvn clean package
 
 ```
 resource-pack=https://raw.githubusercontent.com/tntbbp123-wq/my-Minecraft/main/MyMinecraft-ResourcePack.zip
-resource-pack-sha1=ac1ff2ce53cc13f4f867710377c09d303c66d9e1
+resource-pack-sha1=062dd053a46c2488be0b4b1ad135be7e15b45266
 ```
+
+Minecraft 1.21.2 이후로는 아이템 텍스처 분기가 `assets/<ns>/models/item/*.json`의 `overrides`
+방식에서 `assets/<ns>/items/*.json`의 `minecraft:range_dispatch` 방식으로 바뀌었습니다.
+이 리소스팩은 두 방식을 모두 포함하고 있어서, 구버전(`overrides`)과 신버전(`items/*.json`)
+클라이언트 모두에서 적용되도록 했습니다. (단, 1.21.4 이후의 정확한 스키마는 제가 확인할 수
+없는 최신 버전이라 100% 보장은 못 드립니다 — 적용해보고 안 되면 알려주세요.)
 
 `resource-pack-prompt`를 함께 쓴다면 반드시 JSON 형식이어야 합니다 (일반 텍스트를 그대로 넣으면
 서버 시작 시 파싱 에러가 발생합니다):
