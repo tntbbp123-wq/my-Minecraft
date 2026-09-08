@@ -50,10 +50,28 @@ stock:
 enhance:
   # 강화석 아이콘 재질 (전용 아이템이며, /enhanceitem stone <player> 로 지급)
   material: AMETHYST_SHARD
-  # 확률 강화 두루마리 아이콘 재질 (전용 아이템이며, /enhanceitem scroll <player> 로 지급)
-  scroll-material: PAPER
-  # 두루마리 사용 시 추가되는 성공 확률(%)
-  scroll-bonus-percent: 15.0
+  # 확률 강화 두루마리 등급 목록 (전용 아이템이며, /enhanceitem scroll:<id> <player> 로 지급)
+  scrolls:
+    - id: common
+      name: "일반등급 두루마리"
+      material: PAPER
+      color: f
+      bonus-percent: 10.0
+    - id: rare
+      name: "레어등급 두루마리"
+      material: PAPER
+      color: 9
+      bonus-percent: 20.0
+    - id: epic
+      name: "에픽등급 두루마리"
+      material: PAPER
+      color: 5
+      bonus-percent: 30.0
+    - id: legendary
+      name: "레전더리등급 두루마리"
+      material: PAPER
+      color: 6
+      bonus-percent: 45.0
   base-success-percent: 100.0
   decrease-per-level: 8.0
   min-success-percent: 15.0

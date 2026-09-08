@@ -218,7 +218,8 @@ public class GUIListener implements Listener {
         ItemStack targetItem = event.getInventory().getItem(EnhanceGUI.INPUT_SLOT);
         ItemStack material = event.getInventory().getItem(EnhanceGUI.MATERIAL_SLOT);
         ItemStack scroll = event.getInventory().getItem(EnhanceGUI.SCROLL_SLOT);
-        boolean useScroll = enhanceManager.isProbabilityScroll(scroll);
+        double scrollBonus = enhanceManager.scrollBonusOf(scroll);
+        boolean useScroll = scrollBonus > 0;
 
         if (targetItem == null || targetItem.getType().isAir()) {
             player.sendMessage(ChatColor.RED + "강화할 아이템을 왼쪽 칸에 넣어주세요.");
@@ -251,7 +252,7 @@ public class GUIListener implements Listener {
             event.getInventory().setItem(EnhanceGUI.SCROLL_SLOT, scroll.getAmount() <= 0 ? null : scroll);
         }
 
-        boolean success = enhanceManager.rollSuccess(currentLevel, useScroll);
+        boolean success = enhanceManager.rollSuccess(currentLevel, scrollBonus);
         if (success) {
             int newLevel = currentLevel + 1;
             enhanceManager.applyEnhance(targetItem, newLevel);

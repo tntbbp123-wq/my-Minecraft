@@ -10,7 +10,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-/** 관리자가 강화석/확률 강화 두루마리를 지급하는 명령어. */
+import java.util.stream.Collectors;
+
+/** 관리자가 강화석/등급별 확률 강화 두루마리를 지급하는 명령어. */
 public class EnhanceItemCommand implements CommandExecutor {
 
     private final EnhanceManager enhanceManager;
@@ -26,11 +28,15 @@ public class EnhanceItemCommand implements CommandExecutor {
             return true;
         }
         if (args.length < 2) {
-            sender.sendMessage(ChatColor.YELLOW + "사용법: /enhanceitem <stone|scroll> <player> [amount]");
+            String grades = enhanceManager.scrollGrades().stream()
+                    .map(EnhanceManager.ScrollGrade::id)
+                    .collect(Collectors.joining("|"));
+            sender.sendMessage(ChatColor.YELLOW + "사용법: /enhanceitem <stone|scroll:<" + grades + ">> <player> [amount]");
             return true;
         }
 
-        String type = args[0].toLowerCase();
+        String[] typeParts = args[0].toLowerCase().split(":", 2);
+        String type = typeParts[0];
         Player target = Bukkit.getPlayerExact(args[1]);
         if (target == null) {
             sender.sendMessage(ChatColor.RED + "온라인 상태인 플레이어를 찾을 수 없습니다.");
@@ -55,11 +61,20 @@ public class EnhanceItemCommand implements CommandExecutor {
                 itemName = "강화석";
             }
             case "scroll" -> {
-                item = enhanceManager.createProbabilityScroll(amount);
-                itemName = "확률 강화 두루마리";
+                String gradeId = typeParts.length > 1 ? typeParts[1] : enhanceManager.defaultScrollGrade().id();
+                EnhanceManager.ScrollGrade grade = enhanceManager.getScrollGrade(gradeId);
+                if (grade == null) {
+                    String grades = enhanceManager.scrollGrades().stream()
+                            .map(EnhanceManager.ScrollGrade::id)
+                            .collect(Collectors.joining(", "));
+                    sender.sendMessage(ChatColor.RED + "알 수 없는 두루마리 등급입니다. 사용 가능: " + grades);
+                    return true;
+                }
+                item = enhanceManager.createProbabilityScroll(grade, amount);
+                itemName = grade.displayName();
             }
             default -> {
-                sender.sendMessage(ChatColor.RED + "종류는 stone 또는 scroll 이어야 합니다.");
+                sender.sendMessage(ChatColor.RED + "종류는 stone 또는 scroll[:등급] 이어야 합니다.");
                 return true;
             }
         }

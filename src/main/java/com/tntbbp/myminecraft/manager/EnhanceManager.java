@@ -11,20 +11,45 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-/** 대장간 강화 시스템의 계산/적용 로직 및 전용 아이템(강화석, 확률 강화 두루마리) 정의. */
+/** 대장간 강화 시스템의 계산/적용 로직 및 전용 아이템(강화석, 등급별 확률 강화 두루마리) 정의. */
 public class EnhanceManager {
+
+    /** 확률 강화 두루마리의 등급 정의 (id, 표시 이름, 아이콘, 색상 코드, 성공 확률 보너스%). */
+    public record ScrollGrade(String id, String displayName, Material material, String colorCode, double bonusPercent) {
+    }
 
     private final MyMinecraftPlugin plugin;
     private final NamespacedKey levelKey;
     private final NamespacedKey stoneKey;
-    private final NamespacedKey scrollKey;
+    private final NamespacedKey scrollGradeKey;
+    private final List<ScrollGrade> scrollGrades = new ArrayList<>();
 
     public EnhanceManager(MyMinecraftPlugin plugin) {
         this.plugin = plugin;
         this.levelKey = new NamespacedKey(plugin, "enhance_level");
         this.stoneKey = new NamespacedKey(plugin, "enhance_stone");
-        this.scrollKey = new NamespacedKey(plugin, "enhance_scroll");
+        this.scrollGradeKey = new NamespacedKey(plugin, "enhance_scroll_grade");
+        loadScrollGrades();
+    }
+
+    private void loadScrollGrades() {
+        List<Map<?, ?>> list = plugin.getConfig().getMapList("enhance.scrolls");
+        for (Map<?, ?> raw : list) {
+            String id = String.valueOf(raw.get("id"));
+            String name = String.valueOf(raw.get("name"));
+            Material material = Material.matchMaterial(String.valueOf(raw.get("material")));
+            if (material == null) {
+                material = Material.PAPER;
+            }
+            double bonus = raw.get("bonus-percent") instanceof Number n ? n.doubleValue() : 10.0;
+            String color = raw.get("color") != null ? String.valueOf(raw.get("color")) : "f";
+            scrollGrades.add(new ScrollGrade(id, name, material, color, bonus));
+        }
+        if (scrollGrades.isEmpty()) {
+            scrollGrades.add(new ScrollGrade("common", "일반등급 두루마리", Material.PAPER, "f", 10.0));
+        }
     }
 
     // ----- 강화석 -----
@@ -57,40 +82,61 @@ public class EnhanceManager {
         return flag != null && flag == (byte) 1;
     }
 
-    // ----- 확률 강화 두루마리 -----
+    // ----- 확률 강화 두루마리 (등급별) -----
 
-    public Material scrollIconMaterial() {
-        Material material = Material.matchMaterial(plugin.getConfig().getString("enhance.scroll-material", "PAPER"));
-        return material != null ? material : Material.PAPER;
+    public List<ScrollGrade> scrollGrades() {
+        return scrollGrades;
     }
 
-    public double scrollBonusPercent() {
-        return plugin.getConfig().getDouble("enhance.scroll-bonus-percent", 15.0);
+    public ScrollGrade getScrollGrade(String id) {
+        for (ScrollGrade grade : scrollGrades) {
+            if (grade.id().equalsIgnoreCase(id)) {
+                return grade;
+            }
+        }
+        return null;
     }
 
-    public ItemStack createProbabilityScroll(int amount) {
-        ItemStack item = new ItemBuilder(scrollIconMaterial())
-                .name("§d확률 강화 두루마리")
+    public ScrollGrade defaultScrollGrade() {
+        return scrollGrades.get(0);
+    }
+
+    public ItemStack createProbabilityScroll(ScrollGrade grade, int amount) {
+        ItemStack item = new ItemBuilder(grade.material())
+                .name("§" + grade.colorCode() + grade.displayName())
                 .lore(List.of(
                         "§7강화 시도 시 함께 사용하면",
-                        "§7성공 확률이 §a+" + trimZero(scrollBonusPercent()) + "%§7 증가합니다.",
+                        "§7성공 확률이 §a+" + trimZero(grade.bonusPercent()) + "%§7 증가합니다.",
                         "§7(사용 시 1개 소모)"
                 ))
                 .amount(amount)
                 .glow()
                 .build();
         ItemMeta meta = item.getItemMeta();
-        meta.getPersistentDataContainer().set(scrollKey, PersistentDataType.BYTE, (byte) 1);
+        meta.getPersistentDataContainer().set(scrollGradeKey, PersistentDataType.STRING, grade.id());
         item.setItemMeta(meta);
         return item;
     }
 
     public boolean isProbabilityScroll(ItemStack item) {
+        return getScrollGradeId(item) != null;
+    }
+
+    public String getScrollGradeId(ItemStack item) {
         if (item == null || !item.hasItemMeta()) {
-            return false;
+            return null;
         }
-        Byte flag = item.getItemMeta().getPersistentDataContainer().get(scrollKey, PersistentDataType.BYTE);
-        return flag != null && flag == (byte) 1;
+        return item.getItemMeta().getPersistentDataContainer().get(scrollGradeKey, PersistentDataType.STRING);
+    }
+
+    /** 두루마리 아이템 하나가 제공하는 성공 확률 보너스(%). 두루마리가 아니거나 알 수 없는 등급이면 0. */
+    public double scrollBonusOf(ItemStack item) {
+        String gradeId = getScrollGradeId(item);
+        if (gradeId == null) {
+            return 0.0;
+        }
+        ScrollGrade grade = getScrollGrade(gradeId);
+        return grade != null ? grade.bonusPercent() : 0.0;
     }
 
     private String trimZero(double value) {
@@ -112,15 +158,12 @@ public class EnhanceManager {
         return level == null ? 0 : level;
     }
 
-    public double successChance(int currentLevel, boolean useScroll) {
+    public double successChance(int currentLevel, double scrollBonus) {
         double base = plugin.getConfig().getDouble("enhance.base-success-percent", 100.0);
         double decrease = plugin.getConfig().getDouble("enhance.decrease-per-level", 8.0);
         double min = plugin.getConfig().getDouble("enhance.min-success-percent", 15.0);
         double chance = Math.max(min, base - decrease * currentLevel);
-        if (useScroll) {
-            chance = Math.min(100.0, chance + scrollBonusPercent());
-        }
-        return chance;
+        return Math.min(100.0, chance + scrollBonus);
     }
 
     public double cost(int currentLevel) {
@@ -130,8 +173,8 @@ public class EnhanceManager {
     }
 
     /** 강화 성공 여부를 판정한다. 재료/자금 차감은 호출부에서 이미 끝났다고 가정한다. */
-    public boolean rollSuccess(int currentLevel, boolean useScroll) {
-        double chance = successChance(currentLevel, useScroll);
+    public boolean rollSuccess(int currentLevel, double scrollBonus) {
+        double chance = successChance(currentLevel, scrollBonus);
         return Math.random() * 100.0 < chance;
     }
 
