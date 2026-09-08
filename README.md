@@ -13,7 +13,19 @@ Paper 서버용 유틸리티 플러그인입니다. (대상: Paper 1.21.x, Java 
 - `/spawn`, `/spawn set` — 스폰 이동 / 설정(관리자)
 - `/rt` — 월드 스폰 기준 중심 500x500 지역을 제외한 랜덤 위치로 이동 (쿨다운 존재)
 - 주식(모의 투자) — 메뉴에서 가상 종목을 내부 포인트로 매수/매도, 주기적으로 가격 변동
-- 대장간 강화 — 아이템 강화석을 소모해 아이템을 강화(성공률은 레벨이 오를수록 감소)
+- 대장간 강화 — 전용 아이템 **강화석**을 소모해 아이템을 강화(성공률은 레벨이 오를수록 감소).
+  **확률 강화 두루마리**(등급별)를 함께 넣으면 해당 시도의 성공 확률이 일시적으로 증가:
+  일반 +10% / 레어 +20% / 에픽 +30% / 레전더리 +45% (`config.yml`의 `enhance.scrolls`에서 등급 추가/조정 가능)
+- `/enhanceitem stone <player> [amount]`,
+  `/enhanceitem scroll:<common|rare|epic|legendary> <player> [amount]`
+  — 관리자가 강화석/등급별 확률 강화 두루마리 지급 (기본 op 권한)
+- **레바테인 (Lævateinn)** — 신화 등급 커스텀 무기, `/laevateinn <player>` 로 지급 (관리자)
+  - 영원한 불꽃: 공격 적중 시 시간 경과나 블록 설치로는 꺼지지 않는 저주받은 불꽃 부여
+    (다량의 물 — 일정 시간 이상 물에 잠기거나 근처에 물 양동이를 사용 — 로만 해제)
+  - 지옥의 화상: 방어력을 무시하는 지속 피해 + 불타는 동안 치유 효과 감소
+  - 라그나로크의 숨결 (F키 발동, 재사용 대기 120초): 전방 부채꼴 범위에 화염을 내뿜어
+    광역 피해 + 공중으로 띄우기 + 착지 후 10초간 지옥의 화상, 지나간 자리는 일정 시간
+    마그마 블록으로 변함 (`config.yml`의 `laevateinn` 항목에서 세부 수치 조정 가능)
 
 ## 빌드
 
@@ -30,3 +42,31 @@ mvn clean package
 
 관리자 권한(`myminecraft.admin`, 기본 op)이 있는 플레이어만 `/spawn set`, `/lobby set`을
 사용할 수 있습니다.
+
+## 리소스팩 (전용 아이템 커스텀 텍스처)
+
+`resourcepack/` 폴더(및 루트의 `MyMinecraft-ResourcePack.zip`)는 강화석, 두루마리 4등급,
+레바테인이 전용 아트워크로 보이도록 만든 클라이언트 리소스팩입니다. `CustomModelData`로
+동작하므로 리소스팩을 적용하지 않은 플레이어에게는 원래 아이콘(강화석→자수정 조각,
+두루마리→종이, 레바테인→네더라이트 검)으로만 보이고 기능에는 영향이 없습니다.
+
+**적용 방법**
+
+이 저장소가 **공개(public)** 상태라면, GitHub가 그대로 리소스팩을 호스팅해줍니다.
+`server.properties`에 아래 두 값을 설정하세요.
+
+```
+resource-pack=https://raw.githubusercontent.com/tntbbp123-wq/my-Minecraft/claude/minecraft-plugin-dev-2rt9ws/MyMinecraft-ResourcePack.zip
+resource-pack-sha1=<zip 파일의 SHA-1 해시>
+```
+
+해시는 `sha1sum MyMinecraft-ResourcePack.zip` 로 확인할 수 있습니다. 서버를 재시작하면
+접속하는 플레이어에게 리소스팩 적용 여부를 묻는 창이 뜹니다.
+
+저장소가 비공개(private)라면 위 raw 링크는 서버가 접근할 수 없으니, zip을 직접
+다른 곳(자체 웹호스팅 등)에 올리고 그 URL을 `resource-pack`에 넣어주세요.
+
+리소스팩 zip 파일을 수정한 뒤에는 반드시 해시를 다시 계산해 `resource-pack-sha1`도
+갱신해야 합니다. (zip 내용이 바뀌면 해시가 달라집니다.) 또한 이 링크는 `claude/minecraft-plugin-dev-2rt9ws`
+브랜치를 가리키므로, 나중에 이 브랜치를 병합하거나 삭제하면 URL의 브랜치 부분을
+(예: 기본 브랜치명으로) 함께 바꿔줘야 합니다.

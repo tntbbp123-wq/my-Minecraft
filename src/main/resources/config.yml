@@ -48,11 +48,62 @@ stock:
       max-change-percent: 15.0
 
 enhance:
-  # 강화 재료 아이템
+  # 강화석 아이콘 재질 (전용 아이템이며, /enhanceitem stone <player> 로 지급)
   material: AMETHYST_SHARD
+  # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 기본 아이콘으로 보임)
+  model-data: 500001
+  # 확률 강화 두루마리 등급 목록 (전용 아이템이며, /enhanceitem scroll:<id> <player> 로 지급)
+  scrolls:
+    - id: common
+      name: "일반등급 두루마리"
+      material: PAPER
+      color: f
+      model-data: 500010
+      bonus-percent: 10.0
+    - id: rare
+      name: "레어등급 두루마리"
+      material: PAPER
+      color: 9
+      model-data: 500011
+      bonus-percent: 20.0
+    - id: epic
+      name: "에픽등급 두루마리"
+      material: PAPER
+      color: 5
+      model-data: 500012
+      bonus-percent: 30.0
+    - id: legendary
+      name: "레전더리등급 두루마리"
+      material: PAPER
+      color: 6
+      model-data: 500013
+      bonus-percent: 45.0
   base-success-percent: 100.0
   decrease-per-level: 8.0
   min-success-percent: 15.0
   max-level: 10
   base-cost: 100.0
   cost-per-level: 50.0
+
+# 신화 등급 무기 '레바테인' (/laevateinn <player> 로 지급)
+laevateinn:
+  # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 네더라이트 검 기본 아이콘으로 보임)
+  model-data: 500020
+  # 지옥의 화상 상태에서 치유 효과 감소율(%)
+  heal-reduction-percent: 50.0
+  # 이 시간(틱, 20틱=1초) 이상 연속으로 물에 젖어 있으면 지옥의 화상이 해제됩니다.
+  water-extinguish-ticks: 60
+  # 공격 적중 시 부여되는 지옥의 화상
+  onhit:
+    burn-duration-seconds: 6
+    burn-damage-per-second: 3.0
+  # 라그나로크의 숨결 (F키 발동)
+  ability:
+    cooldown-seconds: 120
+    range: 8.0
+    cone-angle-degrees: 80.0
+    damage: 20.0
+    launch-power: 1.0
+    burn-duration-seconds: 10
+    burn-damage-per-second: 4.0
+    magma-duration-seconds: 8

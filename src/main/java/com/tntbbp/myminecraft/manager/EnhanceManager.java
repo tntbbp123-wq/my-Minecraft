@@ -1,6 +1,7 @@
 package com.tntbbp.myminecraft.manager;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
+import com.tntbbp.myminecraft.util.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -10,32 +11,151 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-/** 대장간 강화 시스템의 계산/적용 로직. */
+/** 대장간 강화 시스템의 계산/적용 로직 및 전용 아이템(강화석, 등급별 확률 강화 두루마리) 정의. */
 public class EnhanceManager {
 
-    public enum EnhanceOutcome {
-        SUCCESS,
-        FAIL,
-        MAX_LEVEL,
-        INVALID_ITEM,
-        WRONG_MATERIAL,
-        NOT_ENOUGH_MATERIAL,
-        NOT_ENOUGH_BALANCE
+    /** 확률 강화 두루마리의 등급 정의 (id, 표시 이름, 아이콘, 색상 코드, CustomModelData, 성공 확률 보너스%). */
+    public record ScrollGrade(String id, String displayName, Material material, String colorCode, int modelData, double bonusPercent) {
     }
 
     private final MyMinecraftPlugin plugin;
     private final NamespacedKey levelKey;
+    private final NamespacedKey stoneKey;
+    private final NamespacedKey scrollGradeKey;
+    private final List<ScrollGrade> scrollGrades = new ArrayList<>();
 
     public EnhanceManager(MyMinecraftPlugin plugin) {
         this.plugin = plugin;
         this.levelKey = new NamespacedKey(plugin, "enhance_level");
+        this.stoneKey = new NamespacedKey(plugin, "enhance_stone");
+        this.scrollGradeKey = new NamespacedKey(plugin, "enhance_scroll_grade");
+        loadScrollGrades();
     }
 
-    public Material requiredMaterial() {
+    private void loadScrollGrades() {
+        List<Map<?, ?>> list = plugin.getConfig().getMapList("enhance.scrolls");
+        for (Map<?, ?> raw : list) {
+            String id = String.valueOf(raw.get("id"));
+            String name = String.valueOf(raw.get("name"));
+            Material material = Material.matchMaterial(String.valueOf(raw.get("material")));
+            if (material == null) {
+                material = Material.PAPER;
+            }
+            double bonus = raw.get("bonus-percent") instanceof Number n ? n.doubleValue() : 10.0;
+            String color = raw.get("color") != null ? String.valueOf(raw.get("color")) : "f";
+            int modelData = raw.get("model-data") instanceof Number n ? n.intValue() : 0;
+            scrollGrades.add(new ScrollGrade(id, name, material, color, modelData, bonus));
+        }
+        if (scrollGrades.isEmpty()) {
+            scrollGrades.add(new ScrollGrade("common", "일반등급 두루마리", Material.PAPER, "f", 500010, 10.0));
+        }
+    }
+
+    // ----- 강화석 -----
+
+    public Material stoneIconMaterial() {
         Material material = Material.matchMaterial(plugin.getConfig().getString("enhance.material", "AMETHYST_SHARD"));
         return material != null ? material : Material.AMETHYST_SHARD;
     }
+
+    public int stoneModelData() {
+        return plugin.getConfig().getInt("enhance.model-data", 0);
+    }
+
+    public ItemStack createEnhanceStone(int amount) {
+        ItemStack item = new ItemBuilder(stoneIconMaterial())
+                .name("§b강화석")
+                .lore(List.of(
+                        "§7대장간 강화에 사용되는 전용 재료입니다.",
+                        "§7강화 시도 시 1개가 소모됩니다."
+                ))
+                .amount(amount)
+                .build();
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(stoneKey, PersistentDataType.BYTE, (byte) 1);
+        int modelData = stoneModelData();
+        if (modelData != 0) {
+            meta.setCustomModelData(modelData);
+        }
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public boolean isEnhanceStone(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) {
+            return false;
+        }
+        Byte flag = item.getItemMeta().getPersistentDataContainer().get(stoneKey, PersistentDataType.BYTE);
+        return flag != null && flag == (byte) 1;
+    }
+
+    // ----- 확률 강화 두루마리 (등급별) -----
+
+    public List<ScrollGrade> scrollGrades() {
+        return scrollGrades;
+    }
+
+    public ScrollGrade getScrollGrade(String id) {
+        for (ScrollGrade grade : scrollGrades) {
+            if (grade.id().equalsIgnoreCase(id)) {
+                return grade;
+            }
+        }
+        return null;
+    }
+
+    public ScrollGrade defaultScrollGrade() {
+        return scrollGrades.get(0);
+    }
+
+    public ItemStack createProbabilityScroll(ScrollGrade grade, int amount) {
+        ItemStack item = new ItemBuilder(grade.material())
+                .name("§" + grade.colorCode() + grade.displayName())
+                .lore(List.of(
+                        "§7강화 시도 시 함께 사용하면",
+                        "§7성공 확률이 §a+" + trimZero(grade.bonusPercent()) + "%§7 증가합니다.",
+                        "§7(사용 시 1개 소모)"
+                ))
+                .amount(amount)
+                .glow()
+                .build();
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(scrollGradeKey, PersistentDataType.STRING, grade.id());
+        if (grade.modelData() != 0) {
+            meta.setCustomModelData(grade.modelData());
+        }
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public boolean isProbabilityScroll(ItemStack item) {
+        return getScrollGradeId(item) != null;
+    }
+
+    public String getScrollGradeId(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) {
+            return null;
+        }
+        return item.getItemMeta().getPersistentDataContainer().get(scrollGradeKey, PersistentDataType.STRING);
+    }
+
+    /** 두루마리 아이템 하나가 제공하는 성공 확률 보너스(%). 두루마리가 아니거나 알 수 없는 등급이면 0. */
+    public double scrollBonusOf(ItemStack item) {
+        String gradeId = getScrollGradeId(item);
+        if (gradeId == null) {
+            return 0.0;
+        }
+        ScrollGrade grade = getScrollGrade(gradeId);
+        return grade != null ? grade.bonusPercent() : 0.0;
+    }
+
+    private String trimZero(double value) {
+        return value == Math.floor(value) ? String.valueOf((long) value) : String.valueOf(value);
+    }
+
+    // ----- 강화 계산 -----
 
     public int maxLevel() {
         return plugin.getConfig().getInt("enhance.max-level", 10);
@@ -50,11 +170,12 @@ public class EnhanceManager {
         return level == null ? 0 : level;
     }
 
-    public double successChance(int currentLevel) {
+    public double successChance(int currentLevel, double scrollBonus) {
         double base = plugin.getConfig().getDouble("enhance.base-success-percent", 100.0);
         double decrease = plugin.getConfig().getDouble("enhance.decrease-per-level", 8.0);
         double min = plugin.getConfig().getDouble("enhance.min-success-percent", 15.0);
-        return Math.max(min, base - decrease * currentLevel);
+        double chance = Math.max(min, base - decrease * currentLevel);
+        return Math.min(100.0, chance + scrollBonus);
     }
 
     public double cost(int currentLevel) {
@@ -63,9 +184,9 @@ public class EnhanceManager {
         return base + perLevel * currentLevel;
     }
 
-    /** 강화를 시도하고 성공 시 item을 직접 갱신한다. 실제 판정(재료/자금 차감)은 호출부에서 이미 끝났다고 가정한다. */
-    public boolean rollSuccess(int currentLevel) {
-        double chance = successChance(currentLevel);
+    /** 강화 성공 여부를 판정한다. 재료/자금 차감은 호출부에서 이미 끝났다고 가정한다. */
+    public boolean rollSuccess(int currentLevel, double scrollBonus) {
+        double chance = successChance(currentLevel, scrollBonus);
         return Math.random() * 100.0 < chance;
     }
 
