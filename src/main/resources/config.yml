@@ -1,0 +1,58 @@
+# MyMinecraft 설정 파일
+
+economy:
+  starting-balance: 1000.0
+  currency-name: "포인트"
+
+home:
+  max-homes: 5
+
+tpa:
+  request-timeout-seconds: 30
+
+randomtp:
+  # 중심(월드 스폰 좌표)으로부터 이 반경(블록) 안에서만 이동합니다.
+  max-radius: 5000
+  # 중심 기준 이 크기(가로x세로, 블록)의 정사각형 지역은 랜덤 이동 대상에서 제외됩니다.
+  exclude-size: 500
+  cooldown-seconds: 30
+  # 안전한 착지 지점을 찾기 위한 최대 시도 횟수
+  max-attempts: 30
+
+stock:
+  update-interval-seconds: 300
+  list:
+    - id: apple
+      name: "애플전자"
+      material: GOLD_INGOT
+      price: 100.0
+      min-price: 10.0
+      max-change-percent: 8.0
+    - id: gold
+      name: "골드마이닝"
+      material: GOLD_NUGGET
+      price: 250.0
+      min-price: 20.0
+      max-change-percent: 12.0
+    - id: diamond
+      name: "다이아산업"
+      material: DIAMOND
+      price: 500.0
+      min-price: 50.0
+      max-change-percent: 10.0
+    - id: nether
+      name: "네더에너지"
+      material: BLAZE_POWDER
+      price: 150.0
+      min-price: 15.0
+      max-change-percent: 15.0
+
+enhance:
+  # 강화 재료 아이템
+  material: AMETHYST_SHARD
+  base-success-percent: 100.0
+  decrease-per-level: 8.0
+  min-success-percent: 15.0
+  max-level: 10
+  base-cost: 100.0
+  cost-per-level: 50.0
