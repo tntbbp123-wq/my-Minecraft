@@ -57,7 +57,7 @@ mvn clean package
 
 ```
 resource-pack=https://raw.githubusercontent.com/tntbbp123-wq/my-Minecraft/main/MyMinecraft-ResourcePack.zip
-resource-pack-sha1=7ceb9e0b77a104d23dc5fa410aa2f77c63135915
+resource-pack-sha1=a651e55ed92dc6d3d4f96eecde9900285f3c5bba
 ```
 
 Minecraft 1.21.2 이후로는 아이템 텍스처 분기가 `assets/<ns>/models/item/*.json`의 `overrides`
