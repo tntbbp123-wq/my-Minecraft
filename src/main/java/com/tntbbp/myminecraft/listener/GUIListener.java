@@ -71,7 +71,8 @@ public class GUIListener implements Listener {
             }
         } else if (holder instanceof EnhanceHolder) {
             for (int slot : event.getRawSlots()) {
-                if (slot < topSize && slot != EnhanceGUI.INPUT_SLOT && slot != EnhanceGUI.MATERIAL_SLOT) {
+                if (slot < topSize && slot != EnhanceGUI.INPUT_SLOT && slot != EnhanceGUI.MATERIAL_SLOT
+                        && slot != EnhanceGUI.SCROLL_SLOT) {
                     event.setCancelled(true);
                     return;
                 }
@@ -87,8 +88,10 @@ public class GUIListener implements Listener {
             Player player = (Player) event.getPlayer();
             returnItem(player, event.getInventory().getItem(EnhanceGUI.INPUT_SLOT));
             returnItem(player, event.getInventory().getItem(EnhanceGUI.MATERIAL_SLOT));
+            returnItem(player, event.getInventory().getItem(EnhanceGUI.SCROLL_SLOT));
             event.getInventory().setItem(EnhanceGUI.INPUT_SLOT, null);
             event.getInventory().setItem(EnhanceGUI.MATERIAL_SLOT, null);
+            event.getInventory().setItem(EnhanceGUI.SCROLL_SLOT, null);
         }
     }
 
@@ -196,7 +199,7 @@ public class GUIListener implements Listener {
         }
 
         int slot = event.getRawSlot();
-        if (slot == EnhanceGUI.INPUT_SLOT || slot == EnhanceGUI.MATERIAL_SLOT) {
+        if (slot == EnhanceGUI.INPUT_SLOT || slot == EnhanceGUI.MATERIAL_SLOT || slot == EnhanceGUI.SCROLL_SLOT) {
             Bukkit.getScheduler().runTask(plugin, () -> EnhanceGUI.refreshProgress(plugin, topInventory));
             return;
         }
@@ -214,13 +217,15 @@ public class GUIListener implements Listener {
 
         ItemStack targetItem = event.getInventory().getItem(EnhanceGUI.INPUT_SLOT);
         ItemStack material = event.getInventory().getItem(EnhanceGUI.MATERIAL_SLOT);
+        ItemStack scroll = event.getInventory().getItem(EnhanceGUI.SCROLL_SLOT);
+        boolean useScroll = enhanceManager.isProbabilityScroll(scroll);
 
         if (targetItem == null || targetItem.getType().isAir()) {
             player.sendMessage(ChatColor.RED + "강화할 아이템을 왼쪽 칸에 넣어주세요.");
             return;
         }
-        if (material == null || material.getType() != enhanceManager.requiredMaterial() || material.getAmount() < 1) {
-            player.sendMessage(ChatColor.RED + "강화 재료(" + enhanceManager.requiredMaterial().name() + ")가 필요합니다.");
+        if (!enhanceManager.isEnhanceStone(material) || material.getAmount() < 1) {
+            player.sendMessage(ChatColor.RED + "강화 재료(강화석)가 필요합니다.");
             return;
         }
 
@@ -241,7 +246,12 @@ public class GUIListener implements Listener {
         material.setAmount(material.getAmount() - 1);
         event.getInventory().setItem(EnhanceGUI.MATERIAL_SLOT, material.getAmount() <= 0 ? null : material);
 
-        boolean success = enhanceManager.rollSuccess(currentLevel);
+        if (useScroll) {
+            scroll.setAmount(scroll.getAmount() - 1);
+            event.getInventory().setItem(EnhanceGUI.SCROLL_SLOT, scroll.getAmount() <= 0 ? null : scroll);
+        }
+
+        boolean success = enhanceManager.rollSuccess(currentLevel, useScroll);
         if (success) {
             int newLevel = currentLevel + 1;
             enhanceManager.applyEnhance(targetItem, newLevel);

@@ -19,6 +19,7 @@ public class EnhanceGUI {
 
     public static final int INPUT_SLOT = 11;
     public static final int MATERIAL_SLOT = 15;
+    public static final int SCROLL_SLOT = 16;
     public static final int BUTTON_SLOT = 13;
     public static final int PROGRESS_SLOT = 4;
 
@@ -41,13 +42,16 @@ public class EnhanceGUI {
         }
         inventory.setItem(INPUT_SLOT, null);
         inventory.setItem(MATERIAL_SLOT, null);
+        inventory.setItem(SCROLL_SLOT, null);
 
         EnhanceManager enhanceManager = plugin.getEnhanceManager();
         inventory.setItem(BUTTON_SLOT, new ItemBuilder(Material.ANVIL)
                 .name("§e강화하기")
                 .lore(List.of(
                         "§7왼쪽 칸에 강화할 아이템을,",
-                        "§7오른쪽 칸에 §f" + enhanceManager.requiredMaterial().name() + "§7 을(를) 넣고 클릭하세요.",
+                        "§7가운데 칸에 §b강화석§7을 넣고 클릭하세요.",
+                        "§7오른쪽 칸에 §d확률 강화 두루마리§7를 넣으면",
+                        "§7성공 확률이 §a+" + (int) enhanceManager.scrollBonusPercent() + "%§7 증가합니다. (선택)",
                         "§7(최대 강화 레벨: " + enhanceManager.maxLevel() + ")"
                 ))
                 .build());
@@ -58,7 +62,7 @@ public class EnhanceGUI {
     }
 
     /**
-     * 입력 칸의 아이템을 기준으로 "현재 레벨 -> 다음 레벨" 진행 표시를 갱신한다.
+     * 입력 칸의 아이템/두루마리 여부를 기준으로 "현재 레벨 -> 다음 레벨" 진행 표시를 갱신한다.
      * 아이템을 넣거나 뺄 때, 강화를 시도한 직후에 호출해서 화면을 최신 상태로 유지한다.
      */
     public static void refreshProgress(MyMinecraftPlugin plugin, Inventory inventory) {
@@ -66,6 +70,9 @@ public class EnhanceGUI {
         EconomyManager economyManager = plugin.getEconomyManager();
 
         ItemStack target = inventory.getItem(INPUT_SLOT);
+        ItemStack scroll = inventory.getItem(SCROLL_SLOT);
+        boolean useScroll = enhanceManager.isProbabilityScroll(scroll);
+
         int currentLevel = enhanceManager.getLevel(target);
         boolean hasItem = target != null && !target.getType().isAir();
         boolean maxed = hasItem && currentLevel >= enhanceManager.maxLevel();
@@ -80,12 +87,13 @@ public class EnhanceGUI {
         } else if (maxed) {
             lore = List.of(progressLine, "§7더 이상 강화할 수 없습니다.");
         } else {
-            double chance = enhanceManager.successChance(currentLevel);
+            double chance = enhanceManager.successChance(currentLevel, useScroll);
             double cost = enhanceManager.cost(currentLevel);
             lore = List.of(
                     progressLine,
                     "",
-                    "§7성공 확률: §f" + String.format("%.1f", chance) + "%",
+                    "§7성공 확률: §f" + String.format("%.1f", chance) + "%"
+                            + (useScroll ? " §d(두루마리 적용)" : ""),
                     "§7필요 비용: §f" + String.format("%,.0f", cost) + economyManager.currencyName()
             );
         }

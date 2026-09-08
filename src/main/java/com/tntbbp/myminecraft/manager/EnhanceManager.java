@@ -1,6 +1,7 @@
 package com.tntbbp.myminecraft.manager;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
+import com.tntbbp.myminecraft.util.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -11,31 +12,92 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.List;
 
-/** 대장간 강화 시스템의 계산/적용 로직. */
+/** 대장간 강화 시스템의 계산/적용 로직 및 전용 아이템(강화석, 확률 강화 두루마리) 정의. */
 public class EnhanceManager {
-
-    public enum EnhanceOutcome {
-        SUCCESS,
-        FAIL,
-        MAX_LEVEL,
-        INVALID_ITEM,
-        WRONG_MATERIAL,
-        NOT_ENOUGH_MATERIAL,
-        NOT_ENOUGH_BALANCE
-    }
 
     private final MyMinecraftPlugin plugin;
     private final NamespacedKey levelKey;
+    private final NamespacedKey stoneKey;
+    private final NamespacedKey scrollKey;
 
     public EnhanceManager(MyMinecraftPlugin plugin) {
         this.plugin = plugin;
         this.levelKey = new NamespacedKey(plugin, "enhance_level");
+        this.stoneKey = new NamespacedKey(plugin, "enhance_stone");
+        this.scrollKey = new NamespacedKey(plugin, "enhance_scroll");
     }
 
-    public Material requiredMaterial() {
+    // ----- 강화석 -----
+
+    public Material stoneIconMaterial() {
         Material material = Material.matchMaterial(plugin.getConfig().getString("enhance.material", "AMETHYST_SHARD"));
         return material != null ? material : Material.AMETHYST_SHARD;
     }
+
+    public ItemStack createEnhanceStone(int amount) {
+        ItemStack item = new ItemBuilder(stoneIconMaterial())
+                .name("§b강화석")
+                .lore(List.of(
+                        "§7대장간 강화에 사용되는 전용 재료입니다.",
+                        "§7강화 시도 시 1개가 소모됩니다."
+                ))
+                .amount(amount)
+                .build();
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(stoneKey, PersistentDataType.BYTE, (byte) 1);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public boolean isEnhanceStone(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) {
+            return false;
+        }
+        Byte flag = item.getItemMeta().getPersistentDataContainer().get(stoneKey, PersistentDataType.BYTE);
+        return flag != null && flag == (byte) 1;
+    }
+
+    // ----- 확률 강화 두루마리 -----
+
+    public Material scrollIconMaterial() {
+        Material material = Material.matchMaterial(plugin.getConfig().getString("enhance.scroll-material", "PAPER"));
+        return material != null ? material : Material.PAPER;
+    }
+
+    public double scrollBonusPercent() {
+        return plugin.getConfig().getDouble("enhance.scroll-bonus-percent", 15.0);
+    }
+
+    public ItemStack createProbabilityScroll(int amount) {
+        ItemStack item = new ItemBuilder(scrollIconMaterial())
+                .name("§d확률 강화 두루마리")
+                .lore(List.of(
+                        "§7강화 시도 시 함께 사용하면",
+                        "§7성공 확률이 §a+" + trimZero(scrollBonusPercent()) + "%§7 증가합니다.",
+                        "§7(사용 시 1개 소모)"
+                ))
+                .amount(amount)
+                .glow()
+                .build();
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(scrollKey, PersistentDataType.BYTE, (byte) 1);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public boolean isProbabilityScroll(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) {
+            return false;
+        }
+        Byte flag = item.getItemMeta().getPersistentDataContainer().get(scrollKey, PersistentDataType.BYTE);
+        return flag != null && flag == (byte) 1;
+    }
+
+    private String trimZero(double value) {
+        return value == Math.floor(value) ? String.valueOf((long) value) : String.valueOf(value);
+    }
+
+    // ----- 강화 계산 -----
 
     public int maxLevel() {
         return plugin.getConfig().getInt("enhance.max-level", 10);
@@ -50,11 +112,15 @@ public class EnhanceManager {
         return level == null ? 0 : level;
     }
 
-    public double successChance(int currentLevel) {
+    public double successChance(int currentLevel, boolean useScroll) {
         double base = plugin.getConfig().getDouble("enhance.base-success-percent", 100.0);
         double decrease = plugin.getConfig().getDouble("enhance.decrease-per-level", 8.0);
         double min = plugin.getConfig().getDouble("enhance.min-success-percent", 15.0);
-        return Math.max(min, base - decrease * currentLevel);
+        double chance = Math.max(min, base - decrease * currentLevel);
+        if (useScroll) {
+            chance = Math.min(100.0, chance + scrollBonusPercent());
+        }
+        return chance;
     }
 
     public double cost(int currentLevel) {
@@ -63,9 +129,9 @@ public class EnhanceManager {
         return base + perLevel * currentLevel;
     }
 
-    /** 강화를 시도하고 성공 시 item을 직접 갱신한다. 실제 판정(재료/자금 차감)은 호출부에서 이미 끝났다고 가정한다. */
-    public boolean rollSuccess(int currentLevel) {
-        double chance = successChance(currentLevel);
+    /** 강화 성공 여부를 판정한다. 재료/자금 차감은 호출부에서 이미 끝났다고 가정한다. */
+    public boolean rollSuccess(int currentLevel, boolean useScroll) {
+        double chance = successChance(currentLevel, useScroll);
         return Math.random() * 100.0 < chance;
     }
 

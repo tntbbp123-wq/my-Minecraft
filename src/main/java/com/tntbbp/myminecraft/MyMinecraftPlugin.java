@@ -1,6 +1,7 @@
 package com.tntbbp.myminecraft;
 
 import com.tntbbp.myminecraft.command.EcCommand;
+import com.tntbbp.myminecraft.command.EnhanceItemCommand;
 import com.tntbbp.myminecraft.command.HomeCommand;
 import com.tntbbp.myminecraft.command.LobbyCommand;
 import com.tntbbp.myminecraft.command.MenuCommand;
@@ -56,6 +57,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getCommand("lobby").setExecutor(new LobbyCommand(this));
         getCommand("spawn").setExecutor(new SpawnCommand(this));
         getCommand("rt").setExecutor(new RtCommand(this));
+        getCommand("enhanceitem").setExecutor(new EnhanceItemCommand(this));
 
         getServer().getPluginManager().registerEvents(new GUIListener(this), this);
 

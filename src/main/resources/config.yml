@@ -48,8 +48,12 @@ stock:
       max-change-percent: 15.0
 
 enhance:
-  # 강화 재료 아이템
+  # 강화석 아이콘 재질 (전용 아이템이며, /enhanceitem stone <player> 로 지급)
   material: AMETHYST_SHARD
+  # 확률 강화 두루마리 아이콘 재질 (전용 아이템이며, /enhanceitem scroll <player> 로 지급)
+  scroll-material: PAPER
+  # 두루마리 사용 시 추가되는 성공 확률(%)
+  scroll-bonus-percent: 15.0
   base-success-percent: 100.0
   decrease-per-level: 8.0
   min-success-percent: 15.0

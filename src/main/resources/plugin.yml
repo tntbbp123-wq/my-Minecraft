@@ -42,6 +42,9 @@ commands:
     description: 중앙 500x500 지역을 제외한 랜덤 위치로 이동합니다.
     usage: /rt
     aliases: [randomtp]
+  enhanceitem:
+    description: 관리자가 강화석/확률 강화 두루마리를 지급합니다.
+    usage: /enhanceitem <stone|scroll> <player> [amount]
 
 permissions:
   myminecraft.admin:
