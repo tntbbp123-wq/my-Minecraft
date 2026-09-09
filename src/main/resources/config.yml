@@ -64,24 +64,28 @@ stock:
       price: 100.0
       min-price: 10.0
       max-change-percent: 8.0
+      business: "스마트폰/전자기기 제조 회사"
     - id: gold
       name: "골드마이닝"
       material: GOLD_NUGGET
       price: 250.0
       min-price: 20.0
       max-change-percent: 12.0
+      business: "금 채굴 회사"
     - id: diamond
       name: "다이아산업"
       material: DIAMOND
       price: 500.0
       min-price: 50.0
       max-change-percent: 10.0
+      business: "다이아몬드 채굴/가공 회사"
     - id: nether
       name: "네더에너지"
       material: BLAZE_POWDER
       price: 150.0
       min-price: 15.0
       max-change-percent: 15.0
+      business: "네더 자원을 이용한 에너지 개발 회사"
 
 # 관리자가 /뉴스작성, /가짜뉴스작성 으로 작성한 뉴스의 공개/반영 타이밍
 news:
@@ -89,6 +93,9 @@ news:
   reveal-delay-seconds: 3600
   # 작성 후 이 시간(초)이 지나면 (가짜 뉴스가 아닌 경우) 실제로 해당 종목 가격에 반영됩니다.
   apply-delay-seconds: 7200
+  # AI가 등락 방향/변동폭을 직접 정할 때(예: /뉴스작성 <종목명> AI:<주제>) 허용되는 변동폭(%) 범위.
+  ai-min-magnitude-percent: 1.0
+  ai-max-magnitude-percent: 10.0
 
 # 뉴스 작성 시 "AI:주제" 형식으로 입력하면 아래 AI API로 기사 본문을 자동 생성합니다.
 # Google AI Studio(https://aistudio.google.com/)에서 무료로 Gemini API 키를 발급받아 넣으세요.
