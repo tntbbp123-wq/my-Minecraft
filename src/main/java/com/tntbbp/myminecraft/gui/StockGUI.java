@@ -19,11 +19,15 @@ import java.util.List;
 public class StockGUI {
 
     public static final String TITLE = "§8주식 거래소";
-    public static final int SIZE = 27;
-    public static final int[] STOCK_SLOTS = {10, 11, 12, 13, 14, 15, 16};
-    public static final int[] COIN_SLOTS = {19, 20, 21, 22, 23};
+    public static final int SIZE = 45;
+    public static final int[] STOCK_SLOTS = {
+            10, 11, 12, 13, 14, 15, 16,
+            19, 20, 21, 22, 23, 24, 25,
+            28, 29, 30, 31, 32, 33, 34
+    };
+    public static final int[] COIN_SLOTS = {38, 39, 40, 41, 42};
     public static final int BALANCE_SLOT = 4;
-    public static final int BACK_SLOT = 26;
+    public static final int BACK_SLOT = 8;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;

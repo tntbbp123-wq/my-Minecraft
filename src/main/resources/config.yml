@@ -54,7 +54,9 @@ currency:
       model-data: 500054
 
 stock:
-  update-interval-seconds: 300
+  # 주식 가격 갱신 주기(초). 서버가 꺼져있던 시간도 계산에 포함되어, 다시 켜면 밀린 만큼
+  # 갱신하고 스케줄을 이어갑니다 (stockdata.yml에 마지막 갱신 시각이 저장됨).
+  update-interval-seconds: 3600
   list:
     - id: apple
       name: "애플전자"
@@ -81,12 +83,27 @@ stock:
       min-price: 15.0
       max-change-percent: 15.0
 
+# 관리자가 /뉴스작성, /가짜뉴스작성 으로 작성한 뉴스의 공개/반영 타이밍
+news:
+  # 작성 후 이 시간(초)이 지나면 전체 채팅으로 공개됩니다.
+  reveal-delay-seconds: 3600
+  # 작성 후 이 시간(초)이 지나면 (가짜 뉴스가 아닌 경우) 실제로 해당 종목 가격에 반영됩니다.
+  apply-delay-seconds: 7200
+
+# 뉴스 작성 시 "AI:주제" 형식으로 입력하면 아래 AI API로 기사 본문을 자동 생성합니다.
+# Google AI Studio(https://aistudio.google.com/)에서 무료로 Gemini API 키를 발급받아 넣으세요.
+ai:
+  enabled: false
+  provider: "gemini"
+  api-key: ""
+  model: "gemini-2.5-flash"
+
 enhance:
-  # 강화석 아이콘 재질 (전용 아이템이며, /enhanceitem stone <player> 로 지급)
+  # 강화석 아이콘 재질 (전용 아이템이며, /특수아이템소환 강화석 <유저> <수량> 으로 지급)
   material: AMETHYST_SHARD
   # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 기본 아이콘으로 보임)
   model-data: 500001
-  # 확률 강화 두루마리 등급 목록 (전용 아이템이며, /enhanceitem scroll:<id> <player> 로 지급)
+  # 확률 강화 두루마리 등급 목록 (전용 아이템이며, /특수아이템소환 <등급>두루마리 <유저> <수량> 으로 지급)
   scrolls:
     - id: common
       name: "일반등급 두루마리"
@@ -119,7 +136,7 @@ enhance:
   base-cost: 100.0
   cost-per-level: 50.0
 
-# 신화 등급 무기 '레바테인' (/laevateinn <player> 로 지급)
+# 신화 등급 무기 '레바테인' (/특수아이템소환 레바테인 <유저> <수량> 으로 지급)
 laevateinn:
   # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 네더라이트 검 기본 아이콘으로 보임)
   model-data: 500020
