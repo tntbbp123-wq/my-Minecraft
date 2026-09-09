@@ -216,6 +216,15 @@ public class StockManager {
         return section.getInt(stockId, 0);
     }
 
+    /** 관리자가 대가 없이 주식을 지급한다 (경제 시스템과 무관). */
+    public boolean giveHolding(UUID uuid, String stockId, int amount) {
+        if (amount <= 0 || getStock(stockId) == null) {
+            return false;
+        }
+        setHolding(uuid, stockId, getHolding(uuid, stockId) + amount);
+        return true;
+    }
+
     public TradeResult buy(UUID uuid, String stockId, int amount) {
         if (amount <= 0) {
             return TradeResult.INVALID_AMOUNT;

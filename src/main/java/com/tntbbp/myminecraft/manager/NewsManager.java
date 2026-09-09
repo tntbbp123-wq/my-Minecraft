@@ -2,7 +2,6 @@ package com.tntbbp.myminecraft.manager;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.model.Stock;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -16,8 +15,9 @@ import java.util.regex.Pattern;
 
 /**
  * 관리자가 작성한 (진짜/가짜) 뉴스를 예약 발행한다.
- * 작성 후 {@code reveal-delay-seconds}가 지나면 전체 공지되고,
- * 작성 후 {@code apply-delay-seconds}가 지나면 (가짜 뉴스가 아닌 경우에만) 해당 종목 가격에 실제로 반영된다.
+ * 작성 후 {@code reveal-delay-seconds}가 지나면 해당 종목에 커서를 올렸을 때(주식 거래소 GUI 툴팁)
+ * 보이기 시작하고, 작성 후 {@code apply-delay-seconds}가 지나면 (가짜 뉴스가 아닌 경우에만)
+ * 해당 종목 가격에 실제로 반영된다. 전체 채팅 공지는 하지 않는다.
  */
 public class NewsManager {
 
@@ -161,8 +161,6 @@ public class NewsManager {
             if (!item.revealed && item.revealAtMillis <= now) {
                 item.revealed = true;
                 changed = true;
-                plugin.getServer().broadcastMessage(ChatColor.GOLD + "§l[속보] " + ChatColor.RESET
-                        + ChatColor.YELLOW + "(" + item.stockName + ") " + ChatColor.WHITE + item.content);
             }
         }
 
@@ -190,5 +188,16 @@ public class NewsManager {
 
     public List<NewsItem> getPendingItems() {
         return items;
+    }
+
+    /** 해당 종목에 대해 공개되었지만 아직 가격에 반영되지 않은 뉴스 내용 목록 (주식 GUI 툴팁 표시용). */
+    public List<String> getRevealedNewsForStock(String stockId) {
+        List<String> result = new ArrayList<>();
+        for (NewsItem item : items) {
+            if (item.revealed && !item.applied && item.stockId.equalsIgnoreCase(stockId)) {
+                result.add(item.content);
+            }
+        }
+        return result;
     }
 }

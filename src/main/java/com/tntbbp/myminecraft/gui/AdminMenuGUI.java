@@ -24,6 +24,7 @@ public class AdminMenuGUI {
     public static final int NEWS_SLOT = 12;
     public static final int FAKE_NEWS_SLOT = 14;
     public static final int SPECIAL_ITEM_SLOT = 16;
+    public static final int STOCK_GIVE_SLOT = 4;
     public static final int STOCK_STATUS_SLOT = 22;
     public static final int CLOSE_SLOT = 26;
 
@@ -55,6 +56,16 @@ public class AdminMenuGUI {
                 ))
                 .build());
         holder.mapCommand(STOCK_ADD_SLOT, "/주식종류추가 ");
+
+        inventory.setItem(STOCK_GIVE_SLOT, new ItemBuilder(Material.GOLD_NUGGET)
+                .name("§6주식 지급")
+                .lore(List.of(
+                        "§7/주식지급 <종목명> <유저> <수량>",
+                        "§7대가 없이 플레이어에게 주식을 바로 지급합니다.",
+                        "§7클릭하면 채팅창에 명령어가 입력됩니다."
+                ))
+                .build());
+        holder.mapCommand(STOCK_GIVE_SLOT, "/주식지급 ");
 
         inventory.setItem(NEWS_SLOT, new ItemBuilder(Material.PAPER)
                 .name("§f뉴스 작성")

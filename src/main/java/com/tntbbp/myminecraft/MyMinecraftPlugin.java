@@ -6,6 +6,7 @@ import com.tntbbp.myminecraft.command.HomeCommand;
 import com.tntbbp.myminecraft.command.NewsCommand;
 import com.tntbbp.myminecraft.command.SpecialItemSummonCommand;
 import com.tntbbp.myminecraft.command.StockAddCommand;
+import com.tntbbp.myminecraft.command.StockGiveCommand;
 import com.tntbbp.myminecraft.command.LobbyCommand;
 import com.tntbbp.myminecraft.command.MenuCommand;
 import com.tntbbp.myminecraft.command.RtCommand;
@@ -80,6 +81,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getCommand("랜덤이동").setExecutor(new RtCommand(this));
         getCommand("특수아이템소환").setExecutor(new SpecialItemSummonCommand(this));
         getCommand("주식종류추가").setExecutor(new StockAddCommand(this));
+        getCommand("주식지급").setExecutor(new StockGiveCommand(this));
         getCommand("관리자메뉴").setExecutor(new AdminMenuCommand(this));
 
         NewsCommand newsCommand = new NewsCommand(this);
