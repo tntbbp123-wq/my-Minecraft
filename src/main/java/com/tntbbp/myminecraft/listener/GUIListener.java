@@ -8,7 +8,6 @@ import com.tntbbp.myminecraft.manager.HomeManager;
 import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
 import com.tntbbp.myminecraft.manager.StockManager;
-import com.tntbbp.myminecraft.manager.WorldSelectManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -19,6 +18,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -55,12 +55,6 @@ public class GUIListener implements Listener {
             handleStockClick((Player) event.getWhoClicked(), stockHolder, event.getSlot(), event.getClick());
         } else if (holder instanceof EnhanceHolder) {
             handleEnhanceClick(event);
-        } else if (holder instanceof WorldSelectHolder worldSelectHolder) {
-            event.setCancelled(true);
-            if (event.getClickedInventory() != event.getInventory()) {
-                return;
-            }
-            handleWorldSelectClick((Player) event.getWhoClicked(), worldSelectHolder, event.getSlot());
         }
     }
 
@@ -69,8 +63,7 @@ public class GUIListener implements Listener {
         InventoryHolder holder = event.getInventory().getHolder();
         int topSize = event.getInventory().getSize();
 
-        if (holder instanceof MenuHolder || holder instanceof HomeHolder || holder instanceof StockHolder
-                || holder instanceof WorldSelectHolder) {
+        if (holder instanceof MenuHolder || holder instanceof HomeHolder || holder instanceof StockHolder) {
             for (int slot : event.getRawSlots()) {
                 if (slot < topSize) {
                     event.setCancelled(true);
@@ -86,6 +79,17 @@ public class GUIListener implements Listener {
                 }
             }
             Bukkit.getScheduler().runTask(plugin, () -> EnhanceGUI.refreshProgress(plugin, event.getInventory()));
+        }
+    }
+
+    /**
+     * 제련대는 슬롯이 바뀔 때마다 바닐라 레시피 매칭 결과로 결과 슬롯을 덮어쓰려 하므로,
+     * 강화 GUI인 경우 항상 우리가 계산한 "강화하기" 버튼으로 강제한다.
+     */
+    @EventHandler
+    public void onPrepareSmithing(PrepareSmithingEvent event) {
+        if (event.getInventory().getHolder() instanceof EnhanceHolder) {
+            event.setResult(EnhanceGUI.buildButtonItem(plugin, event.getInventory()));
         }
     }
 
@@ -193,44 +197,6 @@ public class GUIListener implements Listener {
             case INVALID_AMOUNT -> player.sendMessage(ChatColor.RED + "거래에 실패했습니다.");
         }
         new StockGUI(plugin, player).open();
-    }
-
-    private void handleWorldSelectClick(Player player, WorldSelectHolder holder, int slot) {
-        if (slot == WorldSelectGUI.PREV_SLOT) {
-            new WorldSelectGUI(plugin, player, holder.getPage() - 1).open();
-            return;
-        }
-        if (slot == WorldSelectGUI.NEXT_SLOT) {
-            new WorldSelectGUI(plugin, player, holder.getPage() + 1).open();
-            return;
-        }
-
-        String entryId = holder.getEntryId(slot);
-        if (entryId == null) {
-            return;
-        }
-        WorldSelectManager worldSelectManager = plugin.getWorldSelectManager();
-        WorldSelectManager.WorldEntry entry = worldSelectManager.entries().stream()
-                .filter(e -> e.id().equals(entryId))
-                .findFirst()
-                .orElse(null);
-        if (entry == null) {
-            return;
-        }
-
-        if (entry.world() == null) {
-            player.sendMessage(ChatColor.RED + "아직 연결이 설정되지 않은 항목입니다.");
-            return;
-        }
-        org.bukkit.World world = Bukkit.getWorld(entry.world());
-        if (world == null) {
-            player.sendMessage(ChatColor.RED + "'" + entry.name() + "' 월드를 찾을 수 없습니다. (관리자에게 문의하세요)");
-            return;
-        }
-
-        player.closeInventory();
-        player.teleport(world.getSpawnLocation());
-        player.sendMessage(ChatColor.GREEN + "'" + entry.name() + "'(으)로 이동했습니다.");
     }
 
     private void handleEnhanceClick(InventoryClickEvent event) {

@@ -4,19 +4,22 @@ import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.HomeManager;
 import com.tntbbp.myminecraft.util.ItemBuilder;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Map;
 
+/** 양조대(Brewing Stand) GUI를 사용해 다른 메뉴들과 구분되는 배경을 가진다. 슬롯이 5개뿐이라 홈도 최대 5개까지 표시한다. */
 public class HomeGUI {
 
     public static final String TITLE = "§8홈 목록";
-    public static final int SIZE = 27;
+    public static final int SLOT_COUNT = 5;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -28,20 +31,15 @@ public class HomeGUI {
 
     public void open() {
         HomeHolder holder = new HomeHolder(player.getUniqueId());
-        Inventory inventory = Bukkit.createInventory(holder, SIZE, TITLE);
+        Inventory inventory = Bukkit.createInventory(holder, InventoryType.BREWING, TITLE);
         holder.setInventory(inventory);
-
-        ItemStack filler = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).name(" ").build();
-        for (int i = 0; i < SIZE; i++) {
-            inventory.setItem(i, filler);
-        }
 
         HomeManager homeManager = plugin.getHomeManager();
         Map<String, Location> homes = homeManager.getHomes(player.getUniqueId());
 
-        int slot = 10;
+        int slot = 0;
         for (Map.Entry<String, Location> entry : homes.entrySet()) {
-            if (slot > 16) {
+            if (slot >= SLOT_COUNT) {
                 break;
             }
             String name = entry.getKey();
@@ -62,20 +60,14 @@ public class HomeGUI {
         }
 
         if (homes.isEmpty()) {
-            inventory.setItem(13, new ItemBuilder(Material.PAPER)
+            inventory.setItem(0, new ItemBuilder(Material.PAPER)
                     .name("§7저장된 홈이 없습니다.")
                     .lore(List.of("§7/sethome <이름> 으로 홈을 저장하세요."))
                     .build());
         }
 
-        inventory.setItem(22, new ItemBuilder(Material.BOOK)
-                .name("§e홈 관리")
-                .lore(List.of(
-                        "§7/sethome <이름> §f- 홈 저장",
-                        "§7/delhome <이름> §f- 홈 삭제",
-                        "§7최대 " + homeManager.maxHomes() + "개까지 저장 가능"
-                ))
-                .build());
+        player.sendMessage(ChatColor.GRAY + "/sethome <이름>, /delhome <이름> - 최대 "
+                + homeManager.maxHomes() + "개까지 저장 가능");
 
         player.openInventory(inventory);
     }

@@ -8,19 +8,20 @@ import com.tntbbp.myminecraft.util.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/** 디스펜서(Dispenser) GUI를 사용해 다른 메뉴들과 구분되는 배경을 가진다. */
 public class StockGUI {
 
     public static final String TITLE = "§8주식 거래소";
-    public static final int SIZE = 27;
-    public static final int[] STOCK_SLOTS = {10, 11, 12, 13, 14, 15, 16};
-    public static final int BALANCE_SLOT = 4;
-    public static final int BACK_SLOT = 22;
+    public static final int BALANCE_SLOT = 0;
+    public static final int[] STOCK_SLOTS = {1, 2, 3, 4, 5, 6, 7};
+    public static final int BACK_SLOT = 8;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -32,13 +33,8 @@ public class StockGUI {
 
     public void open() {
         StockHolder holder = new StockHolder(player.getUniqueId());
-        Inventory inventory = Bukkit.createInventory(holder, SIZE, TITLE);
+        Inventory inventory = Bukkit.createInventory(holder, InventoryType.DISPENSER, TITLE);
         holder.setInventory(inventory);
-
-        ItemStack filler = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).name(" ").build();
-        for (int i = 0; i < SIZE; i++) {
-            inventory.setItem(i, filler);
-        }
 
         StockManager stockManager = plugin.getStockManager();
         EconomyManager economyManager = plugin.getEconomyManager();

@@ -48,10 +48,6 @@ commands:
   laevateinn:
     description: 관리자가 신화 등급 무기 레바테인을 지급합니다.
     usage: /laevateinn <player>
-  serverselect:
-    description: 서버/월드 선택 로비 메뉴를 엽니다.
-    usage: /serverselect
-    aliases: [서버선택, worldselect]
 
 permissions:
   myminecraft.admin:
