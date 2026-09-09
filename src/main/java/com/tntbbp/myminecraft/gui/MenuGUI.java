@@ -37,26 +37,31 @@ public class MenuGUI {
         inventory.setItem(SPAWN_SLOT, new ItemBuilder(Material.COMPASS)
                 .name("§b스폰")
                 .lore(List.of("§7클릭하면 스폰으로 이동합니다."))
+                .customModelData(MenuIcons.SPAWN)
                 .build());
 
         inventory.setItem(ENDER_CHEST_SLOT, new ItemBuilder(Material.ENDER_CHEST)
                 .name("§5엔더상자")
                 .lore(List.of("§7클릭하면 엔더상자를 엽니다."))
+                .customModelData(MenuIcons.ENDER_CHEST)
                 .build());
 
         inventory.setItem(STOCK_SLOT, new ItemBuilder(Material.EMERALD)
                 .name("§a주식")
                 .lore(List.of("§7클릭하면 주식 거래소를 엽니다."))
+                .customModelData(MenuIcons.STOCK)
                 .build());
 
         inventory.setItem(RANDOM_TP_SLOT, new ItemBuilder(Material.ENDER_PEARL)
                 .name("§d랜덤 TP")
                 .lore(List.of("§7클릭하면 랜덤한 위치로 이동합니다.", "§7(중앙 지역 제외)"))
+                .customModelData(MenuIcons.RANDOM_TP)
                 .build());
 
         inventory.setItem(ENHANCE_SLOT, new ItemBuilder(Material.ANVIL)
                 .name("§e대장간 강화")
                 .lore(List.of("§7클릭하면 아이템 강화 창을 엽니다."))
+                .customModelData(MenuIcons.ENHANCE)
                 .build());
 
         player.openInventory(inventory);

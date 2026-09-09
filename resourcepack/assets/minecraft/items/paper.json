@@ -35,6 +35,13 @@
           "type": "minecraft:model",
           "model": "minecraft:item/scroll_legendary"
         }
+      },
+      {
+        "threshold": 500040,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/menu_stock_item"
+        }
       }
     ]
   }
