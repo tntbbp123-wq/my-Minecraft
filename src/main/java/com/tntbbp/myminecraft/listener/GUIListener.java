@@ -9,6 +9,8 @@ import com.tntbbp.myminecraft.manager.HomeManager;
 import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
 import com.tntbbp.myminecraft.manager.StockManager;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -55,6 +57,12 @@ public class GUIListener implements Listener {
             handleStockClick((Player) event.getWhoClicked(), stockHolder, event.getSlot(), event.getClick());
         } else if (holder instanceof EnhanceHolder) {
             handleEnhanceClick(event);
+        } else if (holder instanceof AdminMenuHolder adminMenuHolder) {
+            event.setCancelled(true);
+            if (event.getClickedInventory() != event.getInventory()) {
+                return;
+            }
+            handleAdminMenuClick((Player) event.getWhoClicked(), adminMenuHolder, event.getSlot());
         }
     }
 
@@ -63,7 +71,8 @@ public class GUIListener implements Listener {
         InventoryHolder holder = event.getInventory().getHolder();
         int topSize = event.getInventory().getSize();
 
-        if (holder instanceof MenuHolder || holder instanceof HomeHolder || holder instanceof StockHolder) {
+        if (holder instanceof MenuHolder || holder instanceof HomeHolder || holder instanceof StockHolder
+                || holder instanceof AdminMenuHolder) {
             for (int slot : event.getRawSlots()) {
                 if (slot < topSize) {
                     event.setCancelled(true);
@@ -224,6 +233,24 @@ public class GUIListener implements Listener {
             }
         }
         new StockGUI(plugin, player).open();
+    }
+
+    private void handleAdminMenuClick(Player player, AdminMenuHolder holder, int slot) {
+        if (slot == AdminMenuGUI.CLOSE_SLOT) {
+            player.closeInventory();
+            return;
+        }
+
+        String suggestedCommand = holder.getSuggestedCommand(slot);
+        if (suggestedCommand == null) {
+            return;
+        }
+
+        player.closeInventory();
+        TextComponent message = new TextComponent(ChatColor.YELLOW + "아래를 클릭하면 채팅창에 명령어가 입력됩니다: "
+                + ChatColor.WHITE + suggestedCommand);
+        message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, suggestedCommand));
+        player.spigot().sendMessage(message);
     }
 
     private void handleEnhanceClick(InventoryClickEvent event) {
