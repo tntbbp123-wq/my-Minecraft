@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * 관리자가 작성한 (진짜/가짜) 뉴스를 예약 발행한다.
@@ -32,6 +33,21 @@ public class NewsManager {
         long applyAtMillis;
         boolean revealed;
         boolean applied;
+    }
+
+    private static final Pattern PERCENT_PATTERN = Pattern.compile("[+-]?\\d+(\\.\\d+)?\\s*%");
+    private static final Pattern DIRECTION_WORD_PATTERN = Pattern.compile("상승|하락");
+
+    /**
+     * 뉴스 내용에는 실제 사건/소식만 담아야 하며, 등락 방향이나 변동폭(%)은 관리자가
+     * 명령어로 별도 입력한 값으로만 내부에서 처리된다. 관리자가 실수로 넣거나 AI가
+     * 생성 과정에서 덧붙인 퍼센트/등락 표현은 여기서 걸러낸다.
+     */
+    public static String sanitizeContent(String content) {
+        String sanitized = PERCENT_PATTERN.matcher(content).replaceAll("");
+        sanitized = DIRECTION_WORD_PATTERN.matcher(sanitized).replaceAll("");
+        sanitized = sanitized.replaceAll("[ \\t]{2,}", " ").trim();
+        return sanitized;
     }
 
     private final MyMinecraftPlugin plugin;
@@ -117,7 +133,7 @@ public class NewsManager {
         item.stockId = stock.getId();
         item.stockName = stock.getName();
         item.impactPercent = Math.abs(magnitudePercent) * Math.signum(direction);
-        item.content = content;
+        item.content = sanitizeContent(content);
         item.fake = fake;
         item.createdAtMillis = now;
         item.revealAtMillis = now + revealDelay;
