@@ -19,7 +19,6 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -57,17 +56,6 @@ public class GUIListener implements Listener {
         } else if (holder instanceof EnhanceHolder) {
             handleEnhanceClick(event);
         }
-    }
-
-    /**
-     * 마인크래프트는 특정 키(Z 등)를 직접 감지할 수 없고, 클라이언트가 이미 어떤 동작에
-     * 묶인 키를 눌렀을 때만 서버로 신호가 온다. "아이템 버리기"(기본 Q) 동작을 메뉴 열기로
-     * 재활용하므로, 플레이어가 조작 설정에서 이 키를 Z로 바꾸면 Z키로 메뉴가 열린다.
-     */
-    @EventHandler
-    public void onDropItem(PlayerDropItemEvent event) {
-        event.setCancelled(true);
-        new MenuGUI(plugin, event.getPlayer()).open();
     }
 
     @EventHandler
