@@ -40,6 +40,8 @@ public class NewsCommand implements CommandExecutor {
 
         if (args.length < 4) {
             sender.sendMessage(ChatColor.YELLOW + "사용법: /" + label + " <종목명> <상승|하락> <변동폭%> <내용 또는 AI:주제>");
+            sender.sendMessage(ChatColor.GRAY + "내용에는 뉴스 소식(사건)만 적어주세요. 등락 방향/퍼센트는 "
+                    + "여기 넣은 값으로만 내부에서 처리되며, 기사 본문에 자동으로 들어가지 않습니다.");
             return true;
         }
 
@@ -93,9 +95,10 @@ public class NewsCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.YELLOW + "AI로 뉴스 기사를 생성하는 중...");
             geminiNewsClient.generateNewsArticle(topic, fake)
                     .thenAccept(generatedContent -> Bukkit.getScheduler().runTask(plugin, () -> {
-                        newsManager.submit(finalStock, direction, magnitude, generatedContent, fake);
+                        String sanitized = NewsManager.sanitizeContent(generatedContent);
+                        newsManager.submit(finalStock, direction, magnitude, sanitized, fake);
                         sender.sendMessage(ChatColor.GREEN + (fake ? "가짜 뉴스" : "뉴스") + "를 예약했습니다: "
-                                + ChatColor.WHITE + generatedContent);
+                                + ChatColor.WHITE + sanitized);
                     }))
                     .exceptionally(ex -> {
                         Bukkit.getScheduler().runTask(plugin, () ->

@@ -53,7 +53,10 @@ public class GeminiNewsClient {
                 ? "그럴듯하지만 사실과 다른 낚시성 루머 기사"
                 : "실제 있었던 것처럼 자연스러운 경제/사건 기사";
         String prompt = "마인크래프트 서버의 가상 주식 시장에 올라갈 짧은 한국어 뉴스 기사를 1~2문장으로 작성해줘. "
-                + "주제: " + topic + ". 스타일: " + style + ". 따옴표나 접두사 없이 기사 본문만 출력해줘.";
+                + "주제: " + topic + ". 스타일: " + style + ". "
+                + "중요: 이 기사는 사건/소식 자체만 전달해야 해. 주가가 오른다/내린다는 언급, "
+                + "'상승'이나 '하락' 같은 단어, 구체적인 퍼센트(%)나 수치 전망은 절대 포함하지 마. "
+                + "따옴표나 접두사 없이 기사 본문만 출력해줘.";
 
         String url = "https://generativelanguage.googleapis.com/v1beta/models/" + model()
                 + ":generateContent?key=" + apiKey();
