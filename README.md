@@ -33,18 +33,21 @@ Paper 서버용 유틸리티 플러그인입니다. (대상: Paper 1.21.x, Java 
 플러그인 메뉴들이 서로 구분되도록 했습니다 — 실제 상자(Chest)는 하나도 쓰지 않아서
 일반 상자를 여는 화면과 겹치지 않습니다.
 
-| 메뉴 | GUI 종류 | 칸 수 |
-|---|---|---|
-| `/menu` 메인 메뉴 | 호퍼 (Hopper) | 5 |
-| `/home` 홈 목록 | 양조대 (Brewing Stand) | 5 |
-| 주식 거래소 | 디스펜서 (Dispenser) | 9 |
-| 대장간 강화 | 베틀 (Loom) | 4 |
+| 메뉴 | GUI 종류 | 칸 수 | 배경 테마 |
+|---|---|---|---|
+| `/menu` 메인 메뉴 | 호퍼 (Hopper) | 5 | 남색/은색 |
+| `/home` 홈 목록 | 양조대 (Brewing Stand) | 5 | 짙은 녹색/청동 |
+| 주식 거래소 | 디스펜서 (Dispenser) | 9 | 짙은 녹색/금색 |
+| 대장간 강화 | 제련대 (Smithing Table) | 4 | 짙은 보라/주황(레바테인 톤) |
 
-각 텍스처(`hopper.png`, `brewing_stand.png`, `dispenser.png`, `loom.png`)를 리소스팩으로
-새로 그려 넣으면 각 메뉴가 완전히 다른 배경 이미지로 보이게 됩니다. 다만 바닐라 원본
-텍스처 파일이 있어야 슬롯 위치를 정확히 맞춰 그릴 수 있어서(제가 임의로 Mojang 자산을
-내려받을 수는 없음), 원본 텍스처 파일이나 이미 만들어진 배경 이미지를 주시면 리소스팩에
-반영해드리겠습니다.
+`resourcepack/assets/minecraft/textures/gui/container/`에 4개 배경(`hopper.png`,
+`brewing_stand.png`, `dispenser.png`, `smithing.png`)을 직접 제작해 넣었습니다.
+바닐라 원본 텍스처 파일 없이, 마인크래프트가 항상 고정으로 쓰는 표준 규격
+(슬롯 18px 간격, 플레이어 인벤토리 칸은 항상 x=8부터 시작 등)을 기준으로 그렸습니다.
+슬롯이 실제로 그려지는 위치는 게임 클라이언트에 고정되어 있어 텍스처와 약간 어긋나도
+기능(클릭 등)에는 전혀 영향이 없고, 최악의 경우 슬롯 테두리가 아이템과 한두 픽셀
+어긋나 보이는 정도입니다. 실제로 적용해보고 위치가 눈에 띄게 다르면 알려주시면
+다시 맞춰드리겠습니다.
 
 ## 빌드
 
@@ -76,7 +79,7 @@ mvn clean package
 
 ```
 resource-pack=https://raw.githubusercontent.com/tntbbp123-wq/my-Minecraft/main/MyMinecraft-ResourcePack.zip
-resource-pack-sha1=a651e55ed92dc6d3d4f96eecde9900285f3c5bba
+resource-pack-sha1=21dbe98859aa34c44273448b731739265e0a92fb
 ```
 
 Minecraft 1.21.2 이후로는 아이템 텍스처 분기가 `assets/<ns>/models/item/*.json`의 `overrides`
