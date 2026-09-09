@@ -11,6 +11,7 @@ import com.tntbbp.myminecraft.command.SpawnCommand;
 import com.tntbbp.myminecraft.command.TpaCommand;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
+import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.HomeManager;
@@ -33,6 +34,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private EnhanceManager enhanceManager;
     private InfernalBurnManager infernalBurnManager;
     private LaevateinnManager laevateinnManager;
+    private CurrencyManager currencyManager;
 
     @Override
     public void onEnable() {
@@ -47,6 +49,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.enhanceManager = new EnhanceManager(this);
         this.infernalBurnManager = new InfernalBurnManager(this);
         this.laevateinnManager = new LaevateinnManager(this);
+        this.currencyManager = new CurrencyManager(this);
 
         stockManager.startFluctuationTask();
         infernalBurnManager.start();
@@ -120,5 +123,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public LaevateinnManager getLaevateinnManager() {
         return laevateinnManager;
+    }
+
+    public CurrencyManager getCurrencyManager() {
+        return currencyManager;
     }
 }

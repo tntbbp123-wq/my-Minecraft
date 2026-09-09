@@ -1,6 +1,7 @@
 package com.tntbbp.myminecraft.gui;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
+import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.model.Stock;
@@ -10,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +21,9 @@ public class StockGUI {
     public static final String TITLE = "§8주식 거래소";
     public static final int SIZE = 27;
     public static final int[] STOCK_SLOTS = {10, 11, 12, 13, 14, 15, 16};
+    public static final int[] COIN_SLOTS = {19, 20, 21, 22, 23};
     public static final int BALANCE_SLOT = 4;
-    public static final int BACK_SLOT = 22;
+    public static final int BACK_SLOT = 26;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -70,6 +73,32 @@ public class StockGUI {
                     .build();
             inventory.setItem(slot, item);
             holder.mapSlot(slot, stock.getId());
+        }
+
+        CurrencyManager currencyManager = plugin.getCurrencyManager();
+        List<CurrencyManager.CoinDenomination> coins = currencyManager.denominations();
+        for (int i = 0; i < coins.size() && i < COIN_SLOTS.length; i++) {
+            CurrencyManager.CoinDenomination coin = coins.get(i);
+            int slot = COIN_SLOTS[i];
+
+            List<String> lore = new ArrayList<>();
+            lore.add("§7가치: §f" + String.format("%,d", coin.value()) + economyManager.currencyName());
+            lore.add("§7실물 화폐 - 플레이어 간 거래 가능");
+            lore.add("");
+            lore.add("§a좌클릭 §7- 구매 (" + economyManager.currencyName() + " → 동전)");
+            lore.add("§c우클릭 §7- 판매 (동전 → " + economyManager.currencyName() + ")");
+
+            ItemStack item = new ItemBuilder(coin.material())
+                    .name("§" + coin.colorCode() + coin.displayName())
+                    .lore(lore)
+                    .build();
+            if (coin.modelData() != 0) {
+                ItemMeta meta = item.getItemMeta();
+                meta.setCustomModelData(coin.modelData());
+                item.setItemMeta(meta);
+            }
+            inventory.setItem(slot, item);
+            holder.mapCoinSlot(slot, coin.id());
         }
 
         inventory.setItem(BACK_SLOT, new ItemBuilder(Material.ARROW)

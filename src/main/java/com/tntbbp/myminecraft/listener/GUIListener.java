@@ -2,6 +2,7 @@ package com.tntbbp.myminecraft.listener;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.gui.*;
+import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.HomeManager;
@@ -159,6 +160,13 @@ public class GUIListener implements Listener {
             new MenuGUI(plugin, player).open();
             return;
         }
+
+        String coinId = holder.getCoinId(slot);
+        if (coinId != null) {
+            handleCoinClick(player, coinId, clickType.isLeftClick());
+            return;
+        }
+
         String stockId = holder.getStockId(slot);
         if (stockId == null) {
             return;
@@ -183,6 +191,37 @@ public class GUIListener implements Listener {
             case NOT_ENOUGH_BALANCE -> player.sendMessage(ChatColor.RED + economyManager.currencyName() + "가 부족합니다.");
             case NOT_ENOUGH_QUANTITY -> player.sendMessage(ChatColor.RED + "보유한 주식 수량이 부족합니다.");
             case INVALID_AMOUNT -> player.sendMessage(ChatColor.RED + "거래에 실패했습니다.");
+        }
+        new StockGUI(plugin, player).open();
+    }
+
+    private void handleCoinClick(Player player, String coinId, boolean isBuy) {
+        CurrencyManager currencyManager = plugin.getCurrencyManager();
+        EconomyManager economyManager = plugin.getEconomyManager();
+        CurrencyManager.CoinDenomination coin = currencyManager.denominations().stream()
+                .filter(c -> c.id().equals(coinId))
+                .findFirst()
+                .orElse(null);
+        if (coin == null) {
+            return;
+        }
+
+        if (isBuy) {
+            if (currencyManager.buyCoin(player, coin)) {
+                player.sendMessage(ChatColor.GREEN + "구매 완료: " + coin.displayName() + " (보유 "
+                        + economyManager.currencyName() + ": "
+                        + String.format("%,.1f", economyManager.getBalance(player.getUniqueId())) + ")");
+            } else {
+                player.sendMessage(ChatColor.RED + economyManager.currencyName() + "가 부족합니다.");
+            }
+        } else {
+            if (currencyManager.sellCoin(player, coin)) {
+                player.sendMessage(ChatColor.GREEN + "판매 완료: " + coin.displayName() + " (보유 "
+                        + economyManager.currencyName() + ": "
+                        + String.format("%,.1f", economyManager.getBalance(player.getUniqueId())) + ")");
+            } else {
+                player.sendMessage(ChatColor.RED + "해당 동전을 보유하고 있지 않습니다.");
+            }
         }
         new StockGUI(plugin, player).open();
     }
