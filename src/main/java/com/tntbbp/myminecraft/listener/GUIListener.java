@@ -8,6 +8,7 @@ import com.tntbbp.myminecraft.manager.HomeManager;
 import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
 import com.tntbbp.myminecraft.manager.StockManager;
+import com.tntbbp.myminecraft.manager.WorldSelectManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -54,6 +55,12 @@ public class GUIListener implements Listener {
             handleStockClick((Player) event.getWhoClicked(), stockHolder, event.getSlot(), event.getClick());
         } else if (holder instanceof EnhanceHolder) {
             handleEnhanceClick(event);
+        } else if (holder instanceof WorldSelectHolder worldSelectHolder) {
+            event.setCancelled(true);
+            if (event.getClickedInventory() != event.getInventory()) {
+                return;
+            }
+            handleWorldSelectClick((Player) event.getWhoClicked(), worldSelectHolder, event.getSlot());
         }
     }
 
@@ -62,7 +69,8 @@ public class GUIListener implements Listener {
         InventoryHolder holder = event.getInventory().getHolder();
         int topSize = event.getInventory().getSize();
 
-        if (holder instanceof MenuHolder || holder instanceof HomeHolder || holder instanceof StockHolder) {
+        if (holder instanceof MenuHolder || holder instanceof HomeHolder || holder instanceof StockHolder
+                || holder instanceof WorldSelectHolder) {
             for (int slot : event.getRawSlots()) {
                 if (slot < topSize) {
                     event.setCancelled(true);
@@ -185,6 +193,44 @@ public class GUIListener implements Listener {
             case INVALID_AMOUNT -> player.sendMessage(ChatColor.RED + "거래에 실패했습니다.");
         }
         new StockGUI(plugin, player).open();
+    }
+
+    private void handleWorldSelectClick(Player player, WorldSelectHolder holder, int slot) {
+        if (slot == WorldSelectGUI.PREV_SLOT) {
+            new WorldSelectGUI(plugin, player, holder.getPage() - 1).open();
+            return;
+        }
+        if (slot == WorldSelectGUI.NEXT_SLOT) {
+            new WorldSelectGUI(plugin, player, holder.getPage() + 1).open();
+            return;
+        }
+
+        String entryId = holder.getEntryId(slot);
+        if (entryId == null) {
+            return;
+        }
+        WorldSelectManager worldSelectManager = plugin.getWorldSelectManager();
+        WorldSelectManager.WorldEntry entry = worldSelectManager.entries().stream()
+                .filter(e -> e.id().equals(entryId))
+                .findFirst()
+                .orElse(null);
+        if (entry == null) {
+            return;
+        }
+
+        if (entry.world() == null) {
+            player.sendMessage(ChatColor.RED + "아직 연결이 설정되지 않은 항목입니다.");
+            return;
+        }
+        org.bukkit.World world = Bukkit.getWorld(entry.world());
+        if (world == null) {
+            player.sendMessage(ChatColor.RED + "'" + entry.name() + "' 월드를 찾을 수 없습니다. (관리자에게 문의하세요)");
+            return;
+        }
+
+        player.closeInventory();
+        player.teleport(world.getSpawnLocation());
+        player.sendMessage(ChatColor.GREEN + "'" + entry.name() + "'(으)로 이동했습니다.");
     }
 
     private void handleEnhanceClick(InventoryClickEvent event) {

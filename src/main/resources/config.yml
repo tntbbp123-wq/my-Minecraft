@@ -107,3 +107,45 @@ laevateinn:
     burn-duration-seconds: 10
     burn-damage-per-second: 4.0
     magma-duration-seconds: 8
+
+# 서버/월드 선택 로비 메뉴 (/serverselect 로 열기)
+worldselect:
+  title: "서버 선택"
+  page-size: 7
+  entries:
+    - id: dungeon
+      name: "던전"
+      name-color: 6
+      tag: "DG"
+      tag-color: c
+      material: NETHER_BRICKS
+      # 이동할 Multiverse 월드 이름 (없으면 클릭 시 안내 메시지만 표시)
+      world: dungeon
+      extra-lines:
+        - "§c해당 서버는 컨텐츠 서버입니다."
+        - "§c처음 오신 분들은, 좌/우측에 있는"
+        - "§c야생, 마인팜 중 하나를 선택하세요."
+    - id: ice
+      name: "아이스"
+      name-color: b
+      tag: "ICE"
+      tag-color: 9
+      material: PACKED_ICE
+      world: ice
+      extra-lines: []
+    - id: survival
+      name: "야생"
+      name-color: a
+      tag: "SV"
+      tag-color: 2
+      material: GRASS_BLOCK
+      world: world
+      extra-lines: []
+    - id: minefarm
+      name: "마인팜"
+      name-color: e
+      tag: "MF"
+      tag-color: 6
+      material: IRON_PICKAXE
+      world: minefarm
+      extra-lines: []

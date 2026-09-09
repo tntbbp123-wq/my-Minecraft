@@ -7,6 +7,7 @@ import com.tntbbp.myminecraft.command.LaevateinnCommand;
 import com.tntbbp.myminecraft.command.LobbyCommand;
 import com.tntbbp.myminecraft.command.MenuCommand;
 import com.tntbbp.myminecraft.command.RtCommand;
+import com.tntbbp.myminecraft.command.ServerSelectCommand;
 import com.tntbbp.myminecraft.command.SpawnCommand;
 import com.tntbbp.myminecraft.command.TpaCommand;
 import com.tntbbp.myminecraft.listener.GUIListener;
@@ -20,6 +21,7 @@ import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
 import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.manager.TeleportRequestManager;
+import com.tntbbp.myminecraft.manager.WorldSelectManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MyMinecraftPlugin extends JavaPlugin {
@@ -33,6 +35,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private EnhanceManager enhanceManager;
     private InfernalBurnManager infernalBurnManager;
     private LaevateinnManager laevateinnManager;
+    private WorldSelectManager worldSelectManager;
 
     @Override
     public void onEnable() {
@@ -47,6 +50,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.enhanceManager = new EnhanceManager(this);
         this.infernalBurnManager = new InfernalBurnManager(this);
         this.laevateinnManager = new LaevateinnManager(this);
+        this.worldSelectManager = new WorldSelectManager(this);
 
         stockManager.startFluctuationTask();
         infernalBurnManager.start();
@@ -68,6 +72,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getCommand("rt").setExecutor(new RtCommand(this));
         getCommand("enhanceitem").setExecutor(new EnhanceItemCommand(this));
         getCommand("laevateinn").setExecutor(new LaevateinnCommand(this));
+        getCommand("serverselect").setExecutor(new ServerSelectCommand(this));
 
         getServer().getPluginManager().registerEvents(new GUIListener(this), this);
         getServer().getPluginManager().registerEvents(new LaevateinnListener(this), this);
@@ -120,5 +125,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public LaevateinnManager getLaevateinnManager() {
         return laevateinnManager;
+    }
+
+    public WorldSelectManager getWorldSelectManager() {
+        return worldSelectManager;
     }
 }
