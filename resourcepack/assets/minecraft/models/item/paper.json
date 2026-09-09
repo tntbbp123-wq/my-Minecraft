@@ -19,10 +19,6 @@
     {
       "predicate": { "custom_model_data": 500013 },
       "model": "item/scroll_legendary"
-    },
-    {
-      "predicate": { "custom_model_data": 500040 },
-      "model": "item/menu_stock_item"
     }
   ]
 }
