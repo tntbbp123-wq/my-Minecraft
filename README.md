@@ -13,6 +13,10 @@ Paper 서버용 유틸리티 플러그인입니다. (대상: Paper 1.21.x, Java 
 - `/spawn`, `/spawn set` — 스폰 이동 / 설정(관리자)
 - `/rt` — 월드 스폰 기준 중심 500x500 지역을 제외한 랜덤 위치로 이동 (쿨다운 존재)
 - 주식(모의 투자) — 메뉴에서 가상 종목을 내부 포인트로 매수/매도, 주기적으로 가격 변동
+- 실물 화폐(동전) — 주식 거래소 GUI에서 포인트를 5종 동전(1G/10G/100G/1000G/10000G)으로
+  구매(포인트→동전)하거나 다시 판매(동전→포인트)할 수 있음. 동전은 일반 아이템이라
+  플레이어 간에도 자유롭게 주고받거나 거래 가능 (`config.yml`의 `currency.coins`에서
+  등급/가치 조정 가능)
 - 대장간 강화 — 전용 아이템 **강화석**을 소모해 아이템을 강화(성공률은 레벨이 오를수록 감소).
   **확률 강화 두루마리**(등급별)를 함께 넣으면 해당 시도의 성공 확률이 일시적으로 증가:
   일반 +10% / 레어 +20% / 에픽 +30% / 레전더리 +45% (`config.yml`의 `enhance.scrolls`에서 등급 추가/조정 가능)
@@ -46,9 +50,10 @@ mvn clean package
 ## 리소스팩 (전용 아이템 커스텀 텍스처)
 
 `resourcepack/` 폴더(및 루트의 `MyMinecraft-ResourcePack.zip`)는 강화석, 두루마리 4등급,
-레바테인이 전용 아트워크로 보이도록 만든 클라이언트 리소스팩입니다. `CustomModelData`로
-동작하므로 리소스팩을 적용하지 않은 플레이어에게는 원래 아이콘(강화석→자수정 조각,
-두루마리→종이, 레바테인→네더라이트 검)으로만 보이고 기능에는 영향이 없습니다.
+레바테인, 화폐 동전 5종이 전용 아트워크로 보이도록 만든 클라이언트 리소스팩입니다.
+`CustomModelData`로 동작하므로 리소스팩을 적용하지 않은 플레이어에게는 원래 아이콘
+(강화석→자수정 조각, 두루마리→종이, 레바테인→네더라이트 검, 동전→구리/철/금 주괴·
+다이아몬드·네더라이트 주괴)으로만 보이고 기능에는 영향이 없습니다.
 
 **적용 방법**
 
@@ -57,7 +62,7 @@ mvn clean package
 
 ```
 resource-pack=https://raw.githubusercontent.com/tntbbp123-wq/my-Minecraft/main/MyMinecraft-ResourcePack.zip
-resource-pack-sha1=6592784c0f6ccffd8d1b5dff0c2c52c7fd8841c8
+resource-pack-sha1=22af47cdc1f18f00904a3ca22ccbb73dfa921abc
 ```
 
 Minecraft 1.21.2 이후로는 아이템 텍스처 분기가 `assets/<ns>/models/item/*.json`의 `overrides`

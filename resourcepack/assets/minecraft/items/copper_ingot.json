@@ -1,0 +1,20 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/copper_ingot"
+    },
+    "entries": [
+      {
+        "threshold": 500050,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/coin_1g"
+        }
+      }
+    ]
+  }
+}

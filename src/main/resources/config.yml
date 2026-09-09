@@ -19,6 +19,40 @@ randomtp:
   # 안전한 착지 지점을 찾기 위한 최대 시도 횟수
   max-attempts: 30
 
+# 실물 화폐(동전) - 주식 거래소에서 포인트 <-> 동전으로 환전 가능
+currency:
+  coins:
+    - id: coin_1g
+      value: 1
+      name: "1G 동전"
+      color: "6"
+      material: COPPER_INGOT
+      model-data: 500050
+    - id: coin_10g
+      value: 10
+      name: "10G 동전"
+      color: "7"
+      material: IRON_INGOT
+      model-data: 500051
+    - id: coin_100g
+      value: 100
+      name: "100G 동전"
+      color: "e"
+      material: GOLD_INGOT
+      model-data: 500052
+    - id: coin_1000g
+      value: 1000
+      name: "1000G 동전"
+      color: "b"
+      material: DIAMOND
+      model-data: 500053
+    - id: coin_10000g
+      value: 10000
+      name: "10000G 동전"
+      color: "5"
+      material: NETHERITE_INGOT
+      model-data: 500054
+
 stock:
   update-interval-seconds: 300
   list:
