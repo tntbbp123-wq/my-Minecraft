@@ -1,9 +1,8 @@
 package com.tntbbp.myminecraft;
 
 import com.tntbbp.myminecraft.command.EcCommand;
-import com.tntbbp.myminecraft.command.EnhanceItemCommand;
 import com.tntbbp.myminecraft.command.HomeCommand;
-import com.tntbbp.myminecraft.command.LaevateinnCommand;
+import com.tntbbp.myminecraft.command.SpecialItemSummonCommand;
 import com.tntbbp.myminecraft.command.LobbyCommand;
 import com.tntbbp.myminecraft.command.MenuCommand;
 import com.tntbbp.myminecraft.command.RtCommand;
@@ -55,22 +54,21 @@ public class MyMinecraftPlugin extends JavaPlugin {
         infernalBurnManager.start();
 
         TpaCommand tpaCommand = new TpaCommand(this);
-        getCommand("tpa").setExecutor(tpaCommand);
-        getCommand("tpaccept").setExecutor(tpaCommand);
-        getCommand("tpdeny").setExecutor(tpaCommand);
+        getCommand("텔레포트요청").setExecutor(tpaCommand);
+        getCommand("텔레포트수락").setExecutor(tpaCommand);
+        getCommand("텔레포트거절").setExecutor(tpaCommand);
 
         HomeCommand homeCommand = new HomeCommand(this);
-        getCommand("home").setExecutor(homeCommand);
-        getCommand("sethome").setExecutor(homeCommand);
-        getCommand("delhome").setExecutor(homeCommand);
+        getCommand("홈").setExecutor(homeCommand);
+        getCommand("홈설정").setExecutor(homeCommand);
+        getCommand("홈삭제").setExecutor(homeCommand);
 
-        getCommand("ec").setExecutor(new EcCommand());
-        getCommand("menu").setExecutor(new MenuCommand(this));
-        getCommand("lobby").setExecutor(new LobbyCommand(this));
-        getCommand("spawn").setExecutor(new SpawnCommand(this));
-        getCommand("rt").setExecutor(new RtCommand(this));
-        getCommand("enhanceitem").setExecutor(new EnhanceItemCommand(this));
-        getCommand("laevateinn").setExecutor(new LaevateinnCommand(this));
+        getCommand("엔더상자").setExecutor(new EcCommand());
+        getCommand("메뉴").setExecutor(new MenuCommand(this));
+        getCommand("로비").setExecutor(new LobbyCommand(this));
+        getCommand("스폰").setExecutor(new SpawnCommand(this));
+        getCommand("랜덤이동").setExecutor(new RtCommand(this));
+        getCommand("특수아이템소환").setExecutor(new SpecialItemSummonCommand(this));
 
         getServer().getPluginManager().registerEvents(new GUIListener(this), this);
         getServer().getPluginManager().registerEvents(new LaevateinnListener(this), this);

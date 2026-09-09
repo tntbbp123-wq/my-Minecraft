@@ -27,9 +27,9 @@ public class TpaCommand implements CommandExecutor {
         }
 
         switch (label.toLowerCase()) {
-            case "tpa" -> handleTpa(player, args);
-            case "tpaccept" -> handleAccept(player);
-            case "tpdeny" -> handleDeny(player);
+            case "텔레포트요청" -> handleTpa(player, args);
+            case "텔레포트수락" -> handleAccept(player);
+            case "텔레포트거절" -> handleDeny(player);
             default -> {
                 return false;
             }
@@ -39,7 +39,7 @@ public class TpaCommand implements CommandExecutor {
 
     private void handleTpa(Player player, String[] args) {
         if (args.length < 1) {
-            player.sendMessage(ChatColor.YELLOW + "사용법: /tpa <player>");
+            player.sendMessage(ChatColor.YELLOW + "사용법: /텔레포트요청 <플레이어>");
             return;
         }
         Player target = Bukkit.getPlayerExact(args[0]);
@@ -55,7 +55,7 @@ public class TpaCommand implements CommandExecutor {
         requests.createRequest(player.getUniqueId(), target.getUniqueId());
         player.sendMessage(ChatColor.GREEN + target.getName() + "님에게 텔레포트 요청을 보냈습니다.");
         target.sendMessage(ChatColor.GREEN + player.getName() + "님이 텔레포트를 요청했습니다. "
-                + ChatColor.YELLOW + "/tpaccept" + ChatColor.GREEN + " 또는 " + ChatColor.YELLOW + "/tpdeny"
+                + ChatColor.YELLOW + "/텔레포트수락" + ChatColor.GREEN + " 또는 " + ChatColor.YELLOW + "/텔레포트거절"
                 + ChatColor.GREEN + "로 응답하세요. (" + requests.timeoutSeconds() + "초 후 만료)");
     }
 
