@@ -3,6 +3,7 @@ package com.tntbbp.myminecraft.gui;
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
+import com.tntbbp.myminecraft.manager.NewsManager;
 import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.model.Stock;
 import com.tntbbp.myminecraft.util.ItemBuilder;
@@ -49,6 +50,7 @@ public class StockGUI {
 
         StockManager stockManager = plugin.getStockManager();
         EconomyManager economyManager = plugin.getEconomyManager();
+        NewsManager newsManager = plugin.getNewsManager();
 
         inventory.setItem(BALANCE_SLOT, new ItemBuilder(Material.GOLD_INGOT)
                 .name("§6보유 " + economyManager.currencyName())
@@ -70,6 +72,15 @@ public class StockGUI {
             lore.add("");
             lore.add("§a좌클릭 §7- 1주 매수 §7(쉬프트: 10주)");
             lore.add("§c우클릭 §7- 1주 매도 §7(쉬프트: 10주)");
+
+            List<String> news = newsManager.getRevealedNewsForStock(stock.getId());
+            if (!news.isEmpty()) {
+                lore.add("");
+                lore.add("§6§l최근 뉴스");
+                for (String content : news) {
+                    lore.add("§6- §f" + content);
+                }
+            }
 
             ItemStack item = new ItemBuilder(stock.getMaterial())
                     .name("§e" + stock.getName())
