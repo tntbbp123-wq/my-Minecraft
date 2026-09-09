@@ -86,7 +86,8 @@ public class StockManager {
             double price = raw.get("price") instanceof Number n ? n.doubleValue() : 100.0;
             double minPrice = raw.get("min-price") instanceof Number n ? n.doubleValue() : 1.0;
             double maxChange = raw.get("max-change-percent") instanceof Number n ? n.doubleValue() : 10.0;
-            stocks.add(new Stock(id, name, material, price, minPrice, maxChange));
+            String business = raw.get("business") != null ? String.valueOf(raw.get("business")) : "";
+            stocks.add(new Stock(id, name, material, price, minPrice, maxChange, business));
         }
     }
 
@@ -99,9 +100,9 @@ public class StockManager {
             double minPrice = raw.get("min-price") instanceof Number n ? n.doubleValue() : 1.0;
             double maxPrice = raw.get("max-price") instanceof Number n ? n.doubleValue() : 0.0;
             double changeUnit = raw.get("change-unit") instanceof Number n ? n.doubleValue() : 1.0;
-            double startPrice = minPrice + (maxPrice > minPrice ? (maxPrice - minPrice) / 2 : 0);
+            String business = raw.get("business") != null ? String.valueOf(raw.get("business")) : "";
             Material icon = CUSTOM_ICONS[Math.abs(id.hashCode() + index) % CUSTOM_ICONS.length];
-            stocks.add(new Stock(id, name, icon, startPrice, minPrice, maxPrice, changeUnit));
+            stocks.add(new Stock(id, name, icon, minPrice, minPrice, maxPrice, changeUnit, business));
             index++;
         }
     }
@@ -122,8 +123,8 @@ public class StockManager {
         }
     }
 
-    /** 관리자가 새 주식 종목을 추가한다. 아이디는 이름 기반으로 자동 생성된다. */
-    public AddResult addCustomStock(String name, double minPrice, double maxPrice, double changeUnit) {
+    /** 관리자가 새 주식 종목을 추가한다. 아이디는 이름 기반으로 자동 생성되며, 시작 가격은 최소값으로 설정된다. */
+    public AddResult addCustomStock(String name, double minPrice, double maxPrice, double changeUnit, String businessType) {
         if (minPrice < 0 || maxPrice <= minPrice || changeUnit <= 0) {
             return AddResult.INVALID_RANGE;
         }
@@ -132,9 +133,8 @@ public class StockManager {
             return AddResult.DUPLICATE_NAME;
         }
 
-        double startPrice = minPrice + (maxPrice - minPrice) / 2;
         Material icon = CUSTOM_ICONS[Math.abs(id.hashCode()) % CUSTOM_ICONS.length];
-        Stock stock = new Stock(id, name, icon, startPrice, minPrice, maxPrice, changeUnit);
+        Stock stock = new Stock(id, name, icon, minPrice, minPrice, maxPrice, changeUnit, businessType);
         stocks.add(stock);
 
         List<Map<?, ?>> list = new ArrayList<>(data.getMapList("custom-stocks"));
@@ -143,7 +143,8 @@ public class StockManager {
                 "name", name,
                 "min-price", minPrice,
                 "max-price", maxPrice,
-                "change-unit", changeUnit
+                "change-unit", changeUnit,
+                "business", businessType
         );
         list.add(entry);
         data.set("custom-stocks", list);

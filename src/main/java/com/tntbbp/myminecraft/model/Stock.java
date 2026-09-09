@@ -13,22 +13,23 @@ public class Stock {
     private final double maxChangePercent;
     private final double changeUnit;
     private final boolean custom;
+    private final String businessType;
 
     private double price;
     private double previousPrice;
 
     /** 기본 제공 종목 (config.yml의 stock.list, 퍼센트 기반 변동). */
-    public Stock(String id, String name, Material material, double price, double minPrice, double maxChangePercent) {
-        this(id, name, material, price, minPrice, 0.0, maxChangePercent, 0.0, false);
+    public Stock(String id, String name, Material material, double price, double minPrice, double maxChangePercent, String businessType) {
+        this(id, name, material, price, minPrice, 0.0, maxChangePercent, 0.0, false, businessType);
     }
 
     /** 관리자가 추가한 종목 (최소/최대값 + 변동 단위 기반 변동). */
-    public Stock(String id, String name, Material material, double price, double minPrice, double maxPrice, double changeUnit) {
-        this(id, name, material, price, minPrice, maxPrice, 0.0, changeUnit, true);
+    public Stock(String id, String name, Material material, double price, double minPrice, double maxPrice, double changeUnit, String businessType) {
+        this(id, name, material, price, minPrice, maxPrice, 0.0, changeUnit, true, businessType);
     }
 
     private Stock(String id, String name, Material material, double price, double minPrice, double maxPrice,
-                  double maxChangePercent, double changeUnit, boolean custom) {
+                  double maxChangePercent, double changeUnit, boolean custom, String businessType) {
         this.id = id;
         this.name = name;
         this.material = material;
@@ -39,6 +40,7 @@ public class Stock {
         this.maxChangePercent = maxChangePercent;
         this.changeUnit = changeUnit;
         this.custom = custom;
+        this.businessType = businessType != null ? businessType : "";
     }
 
     public String getId() {
@@ -79,6 +81,11 @@ public class Stock {
 
     public boolean isCustom() {
         return custom;
+    }
+
+    /** AI 뉴스 생성 시 참고하는 업종/하는 일 설명. */
+    public String getBusinessType() {
+        return businessType;
     }
 
     /** 재시작 후 저장된 가격을 복원한다. */

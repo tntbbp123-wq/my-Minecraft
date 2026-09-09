@@ -13,7 +13,14 @@ import org.bukkit.command.CommandSender;
 
 /**
  * 관리자가 (진짜/가짜) 뉴스를 예약 작성하는 명령어.
- * 내용 대신 "AI:주제"를 넣으면 Gemini API로 기사를 자동 생성한다 (config.yml의 ai.enabled 필요).
+ *
+ * <ul>
+ *   <li>/뉴스작성 &lt;종목명&gt; &lt;상승|하락&gt; &lt;변동폭%&gt; &lt;내용&gt; - 완전 수동</li>
+ *   <li>/뉴스작성 &lt;종목명&gt; &lt;상승|하락&gt; &lt;변동폭%&gt; AI:&lt;주제&gt; - 등락/변동폭은 관리자가,
+ *       기사 본문만 AI가 작성</li>
+ *   <li>/뉴스작성 &lt;종목명&gt; AI:&lt;주제&gt; (주제 생략 가능) - 관리자가 방향/변동폭을 정하지 않으면
+ *       종목의 업종에 맞춰 AI가 기사 본문과 등락 방향/변동폭을 모두 직접 정함</li>
+ * </ul>
  */
 public class NewsCommand implements CommandExecutor {
 
@@ -38,10 +45,8 @@ public class NewsCommand implements CommandExecutor {
 
         boolean fake = label.equalsIgnoreCase("가짜뉴스작성");
 
-        if (args.length < 4) {
-            sender.sendMessage(ChatColor.YELLOW + "사용법: /" + label + " <종목명> <상승|하락> <변동폭%> <내용 또는 AI:주제>");
-            sender.sendMessage(ChatColor.GRAY + "내용에는 뉴스 소식(사건)만 적어주세요. 등락 방향/퍼센트는 "
-                    + "여기 넣은 값으로만 내부에서 처리되며, 기사 본문에 자동으로 들어가지 않습니다.");
+        if (args.length < 2) {
+            sendUsage(sender, label);
             return true;
         }
 
@@ -51,6 +56,34 @@ public class NewsCommand implements CommandExecutor {
         }
         if (stock == null) {
             sender.sendMessage(ChatColor.RED + "존재하지 않는 종목입니다: " + args[0]);
+            return true;
+        }
+        Stock finalStock = stock;
+
+        // 관리자가 방향/변동폭을 정하지 않고 바로 AI: 를 쓰면, AI가 종목의 업종에 맞춰
+        // 기사 내용은 물론 등락 방향과 변동폭까지 모두 직접 정한다.
+        if (args[1].startsWith("AI:")) {
+            String topic = joinFrom(args, 1).substring("AI:".length()).trim();
+            sender.sendMessage(ChatColor.YELLOW + "AI가 " + stock.getName() + "의 업종에 맞는 뉴스와 등락을 정하는 중...");
+            geminiNewsClient.generateNewsWithImpact(finalStock, topic, fake)
+                    .thenAccept(draft -> Bukkit.getScheduler().runTask(plugin, () -> {
+                        String sanitized = NewsManager.sanitizeContent(draft.content());
+                        newsManager.submit(finalStock, draft.direction(), draft.magnitudePercent(), sanitized, fake);
+                        sender.sendMessage(ChatColor.GREEN + (fake ? "가짜 뉴스" : "뉴스") + "를 예약했습니다: "
+                                + ChatColor.WHITE + sanitized);
+                        sender.sendMessage(ChatColor.GRAY + "(AI 판단: " + (draft.direction() > 0 ? "상승" : "하락")
+                                + " " + draft.magnitudePercent() + "% - 이 정보는 공개되지 않습니다)");
+                    }))
+                    .exceptionally(ex -> {
+                        Bukkit.getScheduler().runTask(plugin, () ->
+                                sender.sendMessage(ChatColor.RED + "AI 뉴스 생성 실패: " + ex.getMessage()));
+                        return null;
+                    });
+            return true;
+        }
+
+        if (args.length < 4) {
+            sendUsage(sender, label);
             return true;
         }
 
@@ -76,16 +109,10 @@ public class NewsCommand implements CommandExecutor {
             return true;
         }
 
-        StringBuilder contentBuilder = new StringBuilder();
-        for (int i = 3; i < args.length; i++) {
-            if (i > 3) {
-                contentBuilder.append(" ");
-            }
-            contentBuilder.append(args[i]);
-        }
-        String contentArg = contentBuilder.toString();
+        String contentArg = joinFrom(args, 3);
 
-        Stock finalStock = stock;
+        int finalDirection = direction;
+        double finalMagnitude = magnitude;
         if (contentArg.startsWith("AI:")) {
             String topic = contentArg.substring("AI:".length()).trim();
             if (topic.isEmpty()) {
@@ -96,7 +123,7 @@ public class NewsCommand implements CommandExecutor {
             geminiNewsClient.generateNewsArticle(topic, fake)
                     .thenAccept(generatedContent -> Bukkit.getScheduler().runTask(plugin, () -> {
                         String sanitized = NewsManager.sanitizeContent(generatedContent);
-                        newsManager.submit(finalStock, direction, magnitude, sanitized, fake);
+                        newsManager.submit(finalStock, finalDirection, finalMagnitude, sanitized, fake);
                         sender.sendMessage(ChatColor.GREEN + (fake ? "가짜 뉴스" : "뉴스") + "를 예약했습니다: "
                                 + ChatColor.WHITE + sanitized);
                     }))
@@ -111,5 +138,24 @@ public class NewsCommand implements CommandExecutor {
         newsManager.submit(stock, direction, magnitude, contentArg, fake);
         sender.sendMessage(ChatColor.GREEN + (fake ? "가짜 뉴스" : "뉴스") + "를 예약했습니다.");
         return true;
+    }
+
+    private String joinFrom(String[] args, int startIndex) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = startIndex; i < args.length; i++) {
+            if (i > startIndex) {
+                builder.append(" ");
+            }
+            builder.append(args[i]);
+        }
+        return builder.toString();
+    }
+
+    private void sendUsage(CommandSender sender, String label) {
+        sender.sendMessage(ChatColor.YELLOW + "사용법: /" + label + " <종목명> <상승|하락> <변동폭%> <내용 또는 AI:주제>");
+        sender.sendMessage(ChatColor.YELLOW + "또는: /" + label + " <종목명> AI:[주제] "
+                + ChatColor.GRAY + "(등락 방향/변동폭까지 종목 업종에 맞게 AI가 직접 정함)");
+        sender.sendMessage(ChatColor.GRAY + "내용에는 뉴스 소식(사건)만 적어주세요. 등락 방향/퍼센트는 "
+                + "기사 본문에 자동으로 들어가지 않습니다.");
     }
 }
