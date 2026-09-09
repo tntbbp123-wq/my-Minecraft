@@ -18,7 +18,6 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -79,17 +78,6 @@ public class GUIListener implements Listener {
                 }
             }
             Bukkit.getScheduler().runTask(plugin, () -> EnhanceGUI.refreshProgress(plugin, event.getInventory()));
-        }
-    }
-
-    /**
-     * 제련대는 슬롯이 바뀔 때마다 바닐라 레시피 매칭 결과로 결과 슬롯을 덮어쓰려 하므로,
-     * 강화 GUI인 경우 항상 우리가 계산한 "강화하기" 버튼으로 강제한다.
-     */
-    @EventHandler
-    public void onPrepareSmithing(PrepareSmithingEvent event) {
-        if (event.getInventory().getHolder() instanceof EnhanceHolder) {
-            event.setResult(EnhanceGUI.buildButtonItem(plugin, event.getInventory()));
         }
     }
 

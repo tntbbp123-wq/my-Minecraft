@@ -51,12 +51,6 @@ public final class ItemBuilder {
         return this;
     }
 
-    /** 리소스팩의 커스텀 텍스처와 연결되는 CustomModelData 값을 지정한다. */
-    public ItemBuilder customModelData(int modelData) {
-        meta.setCustomModelData(modelData);
-        return this;
-    }
-
     public ItemStack build() {
         item.setItemMeta(meta);
         return item;
