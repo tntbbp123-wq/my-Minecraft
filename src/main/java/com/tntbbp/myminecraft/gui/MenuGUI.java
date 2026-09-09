@@ -5,21 +5,21 @@ import com.tntbbp.myminecraft.util.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
+/** 호퍼(Hopper) GUI를 사용해 다른 메뉴들과 구분되는 배경을 가진다. */
 public class MenuGUI {
 
     public static final String TITLE = "§8메인 메뉴";
-    public static final int SIZE = 27;
 
-    public static final int SPAWN_SLOT = 10;
-    public static final int ENDER_CHEST_SLOT = 12;
-    public static final int STOCK_SLOT = 14;
-    public static final int RANDOM_TP_SLOT = 16;
-    public static final int ENHANCE_SLOT = 22;
+    public static final int SPAWN_SLOT = 0;
+    public static final int ENDER_CHEST_SLOT = 1;
+    public static final int STOCK_SLOT = 2;
+    public static final int RANDOM_TP_SLOT = 3;
+    public static final int ENHANCE_SLOT = 4;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -31,13 +31,8 @@ public class MenuGUI {
 
     public void open() {
         MenuHolder holder = new MenuHolder();
-        Inventory inventory = Bukkit.createInventory(holder, SIZE, TITLE);
+        Inventory inventory = Bukkit.createInventory(holder, InventoryType.HOPPER, TITLE);
         holder.setInventory(inventory);
-
-        ItemStack filler = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).name(" ").build();
-        for (int i = 0; i < SIZE; i++) {
-            inventory.setItem(i, filler);
-        }
 
         inventory.setItem(SPAWN_SLOT, new ItemBuilder(Material.COMPASS)
                 .name("§b스폰")
