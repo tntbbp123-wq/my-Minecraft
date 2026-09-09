@@ -53,6 +53,7 @@ public class HomeGUI {
                             "§a좌클릭 §7- 이동",
                             "§c우클릭 §7- 삭제"
                     ))
+                    .customModelData(MenuIcons.HOME)
                     .build();
             inventory.setItem(slot, item);
             holder.mapSlot(slot, name);

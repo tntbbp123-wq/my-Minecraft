@@ -93,6 +93,7 @@ public class EnhanceGUI {
         return new ItemBuilder(Material.ANVIL)
                 .name("§e강화하기")
                 .lore(lore)
+                .customModelData(MenuIcons.ENHANCE)
                 .build();
     }
 }

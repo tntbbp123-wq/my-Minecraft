@@ -42,6 +42,7 @@ public class StockGUI {
         inventory.setItem(BALANCE_SLOT, new ItemBuilder(Material.GOLD_INGOT)
                 .name("§6보유 " + economyManager.currencyName())
                 .lore(List.of("§f" + format(economyManager.getBalance(player.getUniqueId())) + economyManager.currencyName()))
+                .customModelData(MenuIcons.BALANCE)
                 .build());
 
         List<Stock> stocks = stockManager.getStocks();
@@ -63,6 +64,7 @@ public class StockGUI {
             ItemStack item = new ItemBuilder(stock.getMaterial())
                     .name("§e" + stock.getName())
                     .lore(lore)
+                    .customModelData(MenuIcons.STOCK_ITEM)
                     .build();
             inventory.setItem(slot, item);
             holder.mapSlot(slot, stock.getId());
@@ -70,6 +72,7 @@ public class StockGUI {
 
         inventory.setItem(BACK_SLOT, new ItemBuilder(Material.ARROW)
                 .name("§7« 메뉴로 돌아가기")
+                .customModelData(MenuIcons.BACK)
                 .build());
 
         player.openInventory(inventory);
