@@ -24,7 +24,7 @@ public class SpawnCommand implements CommandExecutor {
             return true;
         }
 
-        if (args.length > 0 && args[0].equalsIgnoreCase("set")) {
+        if (args.length > 0 && args[0].equals("설정")) {
             if (!player.hasPermission("myminecraft.admin")) {
                 player.sendMessage(ChatColor.RED + "권한이 없습니다.");
                 return true;

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/** /tpa, /tpaccept, /tpdeny 요청을 관리한다. */
+/** /텔레포트요청, /텔레포트수락, /텔레포트거절 요청을 관리한다. */
 public class TeleportRequestManager {
 
     public record Request(UUID requester, long expiresAtMillis) {

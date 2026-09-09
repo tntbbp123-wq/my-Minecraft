@@ -64,15 +64,15 @@ public class HomeGUI {
         if (homes.isEmpty()) {
             inventory.setItem(13, new ItemBuilder(Material.PAPER)
                     .name("§7저장된 홈이 없습니다.")
-                    .lore(List.of("§7/sethome <이름> 으로 홈을 저장하세요."))
+                    .lore(List.of("§7/홈설정 <이름> 으로 홈을 저장하세요."))
                     .build());
         }
 
         inventory.setItem(22, new ItemBuilder(Material.BOOK)
                 .name("§e홈 관리")
                 .lore(List.of(
-                        "§7/sethome <이름> §f- 홈 저장",
-                        "§7/delhome <이름> §f- 홈 삭제",
+                        "§7/홈설정 <이름> §f- 홈 저장",
+                        "§7/홈삭제 <이름> §f- 홈 삭제",
                         "§7최대 " + homeManager.maxHomes() + "개까지 저장 가능"
                 ))
                 .build());

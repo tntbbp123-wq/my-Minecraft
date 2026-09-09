@@ -24,7 +24,7 @@ public class LobbyCommand implements CommandExecutor {
             return true;
         }
 
-        if (args.length > 0 && args[0].equalsIgnoreCase("set")) {
+        if (args.length > 0 && args[0].equals("설정")) {
             if (!player.hasPermission("myminecraft.admin")) {
                 player.sendMessage(ChatColor.RED + "권한이 없습니다.");
                 return true;
@@ -36,7 +36,7 @@ public class LobbyCommand implements CommandExecutor {
 
         Location lobby = locationsManager.getLobby();
         if (lobby == null) {
-            player.sendMessage(ChatColor.RED + "로비가 아직 설정되지 않았습니다. (관리자: /lobby set)");
+            player.sendMessage(ChatColor.RED + "로비가 아직 설정되지 않았습니다. (관리자: /로비 설정)");
             return true;
         }
         player.teleport(lobby);

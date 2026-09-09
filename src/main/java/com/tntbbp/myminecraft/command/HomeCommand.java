@@ -27,9 +27,9 @@ public class HomeCommand implements CommandExecutor {
         }
 
         switch (label.toLowerCase()) {
-            case "home" -> new HomeGUI(plugin, player).open();
-            case "sethome" -> handleSetHome(player, args);
-            case "delhome" -> handleDelHome(player, args);
+            case "홈" -> new HomeGUI(plugin, player).open();
+            case "홈설정" -> handleSetHome(player, args);
+            case "홈삭제" -> handleDelHome(player, args);
             default -> {
                 return false;
             }
@@ -49,7 +49,7 @@ public class HomeCommand implements CommandExecutor {
 
     private void handleDelHome(Player player, String[] args) {
         if (args.length < 1) {
-            player.sendMessage(ChatColor.YELLOW + "사용법: /delhome <name>");
+            player.sendMessage(ChatColor.YELLOW + "사용법: /홈삭제 <이름>");
             return;
         }
         boolean deleted = homeManager.delHome(player.getUniqueId(), args[0]);
