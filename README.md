@@ -61,7 +61,13 @@ Paper 서버용 유틸리티 플러그인입니다. (대상: Paper 1.21.x, Java 
 mvn clean package
 ```
 
-`target/MyMinecraft-1.0.0.jar` 를 서버의 `plugins/` 폴더에 넣으면 됩니다.
+빌드 결과물은 `target/MyMinecraft-<버전>.jar` 형태로 생성됩니다 (버전은 `pom.xml`의
+`<version>`). 서버의 `plugins/` 폴더에 넣으면 됩니다.
+
+업데이트할 때마다 `pom.xml`의 `<version>`을 올려서 jar 파일 이름이 매번 달라지도록 합니다.
+이렇게 하면 서버에 어느 버전이 적용되어 있는지, 새 jar로 제대로 교체됐는지 파일명만 보고
+바로 확인할 수 있습니다. (기존에 같은 이름의 jar가 `plugins/` 폴더에 남아있으면 삭제하거나
+백업 폴더로 옮겨주세요.)
 
 ## 설정
 
