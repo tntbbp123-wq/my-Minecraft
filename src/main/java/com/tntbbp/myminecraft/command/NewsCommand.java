@@ -5,11 +5,15 @@ import com.tntbbp.myminecraft.manager.GeminiNewsClient;
 import com.tntbbp.myminecraft.manager.NewsManager;
 import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.model.Stock;
+import com.tntbbp.myminecraft.util.TabCompletions;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+
+import java.util.List;
 
 /**
  * 관리자가 (진짜/가짜) 뉴스를 예약 작성하는 명령어.
@@ -22,7 +26,7 @@ import org.bukkit.command.CommandSender;
  *       종목의 업종에 맞춰 AI가 기사 본문과 등락 방향/변동폭을 모두 직접 정함</li>
  * </ul>
  */
-public class NewsCommand implements CommandExecutor {
+public class NewsCommand implements CommandExecutor, TabCompleter {
 
     private final MyMinecraftPlugin plugin;
     private final StockManager stockManager;
@@ -157,5 +161,26 @@ public class NewsCommand implements CommandExecutor {
                 + ChatColor.GRAY + "(등락 방향/변동폭까지 종목 업종에 맞게 AI가 직접 정함)");
         sender.sendMessage(ChatColor.GRAY + "내용에는 뉴스 소식(사건)만 적어주세요. 등락 방향/퍼센트는 "
                 + "기사 본문에 자동으로 들어가지 않습니다.");
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (!sender.hasPermission("myminecraft.admin")) {
+            return List.of();
+        }
+        if (args.length == 1) {
+            List<String> names = stockManager.getStocks().stream().map(Stock::getName).toList();
+            return TabCompletions.filterPrefix(names, args[0]);
+        }
+        if (args.length == 2) {
+            return TabCompletions.filterPrefix(List.of("상승", "하락", "AI:"), args[1]);
+        }
+        if (args.length == 3 && (args[1].equals("상승") || args[1].equals("하락"))) {
+            return TabCompletions.filterPrefix(List.of("1", "5", "10"), args[2]);
+        }
+        if (args.length == 4 && (args[1].equals("상승") || args[1].equals("하락")) && args[3].isEmpty()) {
+            return List.of("AI:");
+        }
+        return List.of();
     }
 }

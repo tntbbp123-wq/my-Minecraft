@@ -79,14 +79,23 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getCommand("로비").setExecutor(new LobbyCommand(this));
         getCommand("스폰").setExecutor(new SpawnCommand(this));
         getCommand("랜덤이동").setExecutor(new RtCommand(this));
-        getCommand("특수아이템소환").setExecutor(new SpecialItemSummonCommand(this));
+        SpecialItemSummonCommand specialItemSummonCommand = new SpecialItemSummonCommand(this);
+        getCommand("특수아이템소환").setExecutor(specialItemSummonCommand);
+        getCommand("특수아이템소환").setTabCompleter(specialItemSummonCommand);
+
         getCommand("주식종류추가").setExecutor(new StockAddCommand(this));
-        getCommand("주식지급").setExecutor(new StockGiveCommand(this));
+
+        StockGiveCommand stockGiveCommand = new StockGiveCommand(this);
+        getCommand("주식지급").setExecutor(stockGiveCommand);
+        getCommand("주식지급").setTabCompleter(stockGiveCommand);
+
         getCommand("관리자메뉴").setExecutor(new AdminMenuCommand(this));
 
         NewsCommand newsCommand = new NewsCommand(this);
         getCommand("뉴스작성").setExecutor(newsCommand);
+        getCommand("뉴스작성").setTabCompleter(newsCommand);
         getCommand("가짜뉴스작성").setExecutor(newsCommand);
+        getCommand("가짜뉴스작성").setTabCompleter(newsCommand);
 
         getServer().getPluginManager().registerEvents(new GUIListener(this), this);
         getServer().getPluginManager().registerEvents(new LaevateinnListener(this), this);

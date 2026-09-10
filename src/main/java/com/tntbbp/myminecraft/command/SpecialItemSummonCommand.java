@@ -5,18 +5,22 @@ import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.util.SpecialItemCatalog;
+import com.tntbbp.myminecraft.util.TabCompletions;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+
+import java.util.List;
 
 /**
  * 관리자가 강화석/등급별 확률 강화 두루마리/레바테인을 지급하는 통합 명령어.
  * 바닐라 /give 명령어와 같은 순서(대상 → 아이템 → 수량)를 사용한다.
  */
-public class SpecialItemSummonCommand implements CommandExecutor {
+public class SpecialItemSummonCommand implements CommandExecutor, TabCompleter {
 
     private final EnhanceManager enhanceManager;
     private final LaevateinnManager laevateinnManager;
@@ -73,5 +77,22 @@ public class SpecialItemSummonCommand implements CommandExecutor {
         sender.sendMessage(ChatColor.GREEN + target.getName() + "님에게 " + resolved.displayName() + " " + amount + "개를 지급했습니다.");
         target.sendMessage(ChatColor.GREEN + resolved.displayName() + " " + amount + "개를 받았습니다.");
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (!sender.hasPermission("myminecraft.admin")) {
+            return List.of();
+        }
+        if (args.length == 1) {
+            return TabCompletions.filterPrefix(TabCompletions.onlinePlayerNames(), args[0]);
+        }
+        if (args.length == 2) {
+            return TabCompletions.filterPrefix(SpecialItemCatalog.allItemNames(enhanceManager, currencyManager), args[1]);
+        }
+        if (args.length == 3) {
+            return TabCompletions.filterPrefix(List.of("1", "5", "10", "64"), args[2]);
+        }
+        return List.of();
     }
 }
