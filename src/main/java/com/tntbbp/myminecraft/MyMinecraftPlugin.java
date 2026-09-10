@@ -12,8 +12,10 @@ import com.tntbbp.myminecraft.command.MenuCommand;
 import com.tntbbp.myminecraft.command.RtCommand;
 import com.tntbbp.myminecraft.command.SpawnCommand;
 import com.tntbbp.myminecraft.command.TpaCommand;
+import com.tntbbp.myminecraft.listener.CombatListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
+import com.tntbbp.myminecraft.manager.CombatManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
@@ -42,6 +44,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private CurrencyManager currencyManager;
     private NewsManager newsManager;
     private GeminiNewsClient geminiNewsClient;
+    private CombatManager combatManager;
 
     @Override
     public void onEnable() {
@@ -59,6 +62,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.currencyManager = new CurrencyManager(this);
         this.newsManager = new NewsManager(this, stockManager);
         this.geminiNewsClient = new GeminiNewsClient(this);
+        this.combatManager = new CombatManager(this);
 
         stockManager.startFluctuationTask();
         infernalBurnManager.start();
@@ -99,6 +103,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new GUIListener(this), this);
         getServer().getPluginManager().registerEvents(new LaevateinnListener(this), this);
+        getServer().getPluginManager().registerEvents(new CombatListener(this), this);
 
         getLogger().info("MyMinecraft 플러그인이 활성화되었습니다.");
     }
@@ -163,5 +168,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public GeminiNewsClient getGeminiNewsClient() {
         return geminiNewsClient;
+    }
+
+    public CombatManager getCombatManager() {
+        return combatManager;
     }
 }
