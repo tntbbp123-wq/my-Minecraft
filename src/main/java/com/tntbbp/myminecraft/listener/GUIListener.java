@@ -9,6 +9,7 @@ import com.tntbbp.myminecraft.manager.HomeManager;
 import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
 import com.tntbbp.myminecraft.manager.StockManager;
+import com.tntbbp.myminecraft.util.SpecialItemCatalog;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -62,7 +63,7 @@ public class GUIListener implements Listener {
             if (event.getClickedInventory() != event.getInventory()) {
                 return;
             }
-            handleAdminMenuClick((Player) event.getWhoClicked(), adminMenuHolder, event.getSlot());
+            handleAdminMenuClick((Player) event.getWhoClicked(), adminMenuHolder, event.getSlot(), event.getClick());
         }
     }
 
@@ -235,9 +236,25 @@ public class GUIListener implements Listener {
         new StockGUI(plugin, player).open();
     }
 
-    private void handleAdminMenuClick(Player player, AdminMenuHolder holder, int slot) {
+    private void handleAdminMenuClick(Player player, AdminMenuHolder holder, int slot, ClickType clickType) {
         if (slot == AdminMenuGUI.CLOSE_SLOT) {
             player.closeInventory();
+            return;
+        }
+
+        String giveItemName = holder.getGiveItemName(slot);
+        if (giveItemName != null) {
+            SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
+                    plugin.getEnhanceManager(), plugin.getLaevateinnManager(), giveItemName, 1);
+            if (resolved == null) {
+                return;
+            }
+            ItemStack item = resolved.item();
+            int amount = clickType.isShiftClick() ? Math.min(64, item.getMaxStackSize()) : 1;
+            item.setAmount(amount);
+            player.getInventory().addItem(item).values()
+                    .forEach(leftover -> player.getWorld().dropItem(player.getLocation(), leftover));
+            player.sendMessage(ChatColor.GREEN + resolved.displayName() + " " + amount + "개를 받았습니다.");
             return;
         }
 

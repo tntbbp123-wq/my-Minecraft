@@ -10,6 +10,7 @@ public class AdminMenuHolder implements InventoryHolder {
 
     private Inventory inventory;
     private final Map<Integer, String> slotToSuggestedCommand = new HashMap<>();
+    private final Map<Integer, String> slotToGiveItemName = new HashMap<>();
 
     @Override
     public Inventory getInventory() {
@@ -26,5 +27,13 @@ public class AdminMenuHolder implements InventoryHolder {
 
     public String getSuggestedCommand(int slot) {
         return slotToSuggestedCommand.get(slot);
+    }
+
+    public void mapGiveItem(int slot, String itemName) {
+        slotToGiveItemName.put(slot, itemName);
+    }
+
+    public String getGiveItemName(int slot) {
+        return slotToGiveItemName.get(slot);
     }
 }
