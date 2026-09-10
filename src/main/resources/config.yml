@@ -89,6 +89,9 @@ enhance:
   material: AMETHYST_SHARD
   # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 기본 아이콘으로 보임)
   model-data: 500001
+  # 강화 GUI 진행 표시(0➜+1 ~ 9➜+10)에 쓰이는 CustomModelData 시작값. resourcepack/에 레벨별로
+  # 10개(model-data ~ model-data+9)가 미리 준비되어 있음. 리소스팩 미적용 시 기본 화살표 아이콘으로 보임.
+  progress-model-data-base: 500040
   # 확률 강화 두루마리 등급 목록 (전용 아이템이며, /특수아이템소환 <유저> <등급>두루마리 <수량> 으로 지급)
   scrolls:
     - id: common

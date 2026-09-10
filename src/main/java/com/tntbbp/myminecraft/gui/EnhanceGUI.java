@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 
@@ -22,6 +23,9 @@ public class EnhanceGUI {
     public static final int SCROLL_SLOT = 16;
     public static final int BUTTON_SLOT = 13;
     public static final int PROGRESS_SLOT = 4;
+
+    /** resourcepack/에 미리 만들어둔 진행 표시 아이콘(0➜+1 ~ 9➜+10)의 개수. */
+    private static final int PROGRESS_ICON_VARIANTS = 10;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -64,6 +68,8 @@ public class EnhanceGUI {
     /**
      * 입력 칸의 아이템/두루마리 여부를 기준으로 "현재 레벨 -> 다음 레벨" 진행 표시를 갱신한다.
      * 아이템을 넣거나 뺄 때, 강화를 시도한 직후에 호출해서 화면을 최신 상태로 유지한다.
+     * 리소스팩이 적용된 클라이언트에는 레벨에 맞는 화살표 그래픽(0➜+1 ~ 9➜+10)이 보이고,
+     * 적용하지 않은 클라이언트에는 기본 화살표 아이콘 + 아래 텍스트 설명만 보인다.
      */
     public static void refreshProgress(MyMinecraftPlugin plugin, Inventory inventory) {
         EnhanceManager enhanceManager = plugin.getEnhanceManager();
@@ -99,9 +105,18 @@ public class EnhanceGUI {
             );
         }
 
-        inventory.setItem(PROGRESS_SLOT, new ItemBuilder(Material.ENCHANTED_BOOK)
+        ItemStack progressItem = new ItemBuilder(Material.ARROW)
                 .name("§b강화 진행 상황")
                 .lore(lore)
-                .build());
+                .build();
+
+        if (hasItem && !maxed && currentLevel < PROGRESS_ICON_VARIANTS) {
+            int modelDataBase = plugin.getConfig().getInt("enhance.progress-model-data-base", 500040);
+            ItemMeta meta = progressItem.getItemMeta();
+            meta.setCustomModelData(modelDataBase + currentLevel);
+            progressItem.setItemMeta(meta);
+        }
+
+        inventory.setItem(PROGRESS_SLOT, progressItem);
     }
 }
