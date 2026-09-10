@@ -22,7 +22,6 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -90,18 +89,6 @@ public class GUIListener implements Listener {
                 }
             }
             Bukkit.getScheduler().runTask(plugin, () -> EnhanceGUI.refreshProgress(plugin, event.getInventory()));
-        }
-    }
-
-    /**
-     * 강화 GUI는 스미딩 테이블 인벤토리를 빌려 쓰지만 진짜 스미딩 레시피는 아니므로,
-     * 매번 우리가 계산한 "강화하기" 버튼 아이템으로 결과칸을 강제로 덮어써야
-     * 바닐라 레시피 매칭(보통 빈 결과)에 의해 지워지지 않는다.
-     */
-    @EventHandler
-    public void onPrepareSmithing(PrepareSmithingEvent event) {
-        if (event.getInventory().getHolder() instanceof EnhanceHolder) {
-            event.setResult(EnhanceGUI.buildButtonItem(plugin, event.getInventory()));
         }
     }
 

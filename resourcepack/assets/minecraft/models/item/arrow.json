@@ -1,0 +1,18 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "item/arrow"
+  },
+  "overrides": [
+    {"predicate": {"custom_model_data": 500040}, "model": "item/enhance_progress_0"},
+    {"predicate": {"custom_model_data": 500041}, "model": "item/enhance_progress_1"},
+    {"predicate": {"custom_model_data": 500042}, "model": "item/enhance_progress_2"},
+    {"predicate": {"custom_model_data": 500043}, "model": "item/enhance_progress_3"},
+    {"predicate": {"custom_model_data": 500044}, "model": "item/enhance_progress_4"},
+    {"predicate": {"custom_model_data": 500045}, "model": "item/enhance_progress_5"},
+    {"predicate": {"custom_model_data": 500046}, "model": "item/enhance_progress_6"},
+    {"predicate": {"custom_model_data": 500047}, "model": "item/enhance_progress_7"},
+    {"predicate": {"custom_model_data": 500048}, "model": "item/enhance_progress_8"},
+    {"predicate": {"custom_model_data": 500049}, "model": "item/enhance_progress_9"}
+  ]
+}

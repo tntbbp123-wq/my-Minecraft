@@ -7,26 +7,25 @@ import com.tntbbp.myminecraft.util.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 
-/**
- * 대장간 강화 GUI. 스미딩 테이블 인벤토리(템플릿/재료/추가재료 3칸 + 결과칸)를 그대로 빌려서
- * "마법 부여" 스타일의 슬롯 배치와 화살표 진행 표시("0 ➜ +1")를 낸다.
- * 결과칸은 실제 크래프팅 결과가 아니라 클릭하면 강화를 실행하는 버튼으로 쓴다
- * (진짜 스미딩 레시피가 아니므로 GUIListener의 PrepareSmithingEvent 핸들러가 매번 이 버튼으로 덮어써야 한다).
- */
 public class EnhanceGUI {
 
     public static final String TITLE = "§8대장간 강화";
+    public static final int SIZE = 27;
 
-    public static final int INPUT_SLOT = 0;
-    public static final int MATERIAL_SLOT = 1;
-    public static final int SCROLL_SLOT = 2;
-    public static final int BUTTON_SLOT = 3;
+    public static final int INPUT_SLOT = 11;
+    public static final int MATERIAL_SLOT = 15;
+    public static final int SCROLL_SLOT = 16;
+    public static final int BUTTON_SLOT = 13;
+    public static final int PROGRESS_SLOT = 4;
+
+    /** resourcepack/에 미리 만들어둔 진행 표시 아이콘(0➜+1 ~ 9➜+10)의 개수. */
+    private static final int PROGRESS_ICON_VARIANTS = 10;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -38,44 +37,62 @@ public class EnhanceGUI {
 
     public void open() {
         EnhanceHolder holder = new EnhanceHolder(player.getUniqueId());
-        Inventory inventory = Bukkit.createInventory(holder, InventoryType.SMITHING, TITLE);
+        Inventory inventory = Bukkit.createInventory(holder, SIZE, TITLE);
         holder.setInventory(inventory);
+
+        ItemStack filler = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).name(" ").build();
+        for (int i = 0; i < SIZE; i++) {
+            inventory.setItem(i, filler);
+        }
+        inventory.setItem(INPUT_SLOT, null);
+        inventory.setItem(MATERIAL_SLOT, null);
+        inventory.setItem(SCROLL_SLOT, null);
+
+        EnhanceManager enhanceManager = plugin.getEnhanceManager();
+        inventory.setItem(BUTTON_SLOT, new ItemBuilder(Material.ANVIL)
+                .name("§e강화하기")
+                .lore(List.of(
+                        "§7왼쪽 칸에 강화할 아이템을,",
+                        "§7가운데 칸에 §b강화석§7을 넣고 클릭하세요.",
+                        "§7오른쪽 칸에 확률 강화 두루마리를 넣으면",
+                        "§7등급에 따라 성공 확률이 추가로 증가합니다. (선택)",
+                        "§7(최대 강화 레벨: " + enhanceManager.maxLevel() + ")"
+                ))
+                .build());
 
         refreshProgress(plugin, inventory);
 
         player.openInventory(inventory);
     }
 
-    /** 입력/재료/두루마리 칸 상태를 기준으로 결과칸(버튼)의 "현재 레벨 ➜ 다음 레벨" 표시를 갱신한다. */
+    /**
+     * 입력 칸의 아이템/두루마리 여부를 기준으로 "현재 레벨 -> 다음 레벨" 진행 표시를 갱신한다.
+     * 아이템을 넣거나 뺄 때, 강화를 시도한 직후에 호출해서 화면을 최신 상태로 유지한다.
+     * 리소스팩이 적용된 클라이언트에는 레벨에 맞는 화살표 그래픽(0➜+1 ~ 9➜+10)이 보이고,
+     * 적용하지 않은 클라이언트에는 기본 화살표 아이콘 + 아래 텍스트 설명만 보인다.
+     */
     public static void refreshProgress(MyMinecraftPlugin plugin, Inventory inventory) {
-        inventory.setItem(BUTTON_SLOT, buildButtonItem(plugin, inventory));
-    }
-
-    public static ItemStack buildButtonItem(MyMinecraftPlugin plugin, Inventory inventory) {
         EnhanceManager enhanceManager = plugin.getEnhanceManager();
         EconomyManager economyManager = plugin.getEconomyManager();
 
         ItemStack target = inventory.getItem(INPUT_SLOT);
-        ItemStack material = inventory.getItem(MATERIAL_SLOT);
         ItemStack scroll = inventory.getItem(SCROLL_SLOT);
         double scrollBonus = enhanceManager.scrollBonusOf(scroll);
         boolean useScroll = scrollBonus > 0;
 
+        int currentLevel = enhanceManager.getLevel(target);
         boolean hasItem = target != null && !target.getType().isAir();
-        int currentLevel = hasItem ? enhanceManager.getLevel(target) : 0;
         boolean maxed = hasItem && currentLevel >= enhanceManager.maxLevel();
 
         String progressLine = maxed
                 ? "§c최대 강화 레벨 도달"
-                : "§a§l" + currentLevel + " §7➜ §a§l+" + (currentLevel + 1);
+                : "§a" + currentLevel + " §7━━━━━▶ §a+" + (currentLevel + 1);
 
         List<String> lore;
         if (!hasItem) {
-            lore = List.of("§7왼쪽 위 칸에 강화할 아이템을 넣어주세요.");
+            lore = List.of("§7아이템을 넣으면", "§7강화 정보가 표시됩니다.");
         } else if (maxed) {
             lore = List.of(progressLine, "§7더 이상 강화할 수 없습니다.");
-        } else if (!enhanceManager.isEnhanceStone(material) || material.getAmount() < 1) {
-            lore = List.of(progressLine, "", "§7왼쪽 아래 칸에 §b강화석§7을 넣어주세요.");
         } else {
             double chance = enhanceManager.successChance(currentLevel, scrollBonus);
             double cost = enhanceManager.cost(currentLevel);
@@ -84,15 +101,22 @@ public class EnhanceGUI {
                     "",
                     "§7성공 확률: §f" + String.format("%.1f", chance) + "%"
                             + (useScroll ? " §d(두루마리 +" + String.format("%.0f", scrollBonus) + "%)" : ""),
-                    "§7필요 비용: §f" + String.format("%,.0f", cost) + economyManager.currencyName(),
-                    "",
-                    "§e클릭하면 강화를 시도합니다."
+                    "§7필요 비용: §f" + String.format("%,.0f", cost) + economyManager.currencyName()
             );
         }
 
-        return new ItemBuilder(Material.ANVIL)
-                .name("§e강화하기")
+        ItemStack progressItem = new ItemBuilder(Material.ARROW)
+                .name("§b강화 진행 상황")
                 .lore(lore)
                 .build();
+
+        if (hasItem && !maxed && currentLevel < PROGRESS_ICON_VARIANTS) {
+            int modelDataBase = plugin.getConfig().getInt("enhance.progress-model-data-base", 500040);
+            ItemMeta meta = progressItem.getItemMeta();
+            meta.setCustomModelData(modelDataBase + currentLevel);
+            progressItem.setItemMeta(meta);
+        }
+
+        inventory.setItem(PROGRESS_SLOT, progressItem);
     }
 }
