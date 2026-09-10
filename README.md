@@ -155,18 +155,24 @@ resource-pack-prompt={"text":"이 서버는 필수 리소스팩이 있습니다.
 
 ## BetterModel 3D 모델 연동 (선택 사항)
 
-레바테인은 바닐라/리소스팩 아이템 모델(큐브 조합)만으로는 표현할 수 없는 고폴리곤
-3D 검 모델(`bettermodel-models/shadowflame.json`)을 갖고 있습니다. 이 모델을 실제로
-보이게 하려면 서버에 [BetterModel](https://github.com/toxicity188/BetterModel) 플러그인이
-별도로 설치되어 있어야 합니다.
+레바테인을 손에 들면 [BetterModel](https://github.com/toxicity188/BetterModel)이
+설치된 서버에서 3D 검 모델이 추가로 표시되도록 연동했습니다. (모델 파일 자체는
+아직 이 저장소에 포함되어 있지 않습니다 — 확정되는 대로 `bettermodel-models/`에
+추가될 예정입니다.)
+
+> 참고: BetterModel에서 임의의 형태를 가진 고폴리곤 메쉬(mesh) 모델 지원은
+> 3.0.0 버전부터 추가됐는데, 3.0.0 이상은 전부 Java 25 클래스 파일로 컴파일되어
+> 있어 Java 21 서버에서는 로드되지 않습니다. Java 21 서버와 함께 쓰려면
+> 큐브 조합(Blockbench cube) 모델만 지원하는 구버전(2.2.0)을 써야 합니다.
+> 이 저장소의 `pom.xml`은 현재 2.2.0을 기준으로 컴파일됩니다.
 
 **설치 방법**
 
-1. BetterModel 플러그인 jar를 서버 `plugins/` 폴더에 넣고 서버를 재시작합니다.
-   (BetterModel 최신 버전은 Java 25 런타임이 필요합니다 — Java 21에서 실행하면
-   `UnsupportedClassVersionError`가 발생하니, 서버 구동 Java를 25로 올려주세요.)
-2. 이 저장소의 `bettermodel-models/shadowflame.json` 파일을 서버의
-   `plugins/BetterModel/models/shadowflame.json` 경로에 복사합니다.
+1. BetterModel 플러그인 jar(Java 21과 호환되는 버전, 예: 2.2.0)를 서버 `plugins/`
+   폴더에 넣고 서버를 재시작합니다.
+2. `bettermodel-models/shadowflame.json`(또는 `config.yml`의
+   `laevateinn.bettermodel-name`에 설정한 이름의 모델 파일)을 서버의
+   `plugins/BetterModel/models/` 경로에 복사합니다.
 3. 서버를 재시작(또는 BetterModel 리로드)하면 모델이 등록됩니다.
 
 **동작 방식**
