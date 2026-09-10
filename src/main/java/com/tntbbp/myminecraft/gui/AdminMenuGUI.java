@@ -1,10 +1,13 @@
 package com.tntbbp.myminecraft.gui;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
+import com.tntbbp.myminecraft.manager.EnhanceManager;
+import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.NewsManager;
 import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.model.Stock;
 import com.tntbbp.myminecraft.util.ItemBuilder;
+import com.tntbbp.myminecraft.util.SpecialItemCatalog;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -14,19 +17,20 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-/** 관리자 전용 안내/현황 GUI. 클릭 시 해당 명령어를 채팅창에 자동으로 입력해준다. */
+/** 관리자 전용 안내/현황 GUI. 명령어 안내 항목은 클릭 시 채팅창에 명령어를 입력해주고, 특수 아이템 항목은 클릭 시 직접 지급된다. */
 public class AdminMenuGUI {
 
     public static final String TITLE = "§4관리자 메뉴";
-    public static final int SIZE = 27;
+    public static final int SIZE = 45;
 
+    public static final int STOCK_GIVE_SLOT = 4;
+    public static final int CLOSE_SLOT = 8;
     public static final int STOCK_ADD_SLOT = 10;
     public static final int NEWS_SLOT = 12;
     public static final int FAKE_NEWS_SLOT = 14;
     public static final int SPECIAL_ITEM_SLOT = 16;
-    public static final int STOCK_GIVE_SLOT = 4;
-    public static final int STOCK_STATUS_SLOT = 22;
-    public static final int CLOSE_SLOT = 26;
+    public static final int[] TAKE_ITEM_SLOTS = {19, 20, 21, 22, 23, 24, 25};
+    public static final int STOCK_STATUS_SLOT = 31;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -93,13 +97,35 @@ public class AdminMenuGUI {
         holder.mapCommand(FAKE_NEWS_SLOT, "/가짜뉴스작성 ");
 
         inventory.setItem(SPECIAL_ITEM_SLOT, new ItemBuilder(Material.NETHER_STAR)
-                .name("§d특수 아이템 지급")
+                .name("§d다른 플레이어에게 특수 아이템 지급")
                 .lore(List.of(
-                        "§7/특수아이템소환 <아이템명> <유저> <수량>",
-                        "§7클릭하면 채팅창에 명령어가 입력됩니다."
+                        "§7/특수아이템소환 <유저> <아이템명> <수량>",
+                        "§7클릭하면 채팅창에 명령어가 입력됩니다.",
+                        "§7내 인벤토리로 바로 꺼내려면 아래 칸을 클릭하세요."
                 ))
                 .build());
         holder.mapCommand(SPECIAL_ITEM_SLOT, "/특수아이템소환 ");
+
+        EnhanceManager enhanceManager = plugin.getEnhanceManager();
+        LaevateinnManager laevateinnManager = plugin.getLaevateinnManager();
+        List<String> itemNames = SpecialItemCatalog.allItemNames(enhanceManager);
+        for (int i = 0; i < itemNames.size() && i < TAKE_ITEM_SLOTS.length; i++) {
+            String itemName = itemNames.get(i);
+            SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(enhanceManager, laevateinnManager, itemName, 1);
+            if (resolved == null) {
+                continue;
+            }
+            int slot = TAKE_ITEM_SLOTS[i];
+            ItemStack icon = resolved.item();
+            List<String> lore = new ArrayList<>(icon.hasItemMeta() && icon.getItemMeta().hasLore()
+                    ? icon.getItemMeta().getLore() : List.of());
+            lore.add("");
+            lore.add("§a좌클릭 §7- 1개 꺼내기");
+            lore.add("§a쉬프트+좌클릭 §7- 최대 스택 꺼내기");
+            icon = new ItemBuilder(icon).lore(lore).build();
+            inventory.setItem(slot, icon);
+            holder.mapGiveItem(slot, itemName);
+        }
 
         StockManager stockManager = plugin.getStockManager();
         NewsManager newsManager = plugin.getNewsManager();
