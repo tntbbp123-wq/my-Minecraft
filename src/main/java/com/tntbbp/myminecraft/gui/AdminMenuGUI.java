@@ -1,6 +1,7 @@
 package com.tntbbp.myminecraft.gui;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
+import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.NewsManager;
@@ -29,8 +30,11 @@ public class AdminMenuGUI {
     public static final int NEWS_SLOT = 12;
     public static final int FAKE_NEWS_SLOT = 14;
     public static final int SPECIAL_ITEM_SLOT = 16;
-    public static final int[] TAKE_ITEM_SLOTS = {19, 20, 21, 22, 23, 24, 25};
-    public static final int STOCK_STATUS_SLOT = 31;
+    public static final int[] TAKE_ITEM_SLOTS = {
+            19, 20, 21, 22, 23, 24, 25,
+            28, 29, 30, 31, 32, 33, 34
+    };
+    public static final int STOCK_STATUS_SLOT = 40;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -100,6 +104,7 @@ public class AdminMenuGUI {
                 .name("§d다른 플레이어에게 특수 아이템 지급")
                 .lore(List.of(
                         "§7/특수아이템소환 <유저> <아이템명> <수량>",
+                        "§7강화석/두루마리/레바테인/화폐 동전 모두 지급 가능합니다.",
                         "§7클릭하면 채팅창에 명령어가 입력됩니다.",
                         "§7내 인벤토리로 바로 꺼내려면 아래 칸을 클릭하세요."
                 ))
@@ -108,10 +113,12 @@ public class AdminMenuGUI {
 
         EnhanceManager enhanceManager = plugin.getEnhanceManager();
         LaevateinnManager laevateinnManager = plugin.getLaevateinnManager();
-        List<String> itemNames = SpecialItemCatalog.allItemNames(enhanceManager);
+        CurrencyManager currencyManager = plugin.getCurrencyManager();
+        List<String> itemNames = SpecialItemCatalog.allItemNames(enhanceManager, currencyManager);
         for (int i = 0; i < itemNames.size() && i < TAKE_ITEM_SLOTS.length; i++) {
             String itemName = itemNames.get(i);
-            SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(enhanceManager, laevateinnManager, itemName, 1);
+            SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
+                    enhanceManager, laevateinnManager, currencyManager, itemName, 1);
             if (resolved == null) {
                 continue;
             }
