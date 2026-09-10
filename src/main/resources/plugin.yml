@@ -4,6 +4,7 @@ main: com.tntbbp.myminecraft.MyMinecraftPlugin
 api-version: '1.21'
 author: tntbbp
 description: ${project.description}
+softdepend: [BetterModel]
 
 commands:
   텔레포트요청:

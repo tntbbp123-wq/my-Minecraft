@@ -15,6 +15,7 @@ import com.tntbbp.myminecraft.command.TpaCommand;
 import com.tntbbp.myminecraft.listener.CombatListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
+import com.tntbbp.myminecraft.listener.LaevateinnModelListener;
 import com.tntbbp.myminecraft.manager.CombatManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
@@ -104,6 +105,13 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GUIListener(this), this);
         getServer().getPluginManager().registerEvents(new LaevateinnListener(this), this);
         getServer().getPluginManager().registerEvents(new CombatListener(this), this);
+
+        if (getServer().getPluginManager().isPluginEnabled("BetterModel")) {
+            getServer().getPluginManager().registerEvents(new LaevateinnModelListener(this), this);
+            getLogger().info("BetterModel 연동: 레바테인 3D 모델 표시 기능이 활성화되었습니다.");
+        } else {
+            getLogger().info("BetterModel이 설치되어 있지 않아 레바테인 3D 모델 표시 기능은 비활성화됩니다.");
+        }
 
         getLogger().info("MyMinecraft 플러그인이 활성화되었습니다.");
     }

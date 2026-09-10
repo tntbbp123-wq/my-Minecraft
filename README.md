@@ -68,6 +68,8 @@ Paper 서버용 유틸리티 플러그인입니다. (대상: Paper 1.21.x, Java 
   - 라그나로크의 숨결 (F키 발동, 재사용 대기 120초): 전방 부채꼴 범위에 화염을 내뿜어
     광역 피해 + 공중으로 띄우기 + 착지 후 10초간 지옥의 화상, 지나간 자리는 일정 시간
     마그마 블록으로 변함 (`config.yml`의 `laevateinn` 항목에서 세부 수치 조정 가능)
+  - (선택) **BetterModel** 연동 시 레바테인을 손에 들고 있는 동안 커스텀 3D 검 모델이
+    추가로 덧씌워져 보임 — 아래 "BetterModel 3D 모델 연동" 항목 참고
 
 ## 빌드
 
@@ -150,6 +152,34 @@ resource-pack-prompt={"text":"이 서버는 필수 리소스팩이 있습니다.
 
 해시는 `sha1sum MyMinecraft-ResourcePack.zip` 로 확인할 수 있습니다. 서버를 재시작하면
 접속하는 플레이어에게 리소스팩 적용 여부를 묻는 창이 뜹니다.
+
+## BetterModel 3D 모델 연동 (선택 사항)
+
+레바테인은 바닐라/리소스팩 아이템 모델(큐브 조합)만으로는 표현할 수 없는 고폴리곤
+3D 검 모델(`bettermodel-models/shadowflame.json`)을 갖고 있습니다. 이 모델을 실제로
+보이게 하려면 서버에 [BetterModel](https://github.com/toxicity188/BetterModel) 플러그인이
+별도로 설치되어 있어야 합니다.
+
+**설치 방법**
+
+1. BetterModel 플러그인 jar를 서버 `plugins/` 폴더에 넣고 서버를 재시작합니다.
+   (BetterModel 최신 버전은 Java 25 런타임이 필요합니다 — Java 21에서 실행하면
+   `UnsupportedClassVersionError`가 발생하니, 서버 구동 Java를 25로 올려주세요.)
+2. 이 저장소의 `bettermodel-models/shadowflame.json` 파일을 서버의
+   `plugins/BetterModel/models/shadowflame.json` 경로에 복사합니다.
+3. 서버를 재시작(또는 BetterModel 리로드)하면 모델이 등록됩니다.
+
+**동작 방식**
+
+- MyMinecraft는 BetterModel을 `softdepend`로만 참조합니다. BetterModel이 설치되어
+  있지 않으면 이 기능은 자동으로 꺼지고, 나머지 모든 기능(강화, 주식, 홈 등)은
+  평소와 동일하게 작동합니다.
+- BetterModel이 설치된 상태에서 플레이어가 메인핸드에 레바테인을 들면
+  `config.yml`의 `laevateinn.bettermodel-name`(기본값 `shadowflame`)에 해당하는
+  3D 모델이 플레이어에게 추가로 표시됩니다. 플레이어 본래 외형(스킨)은 그대로 유지되고,
+  검 모델만 별도로 덧붙어 보입니다. 손에서 내려놓으면 자동으로 사라집니다.
+- 모델 이름을 바꾸고 싶다면 `plugins/BetterModel/models/`에 다른 이름으로 모델을 넣고
+  `config.yml`의 `laevateinn.bettermodel-name` 값을 그 이름으로 바꾸면 됩니다.
 
 저장소가 비공개(private)라면 위 raw 링크는 서버가 접근할 수 없으니, zip을 직접
 다른 곳(자체 웹호스팅 등)에 올리고 그 URL을 `resource-pack`에 넣어주세요.
