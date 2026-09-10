@@ -120,6 +120,8 @@ enhance:
 laevateinn:
   # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 네더라이트 검 기본 아이콘으로 보임)
   model-data: 500020
+  # 근접 공격력 (툴팁/실제 데미지 계산에 쓰이는 최종 공격력 수치)
+  attack-damage: 12.0
   # 지옥의 화상 상태에서 치유 효과 감소율(%)
   heal-reduction-percent: 50.0
   # 이 시간(틱, 20틱=1초) 이상 연속으로 물에 젖어 있으면 지옥의 화상이 해제됩니다.

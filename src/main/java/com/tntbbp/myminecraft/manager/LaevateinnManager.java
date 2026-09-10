@@ -8,12 +8,15 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -72,6 +75,15 @@ public class LaevateinnManager {
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ATTRIBUTES);
         meta.addEnchant(Enchantment.FIRE_ASPECT, 2, true);
+
+        double attackDamage = plugin.getConfig().getDouble("laevateinn.attack-damage", 12.0);
+        AttributeModifier attackDamageModifier = new AttributeModifier(
+                new NamespacedKey(plugin, "laevateinn_attack_damage"),
+                attackDamage - 1.0, // 맨손 기본 공격력(1.0)을 더하면 툴팁상 공격력이 attackDamage가 됨
+                AttributeModifier.Operation.ADD_NUMBER,
+                EquipmentSlotGroup.MAINHAND);
+        meta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, attackDamageModifier);
+
         int modelData = plugin.getConfig().getInt("laevateinn.model-data", 0);
         if (modelData != 0) {
             meta.setCustomModelData(modelData);
