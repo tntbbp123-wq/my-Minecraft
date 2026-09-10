@@ -4,12 +4,14 @@ import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.util.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -112,5 +114,70 @@ public class CurrencyManager {
             }
         }
         return false;
+    }
+
+    /** 플레이어가 인벤토리에 들고 있는 모든 동전의 가치 합계. */
+    public double getTotalCoinValue(Player player) {
+        double total = 0;
+        for (ItemStack stack : player.getInventory().getContents()) {
+            Integer value = getCoinValue(stack);
+            if (value != null) {
+                total += (double) value * stack.getAmount();
+            }
+        }
+        return total;
+    }
+
+    public boolean hasEnoughCoins(Player player, double amount) {
+        return getTotalCoinValue(player) >= amount;
+    }
+
+    /**
+     * 큰 동전부터 우선적으로 소모해 비용을 결제한다. 동전은 쪼갤 수 없으므로 필요한 금액보다
+     * 더 많은 가치의 동전을 뜯게 될 수 있는데, 그 초과분은 포인트로 환급한다.
+     * 보유한 동전 총액이 부족하면 아무것도 소모하지 않고 false를 반환한다.
+     */
+    public boolean chargeCoins(Player player, double amount) {
+        if (amount <= 0) {
+            return true;
+        }
+        if (!hasEnoughCoins(player, amount)) {
+            return false;
+        }
+
+        PlayerInventory inventory = player.getInventory();
+        List<CoinDenomination> byValueDesc = new ArrayList<>(denominations);
+        byValueDesc.sort(Comparator.comparingInt(CoinDenomination::value).reversed());
+
+        double removedTotal = 0;
+        for (CoinDenomination coin : byValueDesc) {
+            if (removedTotal >= amount) {
+                break;
+            }
+            for (int slot = 0; slot < inventory.getSize() && removedTotal < amount; slot++) {
+                ItemStack stack = inventory.getItem(slot);
+                Integer value = getCoinValue(stack);
+                if (value == null || value != coin.value()) {
+                    continue;
+                }
+                int needed = (int) Math.ceil((amount - removedTotal) / coin.value());
+                int take = Math.min(stack.getAmount(), needed);
+                if (take <= 0) {
+                    continue;
+                }
+                removedTotal += take * coin.value();
+                int remaining = stack.getAmount() - take;
+                if (remaining <= 0) {
+                    inventory.setItem(slot, null);
+                } else {
+                    stack.setAmount(remaining);
+                }
+            }
+        }
+
+        if (removedTotal > amount) {
+            plugin.getEconomyManager().add(player.getUniqueId(), removedTotal - amount);
+        }
+        return true;
     }
 }

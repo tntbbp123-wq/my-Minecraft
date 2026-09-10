@@ -296,7 +296,7 @@ public class GUIListener implements Listener {
 
     private void runEnhance(Player player, InventoryClickEvent event) {
         EnhanceManager enhanceManager = plugin.getEnhanceManager();
-        EconomyManager economyManager = plugin.getEconomyManager();
+        CurrencyManager currencyManager = plugin.getCurrencyManager();
 
         ItemStack targetItem = event.getInventory().getItem(EnhanceGUI.INPUT_SLOT);
         ItemStack material = event.getInventory().getItem(EnhanceGUI.MATERIAL_SLOT);
@@ -320,13 +320,12 @@ public class GUIListener implements Listener {
         }
 
         double cost = enhanceManager.cost(currentLevel);
-        if (!economyManager.has(player.getUniqueId(), cost)) {
-            player.sendMessage(ChatColor.RED + economyManager.currencyName() + "가 부족합니다. (필요: "
-                    + String.format("%,.0f", cost) + ")");
+        if (!currencyManager.chargeCoins(player, cost)) {
+            player.sendMessage(ChatColor.RED + "동전이 부족합니다. (필요: "
+                    + String.format("%,.0f", cost) + "상당)");
             return;
         }
 
-        economyManager.subtract(player.getUniqueId(), cost);
         material.setAmount(material.getAmount() - 1);
         event.getInventory().setItem(EnhanceGUI.MATERIAL_SLOT, material.getAmount() <= 0 ? null : material);
 
@@ -342,7 +341,7 @@ public class GUIListener implements Listener {
             event.getInventory().setItem(EnhanceGUI.INPUT_SLOT, targetItem);
             player.sendMessage(ChatColor.GREEN + "강화 성공! 현재 강화 레벨: +" + newLevel);
         } else {
-            player.sendMessage(ChatColor.RED + "강화 실패... 재료와 " + economyManager.currencyName() + "가 소모되었습니다.");
+            player.sendMessage(ChatColor.RED + "강화 실패... 재료와 동전이 소모되었습니다.");
         }
         EnhanceGUI.refreshProgress(plugin, event.getInventory());
     }
