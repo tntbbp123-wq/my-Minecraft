@@ -245,7 +245,7 @@ public class GUIListener implements Listener {
         String giveItemName = holder.getGiveItemName(slot);
         if (giveItemName != null) {
             SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
-                    plugin.getEnhanceManager(), plugin.getLaevateinnManager(), giveItemName, 1);
+                    plugin.getEnhanceManager(), plugin.getLaevateinnManager(), plugin.getCurrencyManager(), giveItemName, 1);
             if (resolved == null) {
                 return;
             }
