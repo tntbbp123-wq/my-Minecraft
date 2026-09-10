@@ -2,6 +2,10 @@ package com.tntbbp.myminecraft.command;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.TeleportRequestManager;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -54,9 +58,25 @@ public class TpaCommand implements CommandExecutor {
 
         requests.createRequest(player.getUniqueId(), target.getUniqueId());
         player.sendMessage(ChatColor.GREEN + target.getName() + "님에게 텔레포트 요청을 보냈습니다.");
-        target.sendMessage(ChatColor.GREEN + player.getName() + "님이 텔레포트를 요청했습니다. "
-                + ChatColor.YELLOW + "/텔레포트수락" + ChatColor.GREEN + " 또는 " + ChatColor.YELLOW + "/텔레포트거절"
-                + ChatColor.GREEN + "로 응답하세요. (" + requests.timeoutSeconds() + "초 후 만료)");
+
+        TextComponent message = new TextComponent(ChatColor.GREEN + player.getName() + "님이 텔레포트를 요청했습니다. ("
+                + requests.timeoutSeconds() + "초 후 만료) ");
+
+        TextComponent acceptButton = new TextComponent(ChatColor.BOLD + "" + ChatColor.GREEN + "[수락]");
+        acceptButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/텔레포트수락"));
+        acceptButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new ComponentBuilder("클릭하면 바로 수락됩니다").create()));
+
+        TextComponent denyButton = new TextComponent(ChatColor.BOLD + "" + ChatColor.RED + "[거절]");
+        denyButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/텔레포트거절"));
+        denyButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new ComponentBuilder("클릭하면 바로 거절됩니다").create()));
+
+        message.addExtra(acceptButton);
+        message.addExtra(" ");
+        message.addExtra(denyButton);
+
+        target.spigot().sendMessage(message);
     }
 
     private void handleAccept(Player player) {
