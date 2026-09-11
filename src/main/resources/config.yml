@@ -121,9 +121,14 @@ enhance:
   base-success-percent: 100.0
   decrease-per-level: 8.0
   min-success-percent: 15.0
-  max-level: 10
+  # 기본 강화 한계치. <초월의 제단>에서 초월한 장비는 transcended-max-level까지 강화 가능.
+  max-level: 20
+  transcended-max-level: 30
   base-cost: 100.0
   cost-per-level: 50.0
+  # 무기(검/도끼/삼지창/활/철퇴 등) 강화 시 레벨당 상승하는 기본 공격력/공격속도
+  attack-damage-per-level: 0.5
+  attack-speed-per-level: 0.02
 
 # 신화 등급 무기 '레바테인' (/특수아이템소환 <유저> 레바테인 <수량> 으로 지급)
 laevateinn:
