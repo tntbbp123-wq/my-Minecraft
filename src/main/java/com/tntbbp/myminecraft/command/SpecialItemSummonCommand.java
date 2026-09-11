@@ -4,6 +4,7 @@ import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
+import com.tntbbp.myminecraft.manager.StarforceManager;
 import com.tntbbp.myminecraft.util.SpecialItemCatalog;
 import com.tntbbp.myminecraft.util.TabCompletions;
 import org.bukkit.Bukkit;
@@ -25,11 +26,13 @@ public class SpecialItemSummonCommand implements CommandExecutor, TabCompleter {
     private final EnhanceManager enhanceManager;
     private final LaevateinnManager laevateinnManager;
     private final CurrencyManager currencyManager;
+    private final StarforceManager starforceManager;
 
     public SpecialItemSummonCommand(MyMinecraftPlugin plugin) {
         this.enhanceManager = plugin.getEnhanceManager();
         this.laevateinnManager = plugin.getLaevateinnManager();
         this.currencyManager = plugin.getCurrencyManager();
+        this.starforceManager = plugin.getStarforceManager();
     }
 
     @Override
@@ -64,7 +67,7 @@ public class SpecialItemSummonCommand implements CommandExecutor, TabCompleter {
         }
 
         SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
-                enhanceManager, laevateinnManager, currencyManager, itemName, amount);
+                enhanceManager, laevateinnManager, currencyManager, starforceManager, itemName, amount);
         if (resolved == null) {
             sender.sendMessage(ChatColor.RED + "알 수 없는 아이템명입니다. 사용 가능: "
                     + String.join(", ", SpecialItemCatalog.allItemNames(enhanceManager, currencyManager)));

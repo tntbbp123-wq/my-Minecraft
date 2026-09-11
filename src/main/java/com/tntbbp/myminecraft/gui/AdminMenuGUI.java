@@ -5,6 +5,7 @@ import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.NewsManager;
+import com.tntbbp.myminecraft.manager.StarforceManager;
 import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.model.Stock;
 import com.tntbbp.myminecraft.util.ItemBuilder;
@@ -114,11 +115,12 @@ public class AdminMenuGUI {
         EnhanceManager enhanceManager = plugin.getEnhanceManager();
         LaevateinnManager laevateinnManager = plugin.getLaevateinnManager();
         CurrencyManager currencyManager = plugin.getCurrencyManager();
+        StarforceManager starforceManager = plugin.getStarforceManager();
         List<String> itemNames = SpecialItemCatalog.allItemNames(enhanceManager, currencyManager);
         for (int i = 0; i < itemNames.size() && i < TAKE_ITEM_SLOTS.length; i++) {
             String itemName = itemNames.get(i);
             SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
-                    enhanceManager, laevateinnManager, currencyManager, itemName, 1);
+                    enhanceManager, laevateinnManager, currencyManager, starforceManager, itemName, 1);
             if (resolved == null) {
                 continue;
             }

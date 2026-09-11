@@ -130,6 +130,21 @@ enhance:
   attack-damage-per-level: 0.5
   attack-speed-per-level: 0.02
 
+# 스타포스 (/특수아이템소환 <유저> 별가루 <수량> 으로 지급). 별가루를 소모해 무기에 '성'을
+# 붙이며, 성 개수당 방어관통(%)이 오른다. 10성을 달성하면 무기 종류별 특수 능력이 열린다
+# (10성 특수 능력 자체는 다음 업데이트에서 구현 예정).
+starforce:
+  # 별가루 아이콘 재질 (전용 아이템)
+  material: GLOWSTONE_DUST
+  # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 기본 아이콘으로 보임)
+  model-data: 500003
+  # 성 1개를 붙일 때마다 소모되는 별가루 개수
+  stardust-per-star: 1
+  # 최대 별(성) 개수
+  max-stars: 10
+  # 별 1개당 상승하는 방어관통 수치(%). 최대 별 개수를 곱한 값이 상한.
+  defense-penetration-per-star: 3.0
+
 # 신화 등급 무기 '레바테인' (/특수아이템소환 <유저> 레바테인 <수량> 으로 지급)
 laevateinn:
   # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 네더라이트 검 기본 아이콘으로 보임)
