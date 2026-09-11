@@ -4,7 +4,10 @@ import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.util.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -24,6 +27,9 @@ public class EnhanceManager {
     private final NamespacedKey levelKey;
     private final NamespacedKey stoneKey;
     private final NamespacedKey scrollGradeKey;
+    private final NamespacedKey transcendedKey;
+    private final NamespacedKey attackDamageModifierKey;
+    private final NamespacedKey attackSpeedModifierKey;
     private final List<ScrollGrade> scrollGrades = new ArrayList<>();
 
     public EnhanceManager(MyMinecraftPlugin plugin) {
@@ -31,6 +37,9 @@ public class EnhanceManager {
         this.levelKey = new NamespacedKey(plugin, "enhance_level");
         this.stoneKey = new NamespacedKey(plugin, "enhance_stone");
         this.scrollGradeKey = new NamespacedKey(plugin, "enhance_scroll_grade");
+        this.transcendedKey = new NamespacedKey(plugin, "enhance_transcended");
+        this.attackDamageModifierKey = new NamespacedKey(plugin, "enhance_attack_damage");
+        this.attackSpeedModifierKey = new NamespacedKey(plugin, "enhance_attack_speed");
         loadScrollGrades();
     }
 
@@ -157,8 +166,32 @@ public class EnhanceManager {
 
     // ----- 강화 계산 -----
 
+    /** 초월하지 않은 장비의 기본 강화 한계치. */
     public int maxLevel() {
-        return plugin.getConfig().getInt("enhance.max-level", 10);
+        return plugin.getConfig().getInt("enhance.max-level", 20);
+    }
+
+    /** 이 장비가 초월되었는지에 따른 실제 강화 한계치 (초월 시 transcended-max-level). */
+    public int maxLevel(ItemStack item) {
+        return isTranscended(item) ? transcendedMaxLevel() : maxLevel();
+    }
+
+    /** 초월한 장비의 강화 한계치. */
+    public int transcendedMaxLevel() {
+        return plugin.getConfig().getInt("enhance.transcended-max-level", 30);
+    }
+
+    public boolean isTranscended(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) {
+            return false;
+        }
+        Byte flag = item.getItemMeta().getPersistentDataContainer().get(transcendedKey, PersistentDataType.BYTE);
+        return flag != null && flag == (byte) 1;
+    }
+
+    /** 이번 강화 시도에 필요한 강화석 개수. 강화할 때마다 1씩 증가한다 (0강→1강: 1개, 1강→2강: 2개, ...). */
+    public int requiredStones(int currentLevel) {
+        return currentLevel + 1;
     }
 
     public int getLevel(ItemStack item) {
@@ -190,7 +223,7 @@ public class EnhanceManager {
         return Math.random() * 100.0 < chance;
     }
 
-    public void applyEnhance(ItemStack item, int newLevel) {
+    public void applyEnhance(ItemStack item, int previousLevel, int newLevel) {
         ItemMeta meta = item.getItemMeta();
         meta.getPersistentDataContainer().set(levelKey, PersistentDataType.INTEGER, newLevel);
 
@@ -199,18 +232,50 @@ public class EnhanceManager {
         lore.add(0, "§b강화 레벨: +" + newLevel);
         meta.setLore(lore);
 
-        Enchantment enchantment = enchantmentFor(item.getType());
-        if (enchantment != null && newLevel > 0) {
-            meta.addEnchant(enchantment, newLevel, true);
+        if (isWeapon(item.getType())) {
+            applyWeaponStatBonus(meta, previousLevel, newLevel);
+        } else {
+            Enchantment enchantment = enchantmentFor(item.getType());
+            if (enchantment != null && newLevel > 0) {
+                meta.addEnchant(enchantment, newLevel, true);
+            }
         }
         item.setItemMeta(meta);
     }
 
+    /** 무기 강화 시 부여되는 기본 공격력/공격속도 보너스를 재계산해서 다시 적용한다 (이전 레벨의 보너스를 정확히 제거 후 새로 부여). */
+    private void applyWeaponStatBonus(ItemMeta meta, int previousLevel, int newLevel) {
+        double damagePerLevel = plugin.getConfig().getDouble("enhance.attack-damage-per-level", 0.5);
+        double speedPerLevel = plugin.getConfig().getDouble("enhance.attack-speed-per-level", 0.02);
+
+        if (previousLevel > 0) {
+            meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier(
+                    attackDamageModifierKey, damagePerLevel * previousLevel,
+                    AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
+            meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(
+                    attackSpeedModifierKey, speedPerLevel * previousLevel,
+                    AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
+        }
+
+        if (newLevel <= 0) {
+            return;
+        }
+        meta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier(
+                attackDamageModifierKey, damagePerLevel * newLevel,
+                AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
+        meta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(
+                attackSpeedModifierKey, speedPerLevel * newLevel,
+                AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
+    }
+
+    private boolean isWeapon(Material type) {
+        String name = type.name();
+        return name.endsWith("_SWORD") || name.endsWith("_AXE") || name.equals("TRIDENT")
+                || name.equals("BOW") || name.equals("CROSSBOW") || name.equals("MACE");
+    }
+
     private Enchantment enchantmentFor(Material type) {
         String name = type.name();
-        if (name.endsWith("_SWORD") || name.endsWith("_AXE")) {
-            return Enchantment.SHARPNESS;
-        }
         if (name.endsWith("_HELMET") || name.endsWith("_CHESTPLATE") || name.endsWith("_LEGGINGS") || name.endsWith("_BOOTS")) {
             return Enchantment.PROTECTION;
         }

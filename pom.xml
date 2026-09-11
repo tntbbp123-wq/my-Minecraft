@@ -6,7 +6,7 @@
 
     <groupId>com.tntbbp</groupId>
     <artifactId>myminecraft</artifactId>
-    <version>1.0.12</version>
+    <version>1.0.14</version>
     <packaging>jar</packaging>
 
     <name>MyMinecraft</name>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>io.github.toxicity188</groupId>
             <artifactId>bettermodel-bukkit-api</artifactId>
-            <version>3.4.1</version>
+            <version>2.2.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -46,10 +46,13 @@ public class LaevateinnManager {
     }
 
     public ItemStack createItem() {
+        double attackDamage = plugin.getConfig().getDouble("laevateinn.attack-damage", 12.0);
+
         ItemStack item = new ItemBuilder(Material.NETHERITE_SWORD)
                 .name("§5§l레바테인 §7(Lævateinn)")
                 .lore(List.of(
                         "§d§l신화 (Mythic)",
+                        "§7공격력: §f" + formatNumber(attackDamage),
                         "",
                         "§7\"로키가 니플헤임의 깊은 곳에서 담금질하고,",
                         "§7수르트가 세계의 종말에 휘두를 것이라 전해지는",
@@ -76,7 +79,6 @@ public class LaevateinnManager {
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ATTRIBUTES);
         meta.addEnchant(Enchantment.FIRE_ASPECT, 2, true);
 
-        double attackDamage = plugin.getConfig().getDouble("laevateinn.attack-damage", 12.0);
         AttributeModifier attackDamageModifier = new AttributeModifier(
                 new NamespacedKey(plugin, "laevateinn_attack_damage"),
                 attackDamage - 1.0, // 맨손 기본 공격력(1.0)을 더하면 툴팁상 공격력이 attackDamage가 됨
@@ -90,6 +92,10 @@ public class LaevateinnManager {
         }
         item.setItemMeta(meta);
         return item;
+    }
+
+    private String formatNumber(double value) {
+        return value == Math.floor(value) ? String.valueOf((long) value) : String.valueOf(value);
     }
 
     public boolean isLaevateinn(ItemStack item) {

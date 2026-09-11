@@ -308,13 +308,14 @@ public class GUIListener implements Listener {
             player.sendMessage(ChatColor.RED + "강화할 아이템을 왼쪽 칸에 넣어주세요.");
             return;
         }
-        if (!enhanceManager.isEnhanceStone(material) || material.getAmount() < 1) {
-            player.sendMessage(ChatColor.RED + "강화 재료(강화석)가 필요합니다.");
+        int currentLevel = enhanceManager.getLevel(targetItem);
+        int requiredStones = enhanceManager.requiredStones(currentLevel);
+        if (!enhanceManager.isEnhanceStone(material) || material.getAmount() < requiredStones) {
+            player.sendMessage(ChatColor.RED + "강화 재료(강화석)가 부족합니다. (필요: " + requiredStones + "개)");
             return;
         }
 
-        int currentLevel = enhanceManager.getLevel(targetItem);
-        if (currentLevel >= enhanceManager.maxLevel()) {
+        if (currentLevel >= enhanceManager.maxLevel(targetItem)) {
             player.sendMessage(ChatColor.RED + "이미 최대 강화 레벨입니다.");
             return;
         }
@@ -326,7 +327,7 @@ public class GUIListener implements Listener {
             return;
         }
 
-        material.setAmount(material.getAmount() - 1);
+        material.setAmount(material.getAmount() - requiredStones);
         event.getInventory().setItem(EnhanceGUI.MATERIAL_SLOT, material.getAmount() <= 0 ? null : material);
 
         if (useScroll) {
@@ -337,7 +338,7 @@ public class GUIListener implements Listener {
         boolean success = enhanceManager.rollSuccess(currentLevel, scrollBonus);
         if (success) {
             int newLevel = currentLevel + 1;
-            enhanceManager.applyEnhance(targetItem, newLevel);
+            enhanceManager.applyEnhance(targetItem, currentLevel, newLevel);
             event.getInventory().setItem(EnhanceGUI.INPUT_SLOT, targetItem);
             player.sendMessage(ChatColor.GREEN + "강화 성공! 현재 강화 레벨: +" + newLevel);
         } else {

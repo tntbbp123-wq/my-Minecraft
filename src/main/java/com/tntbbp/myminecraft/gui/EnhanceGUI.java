@@ -56,7 +56,8 @@ public class EnhanceGUI {
                         "§7오른쪽 칸에 확률 강화 두루마리를 넣으면",
                         "§7등급에 따라 성공 확률이 추가로 증가합니다. (선택)",
                         "§7강화 비용은 §6동전§7으로 인벤토리에서 바로 차감됩니다.",
-                        "§7(최대 강화 레벨: " + enhanceManager.maxLevel() + ")"
+                        "§7필요 강화석 개수는 시도할 때마다 1개씩 증가합니다.",
+                        "§7(최대 강화 레벨: " + enhanceManager.maxLevel() + ", 초월 시 " + enhanceManager.transcendedMaxLevel() + ")"
                 ))
                 .build());
 
@@ -81,7 +82,7 @@ public class EnhanceGUI {
 
         int currentLevel = enhanceManager.getLevel(target);
         boolean hasItem = target != null && !target.getType().isAir();
-        boolean maxed = hasItem && currentLevel >= enhanceManager.maxLevel();
+        boolean maxed = hasItem && currentLevel >= enhanceManager.maxLevel(target);
 
         String progressLine = maxed
                 ? "§c최대 강화 레벨 도달"
@@ -95,11 +96,13 @@ public class EnhanceGUI {
         } else {
             double chance = enhanceManager.successChance(currentLevel, scrollBonus);
             double cost = enhanceManager.cost(currentLevel);
+            int requiredStones = enhanceManager.requiredStones(currentLevel);
             lore = List.of(
                     progressLine,
                     "",
                     "§7성공 확률: §f" + String.format("%.1f", chance) + "%"
                             + (useScroll ? " §d(두루마리 +" + String.format("%.0f", scrollBonus) + "%)" : ""),
+                    "§7필요 강화석: §b" + requiredStones + "개",
                     "§7필요 비용: §6" + String.format("%,.0f", cost) + "상당의 동전"
             );
         }
