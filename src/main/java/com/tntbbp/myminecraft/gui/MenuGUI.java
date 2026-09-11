@@ -21,6 +21,7 @@ public class MenuGUI {
     public static final int RANDOM_TP_SLOT = 16;
     public static final int ENHANCE_SLOT = 22;
     public static final int TRANSCEND_SLOT = 20;
+    public static final int STARFORCE_SLOT = 24;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -70,6 +71,14 @@ public class MenuGUI {
                 .lore(List.of(
                         "§7클릭하면 무기의 등급을 올리는",
                         "§7초월의 제단을 엽니다."
+                ))
+                .build());
+
+        inventory.setItem(STARFORCE_SLOT, new ItemBuilder(Material.NETHER_STAR)
+                .name("§e스타포스")
+                .lore(List.of(
+                        "§7클릭하면 무기에 별(성)을 붙이는",
+                        "§7스타포스 창을 엽니다."
                 ))
                 .build());
 

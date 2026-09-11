@@ -9,6 +9,7 @@ import com.tntbbp.myminecraft.manager.GradeManager;
 import com.tntbbp.myminecraft.manager.HomeManager;
 import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
+import com.tntbbp.myminecraft.manager.StarforceManager;
 import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.util.SpecialItemCatalog;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -61,6 +62,8 @@ public class GUIListener implements Listener {
             handleEnhanceClick(event);
         } else if (holder instanceof TranscendAltarHolder) {
             handleTranscendClick(event);
+        } else if (holder instanceof StarforceHolder) {
+            handleStarforceClick(event);
         } else if (holder instanceof AdminMenuHolder adminMenuHolder) {
             event.setCancelled(true);
             if (event.getClickedInventory() != event.getInventory()) {
@@ -100,6 +103,14 @@ public class GUIListener implements Listener {
                 }
             }
             Bukkit.getScheduler().runTask(plugin, () -> TranscendAltarGUI.refreshProgress(plugin, event.getInventory()));
+        } else if (holder instanceof StarforceHolder) {
+            for (int slot : event.getRawSlots()) {
+                if (slot < topSize && slot != StarforceGUI.INPUT_SLOT && slot != StarforceGUI.STARDUST_SLOT) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            Bukkit.getScheduler().runTask(plugin, () -> StarforceGUI.refreshProgress(plugin, event.getInventory()));
         }
     }
 
@@ -118,6 +129,12 @@ public class GUIListener implements Listener {
             Player player = (Player) event.getPlayer();
             returnItem(player, event.getInventory().getItem(TranscendAltarGUI.INPUT_SLOT));
             event.getInventory().setItem(TranscendAltarGUI.INPUT_SLOT, null);
+        } else if (holder instanceof StarforceHolder) {
+            Player player = (Player) event.getPlayer();
+            returnItem(player, event.getInventory().getItem(StarforceGUI.INPUT_SLOT));
+            returnItem(player, event.getInventory().getItem(StarforceGUI.STARDUST_SLOT));
+            event.getInventory().setItem(StarforceGUI.INPUT_SLOT, null);
+            event.getInventory().setItem(StarforceGUI.STARDUST_SLOT, null);
         }
     }
 
@@ -156,6 +173,7 @@ public class GUIListener implements Listener {
             }
             case MenuGUI.ENHANCE_SLOT -> new EnhanceGUI(plugin, player).open();
             case MenuGUI.TRANSCEND_SLOT -> new TranscendAltarGUI(plugin, player).open();
+            case MenuGUI.STARFORCE_SLOT -> new StarforceGUI(plugin, player).open();
             default -> {
             }
         }
@@ -261,7 +279,8 @@ public class GUIListener implements Listener {
         String giveItemName = holder.getGiveItemName(slot);
         if (giveItemName != null) {
             SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
-                    plugin.getEnhanceManager(), plugin.getLaevateinnManager(), plugin.getCurrencyManager(), giveItemName, 1);
+                    plugin.getEnhanceManager(), plugin.getLaevateinnManager(), plugin.getCurrencyManager(),
+                    plugin.getStarforceManager(), giveItemName, 1);
             if (resolved == null) {
                 return;
             }
@@ -408,5 +427,69 @@ public class GUIListener implements Listener {
             player.sendMessage(ChatColor.RED + "이미 최고 등급(마스터)입니다.");
         }
         TranscendAltarGUI.refreshProgress(plugin, event.getInventory());
+    }
+
+    private void handleStarforceClick(InventoryClickEvent event) {
+        Inventory topInventory = event.getInventory();
+        boolean isTopInventory = event.getClickedInventory() != null
+                && event.getClickedInventory() == topInventory;
+
+        if (!isTopInventory) {
+            Bukkit.getScheduler().runTask(plugin, () -> StarforceGUI.refreshProgress(plugin, topInventory));
+            return;
+        }
+
+        int slot = event.getRawSlot();
+        if (slot == StarforceGUI.INPUT_SLOT || slot == StarforceGUI.STARDUST_SLOT) {
+            Bukkit.getScheduler().runTask(plugin, () -> StarforceGUI.refreshProgress(plugin, topInventory));
+            return;
+        }
+
+        event.setCancelled(true);
+
+        if (slot == StarforceGUI.BUTTON_SLOT) {
+            runStarforce((Player) event.getWhoClicked(), event);
+        }
+    }
+
+    private void runStarforce(Player player, InventoryClickEvent event) {
+        StarforceManager starforceManager = plugin.getStarforceManager();
+        ItemStack targetItem = event.getInventory().getItem(StarforceGUI.INPUT_SLOT);
+        ItemStack stardust = event.getInventory().getItem(StarforceGUI.STARDUST_SLOT);
+
+        if (targetItem == null || targetItem.getType().isAir()) {
+            player.sendMessage(ChatColor.RED + "성을 붙일 무기를 왼쪽 칸에 넣어주세요.");
+            return;
+        }
+        if (!EnhanceManager.isWeapon(targetItem.getType())) {
+            player.sendMessage(ChatColor.RED + "무기만 성을 붙일 수 있습니다.");
+            return;
+        }
+
+        int currentStars = starforceManager.getStars(targetItem);
+        if (currentStars >= starforceManager.maxStars()) {
+            player.sendMessage(ChatColor.RED + "이미 최대(" + starforceManager.maxStars() + "성)입니다.");
+            return;
+        }
+
+        int requiredStardust = starforceManager.stardustPerStar();
+        if (!starforceManager.isStardust(stardust) || stardust.getAmount() < requiredStardust) {
+            player.sendMessage(ChatColor.RED + "별가루가 부족합니다. (필요: " + requiredStardust + "개)");
+            return;
+        }
+
+        stardust.setAmount(stardust.getAmount() - requiredStardust);
+        event.getInventory().setItem(StarforceGUI.STARDUST_SLOT, stardust.getAmount() <= 0 ? null : stardust);
+
+        int newStars = currentStars + 1;
+        starforceManager.applyStar(targetItem, newStars);
+        event.getInventory().setItem(StarforceGUI.INPUT_SLOT, targetItem);
+
+        if (newStars >= starforceManager.maxStars()) {
+            player.sendMessage(ChatColor.GOLD + "★ " + newStars + "성 달성! 이 무기의 특수 능력이 활성화됩니다.");
+        } else {
+            player.sendMessage(ChatColor.YELLOW + "★ 현재 " + newStars + "성입니다.");
+        }
+        StarforceGUI.refreshProgress(plugin, event.getInventory());
     }
 }

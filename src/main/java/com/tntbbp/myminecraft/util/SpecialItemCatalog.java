@@ -3,6 +3,7 @@ package com.tntbbp.myminecraft.util;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
+import com.tntbbp.myminecraft.manager.StarforceManager;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -23,9 +24,13 @@ public final class SpecialItemCatalog {
     }
 
     public static Resolved resolve(EnhanceManager enhanceManager, LaevateinnManager laevateinnManager,
-                                    CurrencyManager currencyManager, String itemName, int amount) {
+                                    CurrencyManager currencyManager, StarforceManager starforceManager,
+                                    String itemName, int amount) {
         if (itemName.equals("강화석")) {
             return new Resolved(enhanceManager.createEnhanceStone(amount), "강화석");
+        }
+        if (itemName.equals("별가루")) {
+            return new Resolved(starforceManager.createStardust(amount), "별가루");
         }
         if (itemName.equals("레바테인")) {
             ItemStack item = laevateinnManager.createItem();
@@ -76,6 +81,7 @@ public final class SpecialItemCatalog {
     public static List<String> allItemNames(EnhanceManager enhanceManager, CurrencyManager currencyManager) {
         List<String> names = new ArrayList<>();
         names.add("강화석");
+        names.add("별가루");
         names.add("레바테인");
         names.addAll(enhanceManager.scrollGrades().stream()
                 .map(SpecialItemCatalog::scrollShortName)

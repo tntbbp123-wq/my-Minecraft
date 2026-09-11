@@ -16,6 +16,7 @@ import com.tntbbp.myminecraft.listener.CombatListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
 import com.tntbbp.myminecraft.listener.LaevateinnModelListener;
+import com.tntbbp.myminecraft.listener.StarforceListener;
 import com.tntbbp.myminecraft.manager.CombatManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
@@ -28,6 +29,7 @@ import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.NewsManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
+import com.tntbbp.myminecraft.manager.StarforceManager;
 import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.manager.TeleportRequestManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -42,6 +44,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private RandomTeleportManager randomTeleportManager;
     private EnhanceManager enhanceManager;
     private GradeManager gradeManager;
+    private StarforceManager starforceManager;
     private InfernalBurnManager infernalBurnManager;
     private LaevateinnManager laevateinnManager;
     private CurrencyManager currencyManager;
@@ -61,6 +64,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.randomTeleportManager = new RandomTeleportManager(this);
         this.enhanceManager = new EnhanceManager(this);
         this.gradeManager = new GradeManager(this);
+        this.starforceManager = new StarforceManager(this);
         this.infernalBurnManager = new InfernalBurnManager(this);
         this.laevateinnManager = new LaevateinnManager(this);
         this.currencyManager = new CurrencyManager(this);
@@ -108,6 +112,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GUIListener(this), this);
         getServer().getPluginManager().registerEvents(new LaevateinnListener(this), this);
         getServer().getPluginManager().registerEvents(new CombatListener(this), this);
+        getServer().getPluginManager().registerEvents(new StarforceListener(this), this);
 
         if (getServer().getPluginManager().isPluginEnabled("BetterModel")) {
             getServer().getPluginManager().registerEvents(new LaevateinnModelListener(this), this);
@@ -163,6 +168,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public GradeManager getGradeManager() {
         return gradeManager;
+    }
+
+    public StarforceManager getStarforceManager() {
+        return starforceManager;
     }
 
     public InfernalBurnManager getInfernalBurnManager() {
