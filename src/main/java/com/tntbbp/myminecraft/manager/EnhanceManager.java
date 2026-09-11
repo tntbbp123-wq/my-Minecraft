@@ -189,6 +189,13 @@ public class EnhanceManager {
         return flag != null && flag == (byte) 1;
     }
 
+    /** <초월의 제단>에서 무기가 초월되었음을 기록해 강화 한계치를 30강으로 풀어준다. */
+    public void markTranscended(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(transcendedKey, PersistentDataType.BYTE, (byte) 1);
+        item.setItemMeta(meta);
+    }
+
     /** 이번 강화 시도에 필요한 강화석 개수. 강화할 때마다 1씩 증가한다 (0강→1강: 1개, 1강→2강: 2개, ...). */
     public int requiredStones(int currentLevel) {
         return currentLevel + 1;
@@ -268,7 +275,8 @@ public class EnhanceManager {
                 AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
     }
 
-    private boolean isWeapon(Material type) {
+    /** 다른 매니저(초월의 제단 등)에서도 "이 아이템이 무기인가"를 같은 기준으로 판단할 수 있도록 공개. */
+    public static boolean isWeapon(Material type) {
         String name = type.name();
         return name.endsWith("_SWORD") || name.endsWith("_AXE") || name.equals("TRIDENT")
                 || name.equals("BOW") || name.equals("CROSSBOW") || name.equals("MACE");

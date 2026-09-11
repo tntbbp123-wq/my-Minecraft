@@ -21,6 +21,7 @@ import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.GeminiNewsClient;
+import com.tntbbp.myminecraft.manager.GradeManager;
 import com.tntbbp.myminecraft.manager.HomeManager;
 import com.tntbbp.myminecraft.manager.InfernalBurnManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
@@ -40,6 +41,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private StockManager stockManager;
     private RandomTeleportManager randomTeleportManager;
     private EnhanceManager enhanceManager;
+    private GradeManager gradeManager;
     private InfernalBurnManager infernalBurnManager;
     private LaevateinnManager laevateinnManager;
     private CurrencyManager currencyManager;
@@ -58,6 +60,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.stockManager = new StockManager(this, economyManager);
         this.randomTeleportManager = new RandomTeleportManager(this);
         this.enhanceManager = new EnhanceManager(this);
+        this.gradeManager = new GradeManager(this);
         this.infernalBurnManager = new InfernalBurnManager(this);
         this.laevateinnManager = new LaevateinnManager(this);
         this.currencyManager = new CurrencyManager(this);
@@ -156,6 +159,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public EnhanceManager getEnhanceManager() {
         return enhanceManager;
+    }
+
+    public GradeManager getGradeManager() {
+        return gradeManager;
     }
 
     public InfernalBurnManager getInfernalBurnManager() {
