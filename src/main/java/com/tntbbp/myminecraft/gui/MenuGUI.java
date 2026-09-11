@@ -20,6 +20,7 @@ public class MenuGUI {
     public static final int STOCK_SLOT = 14;
     public static final int RANDOM_TP_SLOT = 16;
     public static final int ENHANCE_SLOT = 22;
+    public static final int TRANSCEND_SLOT = 20;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -62,6 +63,14 @@ public class MenuGUI {
         inventory.setItem(ENHANCE_SLOT, new ItemBuilder(Material.ANVIL)
                 .name("§e대장간 강화")
                 .lore(List.of("§7클릭하면 아이템 강화 창을 엽니다."))
+                .build());
+
+        inventory.setItem(TRANSCEND_SLOT, new ItemBuilder(Material.END_CRYSTAL)
+                .name("§d초월의 제단")
+                .lore(List.of(
+                        "§7클릭하면 무기의 등급을 올리는",
+                        "§7초월의 제단을 엽니다."
+                ))
                 .build());
 
         player.openInventory(inventory);

@@ -5,6 +5,7 @@ import com.tntbbp.myminecraft.gui.*;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
+import com.tntbbp.myminecraft.manager.GradeManager;
 import com.tntbbp.myminecraft.manager.HomeManager;
 import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
@@ -58,6 +59,8 @@ public class GUIListener implements Listener {
             handleStockClick((Player) event.getWhoClicked(), stockHolder, event.getSlot(), event.getClick());
         } else if (holder instanceof EnhanceHolder) {
             handleEnhanceClick(event);
+        } else if (holder instanceof TranscendAltarHolder) {
+            handleTranscendClick(event);
         } else if (holder instanceof AdminMenuHolder adminMenuHolder) {
             event.setCancelled(true);
             if (event.getClickedInventory() != event.getInventory()) {
@@ -89,6 +92,14 @@ public class GUIListener implements Listener {
                 }
             }
             Bukkit.getScheduler().runTask(plugin, () -> EnhanceGUI.refreshProgress(plugin, event.getInventory()));
+        } else if (holder instanceof TranscendAltarHolder) {
+            for (int slot : event.getRawSlots()) {
+                if (slot < topSize && slot != TranscendAltarGUI.INPUT_SLOT) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            Bukkit.getScheduler().runTask(plugin, () -> TranscendAltarGUI.refreshProgress(plugin, event.getInventory()));
         }
     }
 
@@ -103,6 +114,10 @@ public class GUIListener implements Listener {
             event.getInventory().setItem(EnhanceGUI.INPUT_SLOT, null);
             event.getInventory().setItem(EnhanceGUI.MATERIAL_SLOT, null);
             event.getInventory().setItem(EnhanceGUI.SCROLL_SLOT, null);
+        } else if (holder instanceof TranscendAltarHolder) {
+            Player player = (Player) event.getPlayer();
+            returnItem(player, event.getInventory().getItem(TranscendAltarGUI.INPUT_SLOT));
+            event.getInventory().setItem(TranscendAltarGUI.INPUT_SLOT, null);
         }
     }
 
@@ -140,6 +155,7 @@ public class GUIListener implements Listener {
                 }
             }
             case MenuGUI.ENHANCE_SLOT -> new EnhanceGUI(plugin, player).open();
+            case MenuGUI.TRANSCEND_SLOT -> new TranscendAltarGUI(plugin, player).open();
             default -> {
             }
         }
@@ -345,5 +361,52 @@ public class GUIListener implements Listener {
             player.sendMessage(ChatColor.RED + "강화 실패... 재료와 동전이 소모되었습니다.");
         }
         EnhanceGUI.refreshProgress(plugin, event.getInventory());
+    }
+
+    private void handleTranscendClick(InventoryClickEvent event) {
+        Inventory topInventory = event.getInventory();
+        boolean isTopInventory = event.getClickedInventory() != null
+                && event.getClickedInventory() == topInventory;
+
+        if (!isTopInventory) {
+            Bukkit.getScheduler().runTask(plugin, () -> TranscendAltarGUI.refreshProgress(plugin, topInventory));
+            return;
+        }
+
+        int slot = event.getRawSlot();
+        if (slot == TranscendAltarGUI.INPUT_SLOT) {
+            Bukkit.getScheduler().runTask(plugin, () -> TranscendAltarGUI.refreshProgress(plugin, topInventory));
+            return;
+        }
+
+        event.setCancelled(true);
+
+        if (slot == TranscendAltarGUI.BUTTON_SLOT) {
+            runTranscend((Player) event.getWhoClicked(), event);
+        }
+    }
+
+    private void runTranscend(Player player, InventoryClickEvent event) {
+        GradeManager gradeManager = plugin.getGradeManager();
+        ItemStack targetItem = event.getInventory().getItem(TranscendAltarGUI.INPUT_SLOT);
+
+        if (targetItem == null || targetItem.getType().isAir()) {
+            player.sendMessage(ChatColor.RED + "초월할 무기를 왼쪽 칸에 넣어주세요.");
+            return;
+        }
+        if (!EnhanceManager.isWeapon(targetItem.getType())) {
+            player.sendMessage(ChatColor.RED + "무기만 초월할 수 있습니다.");
+            return;
+        }
+
+        boolean success = gradeManager.transcend(targetItem);
+        if (success) {
+            GradeManager.Grade newGrade = gradeManager.getGrade(targetItem);
+            event.getInventory().setItem(TranscendAltarGUI.INPUT_SLOT, targetItem);
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "초월 성공! 현재 등급: " + newGrade.displayName());
+        } else {
+            player.sendMessage(ChatColor.RED + "이미 최고 등급(마스터)입니다.");
+        }
+        TranscendAltarGUI.refreshProgress(plugin, event.getInventory());
     }
 }
