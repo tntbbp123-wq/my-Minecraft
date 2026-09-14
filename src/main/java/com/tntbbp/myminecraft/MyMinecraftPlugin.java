@@ -12,9 +12,11 @@ import com.tntbbp.myminecraft.command.MenuCommand;
 import com.tntbbp.myminecraft.command.RtCommand;
 import com.tntbbp.myminecraft.command.SpawnCommand;
 import com.tntbbp.myminecraft.command.TpaCommand;
+import com.tntbbp.myminecraft.command.DiscordLinkCommand;
 import com.tntbbp.myminecraft.command.TranscendAltarPlaceCommand;
 import com.tntbbp.myminecraft.listener.BlackMarketListener;
 import com.tntbbp.myminecraft.listener.CombatListener;
+import com.tntbbp.myminecraft.listener.DiscordIntrusionListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
 import com.tntbbp.myminecraft.listener.LaevateinnModelListener;
@@ -24,6 +26,8 @@ import com.tntbbp.myminecraft.listener.TranscendAltarBlockListener;
 import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.CombatManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
+import com.tntbbp.myminecraft.manager.DiscordLinkManager;
+import com.tntbbp.myminecraft.manager.DiscordManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.GeminiNewsClient;
@@ -60,6 +64,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private GeminiNewsClient geminiNewsClient;
     private CombatManager combatManager;
     private ProtocolSilenceListener protocolSilenceListener;
+    private DiscordManager discordManager;
+    private DiscordLinkManager discordLinkManager;
 
     @Override
     public void onEnable() {
@@ -82,11 +88,14 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.newsManager = new NewsManager(this, stockManager);
         this.geminiNewsClient = new GeminiNewsClient(this);
         this.combatManager = new CombatManager(this);
+        this.discordManager = new DiscordManager(this);
+        this.discordLinkManager = new DiscordLinkManager(this);
 
         stockManager.startFluctuationTask();
         infernalBurnManager.start();
         newsManager.startTask();
         blackMarketManager.start();
+        discordManager.start();
 
         TpaCommand tpaCommand = new TpaCommand(this);
         getCommand("텔레포트요청").setExecutor(tpaCommand);
@@ -130,6 +139,11 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
         getCommand("초월제단설치").setExecutor(new TranscendAltarPlaceCommand(this));
 
+        DiscordLinkCommand discordLinkCommand = new DiscordLinkCommand(this);
+        getCommand("디스코드연동").setExecutor(discordLinkCommand);
+        getCommand("디스코드연동확인").setExecutor(discordLinkCommand);
+        getServer().getPluginManager().registerEvents(new DiscordIntrusionListener(this), this);
+
         if (getServer().getPluginManager().isPluginEnabled("BetterModel")) {
             getServer().getPluginManager().registerEvents(new LaevateinnModelListener(this), this);
             getLogger().info("BetterModel 연동: 레바테인 3D 모델 표시 기능이 활성화되었습니다.");
@@ -165,6 +179,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
         }
         if (protocolSilenceListener != null) {
             protocolSilenceListener.unregister();
+        }
+        if (discordManager != null) {
+            discordManager.stop();
         }
         getLogger().info("MyMinecraft 플러그인이 비활성화되었습니다.");
     }
@@ -235,5 +252,13 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public CombatManager getCombatManager() {
         return combatManager;
+    }
+
+    public DiscordManager getDiscordManager() {
+        return discordManager;
+    }
+
+    public DiscordLinkManager getDiscordLinkManager() {
+        return discordLinkManager;
     }
 }
