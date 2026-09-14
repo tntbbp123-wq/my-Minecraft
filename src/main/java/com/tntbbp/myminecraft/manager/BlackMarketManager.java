@@ -45,7 +45,7 @@ public class BlackMarketManager {
         ItemStack item = new ItemBuilder(matchOrDefault("blackmarket.loot-all-scroll.material", Material.PAPER))
                 .name("§6일괄 약탈 주문서")
                 .lore(List.of(
-                        "§7상자를 들고 우클릭하면",
+                        "§7상자를 들고 §e쉬프트+우클릭§7하면",
                         "§7상자 안의 모든 아이템을 즉시",
                         "§7내 인벤토리로 쓸어 담습니다.",
                         "§7(사용 시 1개 소모)"

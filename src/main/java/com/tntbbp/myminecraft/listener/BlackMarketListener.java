@@ -59,7 +59,7 @@ public class BlackMarketListener implements Listener {
                     handleTrapKit(player, clicked, hand);
                     return;
                 }
-                if (blackMarketManager.isLootAllScroll(hand)) {
+                if (blackMarketManager.isLootAllScroll(hand) && player.isSneaking()) {
                     event.setCancelled(true);
                     handleLootAllScroll(player, clicked, hand);
                     return;
