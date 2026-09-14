@@ -1,5 +1,6 @@
 package com.tntbbp.myminecraft.util;
 
+import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
@@ -25,7 +26,7 @@ public final class SpecialItemCatalog {
 
     public static Resolved resolve(EnhanceManager enhanceManager, LaevateinnManager laevateinnManager,
                                     CurrencyManager currencyManager, StarforceManager starforceManager,
-                                    String itemName, int amount) {
+                                    BlackMarketManager blackMarketManager, String itemName, int amount) {
         if (itemName.equals("강화석")) {
             return new Resolved(enhanceManager.createEnhanceStone(amount), "강화석");
         }
@@ -36,6 +37,18 @@ public final class SpecialItemCatalog {
             ItemStack item = laevateinnManager.createItem();
             item.setAmount(amount);
             return new Resolved(item, "레바테인");
+        }
+        if (itemName.equals("일괄약탈주문서")) {
+            return new Resolved(blackMarketManager.createLootAllScroll(amount), "일괄 약탈 주문서");
+        }
+        if (itemName.equals("함정설치키트")) {
+            return new Resolved(blackMarketManager.createTrapKit(amount), "함정 설치 키트");
+        }
+        if (itemName.equals("화염병")) {
+            return new Resolved(blackMarketManager.createMolotov(amount), "화염병");
+        }
+        if (itemName.equals("연막탄")) {
+            return new Resolved(blackMarketManager.createSmokeBomb(amount), "연막탄");
         }
 
         EnhanceManager.ScrollGrade grade = findScrollGrade(enhanceManager, itemName);
@@ -83,6 +96,10 @@ public final class SpecialItemCatalog {
         names.add("강화석");
         names.add("별가루");
         names.add("레바테인");
+        names.add("일괄약탈주문서");
+        names.add("함정설치키트");
+        names.add("화염병");
+        names.add("연막탄");
         names.addAll(enhanceManager.scrollGrades().stream()
                 .map(SpecialItemCatalog::scrollShortName)
                 .collect(Collectors.toList()));

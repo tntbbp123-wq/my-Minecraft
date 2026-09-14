@@ -1,6 +1,7 @@
 package com.tntbbp.myminecraft.gui;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
+import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
@@ -32,8 +33,8 @@ public class AdminMenuGUI {
     public static final int FAKE_NEWS_SLOT = 14;
     public static final int SPECIAL_ITEM_SLOT = 16;
     public static final int[] TAKE_ITEM_SLOTS = {
-            19, 20, 21, 22, 23, 24, 25,
-            28, 29, 30, 31, 32, 33, 34
+            19, 20, 21, 22, 23, 24, 25, 26,
+            27, 28, 29, 30, 31, 32, 33, 34
     };
     public static final int STOCK_STATUS_SLOT = 40;
 
@@ -116,11 +117,12 @@ public class AdminMenuGUI {
         LaevateinnManager laevateinnManager = plugin.getLaevateinnManager();
         CurrencyManager currencyManager = plugin.getCurrencyManager();
         StarforceManager starforceManager = plugin.getStarforceManager();
+        BlackMarketManager blackMarketManager = plugin.getBlackMarketManager();
         List<String> itemNames = SpecialItemCatalog.allItemNames(enhanceManager, currencyManager);
         for (int i = 0; i < itemNames.size() && i < TAKE_ITEM_SLOTS.length; i++) {
             String itemName = itemNames.get(i);
             SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
-                    enhanceManager, laevateinnManager, currencyManager, starforceManager, itemName, 1);
+                    enhanceManager, laevateinnManager, currencyManager, starforceManager, blackMarketManager, itemName, 1);
             if (resolved == null) {
                 continue;
             }

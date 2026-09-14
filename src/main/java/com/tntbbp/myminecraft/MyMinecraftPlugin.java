@@ -13,12 +13,14 @@ import com.tntbbp.myminecraft.command.RtCommand;
 import com.tntbbp.myminecraft.command.SpawnCommand;
 import com.tntbbp.myminecraft.command.TpaCommand;
 import com.tntbbp.myminecraft.command.TranscendAltarPlaceCommand;
+import com.tntbbp.myminecraft.listener.BlackMarketListener;
 import com.tntbbp.myminecraft.listener.CombatListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
 import com.tntbbp.myminecraft.listener.LaevateinnModelListener;
 import com.tntbbp.myminecraft.listener.StarforceListener;
 import com.tntbbp.myminecraft.listener.TranscendAltarBlockListener;
+import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.CombatManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
@@ -49,6 +51,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private GradeManager gradeManager;
     private StarforceManager starforceManager;
     private TranscendAltarBlockManager transcendAltarBlockManager;
+    private BlackMarketManager blackMarketManager;
     private InfernalBurnManager infernalBurnManager;
     private LaevateinnManager laevateinnManager;
     private CurrencyManager currencyManager;
@@ -70,6 +73,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.gradeManager = new GradeManager(this);
         this.starforceManager = new StarforceManager(this);
         this.transcendAltarBlockManager = new TranscendAltarBlockManager(this);
+        this.blackMarketManager = new BlackMarketManager(this);
         this.infernalBurnManager = new InfernalBurnManager(this);
         this.laevateinnManager = new LaevateinnManager(this);
         this.currencyManager = new CurrencyManager(this);
@@ -119,6 +123,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CombatListener(this), this);
         getServer().getPluginManager().registerEvents(new StarforceListener(this), this);
         getServer().getPluginManager().registerEvents(new TranscendAltarBlockListener(this), this);
+        getServer().getPluginManager().registerEvents(new BlackMarketListener(this), this);
 
         getCommand("초월제단설치").setExecutor(new TranscendAltarPlaceCommand(this));
 
@@ -184,6 +189,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public TranscendAltarBlockManager getTranscendAltarBlockManager() {
         return transcendAltarBlockManager;
+    }
+
+    public BlackMarketManager getBlackMarketManager() {
+        return blackMarketManager;
     }
 
     public InfernalBurnManager getInfernalBurnManager() {
