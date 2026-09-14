@@ -58,6 +58,9 @@ commands:
   관리자메뉴:
     description: "관리자 전용 메뉴 GUI를 엽니다."
     usage: "/관리자메뉴"
+  초월제단설치:
+    description: "관리자가 바라보고 있는 블록 위에 초월의 제단 커스텀 블록을 세웁니다."
+    usage: "/초월제단설치"
 
 permissions:
   myminecraft.admin:

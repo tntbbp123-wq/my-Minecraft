@@ -12,11 +12,13 @@ import com.tntbbp.myminecraft.command.MenuCommand;
 import com.tntbbp.myminecraft.command.RtCommand;
 import com.tntbbp.myminecraft.command.SpawnCommand;
 import com.tntbbp.myminecraft.command.TpaCommand;
+import com.tntbbp.myminecraft.command.TranscendAltarPlaceCommand;
 import com.tntbbp.myminecraft.listener.CombatListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
 import com.tntbbp.myminecraft.listener.LaevateinnModelListener;
 import com.tntbbp.myminecraft.listener.StarforceListener;
+import com.tntbbp.myminecraft.listener.TranscendAltarBlockListener;
 import com.tntbbp.myminecraft.manager.CombatManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
@@ -32,6 +34,7 @@ import com.tntbbp.myminecraft.manager.RandomTeleportManager;
 import com.tntbbp.myminecraft.manager.StarforceManager;
 import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.manager.TeleportRequestManager;
+import com.tntbbp.myminecraft.manager.TranscendAltarBlockManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MyMinecraftPlugin extends JavaPlugin {
@@ -45,6 +48,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private EnhanceManager enhanceManager;
     private GradeManager gradeManager;
     private StarforceManager starforceManager;
+    private TranscendAltarBlockManager transcendAltarBlockManager;
     private InfernalBurnManager infernalBurnManager;
     private LaevateinnManager laevateinnManager;
     private CurrencyManager currencyManager;
@@ -65,6 +69,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.enhanceManager = new EnhanceManager(this);
         this.gradeManager = new GradeManager(this);
         this.starforceManager = new StarforceManager(this);
+        this.transcendAltarBlockManager = new TranscendAltarBlockManager(this);
         this.infernalBurnManager = new InfernalBurnManager(this);
         this.laevateinnManager = new LaevateinnManager(this);
         this.currencyManager = new CurrencyManager(this);
@@ -113,6 +118,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new LaevateinnListener(this), this);
         getServer().getPluginManager().registerEvents(new CombatListener(this), this);
         getServer().getPluginManager().registerEvents(new StarforceListener(this), this);
+        getServer().getPluginManager().registerEvents(new TranscendAltarBlockListener(this), this);
+
+        getCommand("초월제단설치").setExecutor(new TranscendAltarPlaceCommand(this));
 
         if (getServer().getPluginManager().isPluginEnabled("BetterModel")) {
             getServer().getPluginManager().registerEvents(new LaevateinnModelListener(this), this);
@@ -172,6 +180,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public StarforceManager getStarforceManager() {
         return starforceManager;
+    }
+
+    public TranscendAltarBlockManager getTranscendAltarBlockManager() {
+        return transcendAltarBlockManager;
     }
 
     public InfernalBurnManager getInfernalBurnManager() {
