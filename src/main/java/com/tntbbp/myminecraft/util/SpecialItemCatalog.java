@@ -50,6 +50,18 @@ public final class SpecialItemCatalog {
         if (itemName.equals("연막탄")) {
             return new Resolved(blackMarketManager.createSmokeBomb(amount), "연막탄");
         }
+        if (itemName.equals("밀도나침반")) {
+            return new Resolved(blackMarketManager.createDensityCompass(amount), "타일 밀도 나침반");
+        }
+        if (itemName.equals("발자국추적기")) {
+            return new Resolved(blackMarketManager.createFootprintTracker(amount), "발자국 추적기");
+        }
+        if (itemName.equals("혈흔나침반")) {
+            return new Resolved(blackMarketManager.createBloodCompass(amount), "혈흔 나침반");
+        }
+        if (itemName.equals("소음차단포션")) {
+            return new Resolved(blackMarketManager.createSilencePotion(amount), "소음 차단 포션");
+        }
 
         EnhanceManager.ScrollGrade grade = findScrollGrade(enhanceManager, itemName);
         if (grade != null) {
@@ -100,6 +112,10 @@ public final class SpecialItemCatalog {
         names.add("함정설치키트");
         names.add("화염병");
         names.add("연막탄");
+        names.add("밀도나침반");
+        names.add("발자국추적기");
+        names.add("혈흔나침반");
+        names.add("소음차단포션");
         names.addAll(enhanceManager.scrollGrades().stream()
                 .map(SpecialItemCatalog::scrollShortName)
                 .collect(Collectors.toList()));

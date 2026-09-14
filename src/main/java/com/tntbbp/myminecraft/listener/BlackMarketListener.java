@@ -19,15 +19,19 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import java.util.UUID;
 
 /** 암시장 아이템(일괄 약탈 주문서, 함정 설치 키트, 화염병, 연막탄) 동작 처리. */
 public class BlackMarketListener implements Listener {
@@ -73,7 +77,49 @@ public class BlackMarketListener implements Listener {
         } else if (blackMarketManager.isSmokeBomb(hand)) {
             event.setCancelled(true);
             throwTagged(player, hand, blackMarketManager.smokeBombKey());
+        } else if (blackMarketManager.isFootprintTracker(hand)) {
+            event.setCancelled(true);
+            throwTagged(player, hand, blackMarketManager.footprintTrackerKey());
+        } else if (blackMarketManager.isDensityCompass(hand)) {
+            event.setCancelled(true);
+            handleDensityCompass(player, blackMarketManager);
+        } else if (blackMarketManager.isBloodCompass(hand)) {
+            event.setCancelled(true);
+            handleBloodCompass(player, blackMarketManager);
         }
+    }
+
+    private void handleDensityCompass(Player player, BlackMarketManager blackMarketManager) {
+        long remaining = blackMarketManager.densityCompassRemainingCooldown(player.getUniqueId());
+        if (remaining > 0) {
+            player.sendMessage(ChatColor.RED + "재사용 대기 중입니다. (" + remaining + "초 후 다시 시도하세요)");
+            return;
+        }
+        Location target = blackMarketManager.findDensityTarget(player);
+        if (target == null) {
+            player.sendMessage(ChatColor.GRAY + "주변에서 아무것도 감지되지 않았습니다.");
+            return;
+        }
+        player.setCompassTarget(target);
+        player.sendMessage(ChatColor.AQUA + "나침반이 밀집된 방향을 가리킵니다.");
+    }
+
+    private void handleBloodCompass(Player player, BlackMarketManager blackMarketManager) {
+        UUID killerId = blackMarketManager.getLastKiller(player.getUniqueId());
+        if (killerId == null) {
+            player.sendMessage(ChatColor.GRAY + "추적할 대상이 없습니다.");
+            return;
+        }
+        Player killer = plugin.getServer().getPlayer(killerId);
+        if (killer == null || !killer.isOnline()) {
+            player.sendMessage(ChatColor.GRAY + "대상을 찾을 수 없습니다 (오프라인).");
+            return;
+        }
+        double jitter = blackMarketManager.bloodCompassJitterRadius();
+        Location target = killer.getLocation().clone().add(
+                (Math.random() * 2 - 1) * jitter, 0, (Math.random() * 2 - 1) * jitter);
+        player.setCompassTarget(target);
+        player.sendMessage(ChatColor.DARK_RED + "나침반이 " + killer.getName() + "님의 대략적인 방향을 가리킵니다.");
     }
 
     private boolean isContainer(Material type) {
@@ -183,7 +229,34 @@ public class BlackMarketListener implements Listener {
         } else if (snowball.getPersistentDataContainer().has(blackMarketManager.smokeBombKey(), PersistentDataType.BYTE)) {
             applySmokeBomb(impact, blackMarketManager);
             snowball.remove();
+        } else if (snowball.getPersistentDataContainer().has(blackMarketManager.footprintTrackerKey(), PersistentDataType.BYTE)) {
+            if (event.getHitEntity() instanceof Player target) {
+                blackMarketManager.markFootprint(target.getUniqueId());
+                target.getWorld().playSound(target.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f, 1.0f);
+            }
+            snowball.remove();
         }
+    }
+
+    @EventHandler
+    public void onConsume(PlayerItemConsumeEvent event) {
+        BlackMarketManager blackMarketManager = plugin.getBlackMarketManager();
+        if (!blackMarketManager.isSilencePotion(event.getItem())) {
+            return;
+        }
+        Player player = event.getPlayer();
+        blackMarketManager.markSilenced(player.getUniqueId());
+        player.sendMessage(ChatColor.DARK_GRAY + "소음 차단 효과가 적용되었습니다. ("
+                + blackMarketManager.silenceDurationTicks() / 20 + "초)");
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player killer = event.getEntity().getKiller();
+        if (killer == null) {
+            return;
+        }
+        plugin.getBlackMarketManager().recordKill(event.getEntity().getUniqueId(), killer.getUniqueId());
     }
 
     private void applyMolotov(Location impact, BlackMarketManager blackMarketManager) {

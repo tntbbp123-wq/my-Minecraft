@@ -2,22 +2,30 @@ package com.tntbbp.myminecraft.manager;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.util.ItemBuilder;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
- * 암시장 아이템(1단계: 일괄 약탈 주문서, 치명적 덫 상자, 화염병/연막탄) 관리.
- * 위치 추적류(나침반들)와 디스코드 알림은 다음 단계에서 별도로 다룬다.
+ * 암시장 아이템 관리.
+ * 1단계: 일괄 약탈 주문서, 함정 설치 키트, 화염병, 연막탄.
+ * 2단계: 타일 밀도 나침반, 발자국 추적기, 혈흔 나침반, 소음 차단 포션.
+ * 디스코드 침입 알림은 다음 단계에서 별도로 다룬다.
  */
 public class BlackMarketManager {
 
@@ -28,6 +36,15 @@ public class BlackMarketManager {
     private final NamespacedKey smokeBombKey;
     private final NamespacedKey trapOwnerKey;
     private final NamespacedKey trapModeKey;
+    private final NamespacedKey densityCompassKey;
+    private final NamespacedKey footprintTrackerKey;
+    private final NamespacedKey bloodCompassKey;
+    private final NamespacedKey silencePotionKey;
+
+    private final Map<UUID, Long> densityCompassCooldowns = new HashMap<>();
+    private final Map<UUID, Long> footprintMarked = new HashMap<>();
+    private final Map<UUID, UUID> lastKiller = new HashMap<>();
+    private final Map<UUID, Long> silenced = new HashMap<>();
 
     public BlackMarketManager(MyMinecraftPlugin plugin) {
         this.plugin = plugin;
@@ -37,6 +54,10 @@ public class BlackMarketManager {
         this.smokeBombKey = new NamespacedKey(plugin, "smoke_bomb");
         this.trapOwnerKey = new NamespacedKey(plugin, "trap_owner");
         this.trapModeKey = new NamespacedKey(plugin, "trap_mode");
+        this.densityCompassKey = new NamespacedKey(plugin, "density_compass");
+        this.footprintTrackerKey = new NamespacedKey(plugin, "footprint_tracker");
+        this.bloodCompassKey = new NamespacedKey(plugin, "blood_compass");
+        this.silencePotionKey = new NamespacedKey(plugin, "silence_potion");
     }
 
     // ----- 일괄 약탈 주문서 -----
@@ -221,6 +242,229 @@ public class BlackMarketManager {
         return plugin.getConfig().getInt("blackmarket.smoke-bomb.duration-ticks", 100);
     }
 
+    // ----- 타일 밀도 나침반 -----
+
+    public ItemStack createDensityCompass(int amount) {
+        ItemStack item = new ItemBuilder(matchOrDefault("blackmarket.density-compass.material", Material.COMPASS))
+                .name("§b타일 밀도 나침반")
+                .lore(List.of(
+                        "§7우클릭하면 주변에 상자/화로가",
+                        "§7많이 몰려 있는 방향을 대략적으로",
+                        "§7가리키도록 바늘이 맞춰집니다.",
+                        "§7(지하 기지, 숨겨진 창고 탐색용)"
+                ))
+                .amount(amount)
+                .glow()
+                .build();
+        return tagBoolean(item, densityCompassKey, modelData("density-compass"));
+    }
+
+    public boolean isDensityCompass(ItemStack item) {
+        return hasFlag(item, densityCompassKey);
+    }
+
+    public int densityCompassRadius() {
+        return plugin.getConfig().getInt("blackmarket.density-compass.radius", 64);
+    }
+
+    public int densityCompassCooldownSeconds() {
+        return plugin.getConfig().getInt("blackmarket.density-compass.cooldown-seconds", 30);
+    }
+
+    public long densityCompassRemainingCooldown(UUID uuid) {
+        Long lastUse = densityCompassCooldowns.get(uuid);
+        if (lastUse == null) {
+            return 0;
+        }
+        long remaining = densityCompassCooldownSeconds() - (System.currentTimeMillis() - lastUse) / 1000;
+        return Math.max(0, remaining);
+    }
+
+    /**
+     * 플레이어 주변 청크(로드된 것만)를 훑어 상자/화로류 타일 엔티티의 무게중심 위치를 찾는다.
+     * 아무것도 못 찾으면 null.
+     */
+    public Location findDensityTarget(Player player) {
+        densityCompassCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+
+        int radius = densityCompassRadius();
+        int chunkRadius = (radius >> 4) + 1;
+        Location origin = player.getLocation();
+        Chunk centerChunk = origin.getChunk();
+
+        double sumX = 0;
+        double sumY = 0;
+        double sumZ = 0;
+        int count = 0;
+
+        for (int cx = -chunkRadius; cx <= chunkRadius; cx++) {
+            for (int cz = -chunkRadius; cz <= chunkRadius; cz++) {
+                if (!player.getWorld().isChunkLoaded(centerChunk.getX() + cx, centerChunk.getZ() + cz)) {
+                    continue;
+                }
+                Chunk chunk = player.getWorld().getChunkAt(centerChunk.getX() + cx, centerChunk.getZ() + cz);
+                for (BlockState state : chunk.getTileEntities()) {
+                    if (!isDensityTarget(state.getType())) {
+                        continue;
+                    }
+                    if (state.getLocation().distanceSquared(origin) > (double) radius * radius) {
+                        continue;
+                    }
+                    sumX += state.getX();
+                    sumY += state.getY();
+                    sumZ += state.getZ();
+                    count++;
+                }
+            }
+        }
+
+        if (count == 0) {
+            return null;
+        }
+        return new Location(player.getWorld(), sumX / count, sumY / count, sumZ / count);
+    }
+
+    private boolean isDensityTarget(Material type) {
+        return type == Material.CHEST || type == Material.TRAPPED_CHEST || type == Material.BARREL
+                || type == Material.FURNACE || type == Material.BLAST_FURNACE || type == Material.SMOKER
+                || type.name().endsWith("SHULKER_BOX");
+    }
+
+    // ----- 발자국 추적기 -----
+
+    public ItemStack createFootprintTracker(int amount) {
+        ItemStack item = new ItemBuilder(matchOrDefault("blackmarket.footprint-tracker.material", Material.ARROW))
+                .name("§2발자국 추적기")
+                .lore(List.of(
+                        "§7던져서 플레이어를 맞히면",
+                        "§7그 플레이어가 지나간 자리에",
+                        "§7" + (footprintDurationTicks() / 20) + "초 동안 흔적 파티클이 남습니다.",
+                        "§7흔적을 따라가 아지트를 찾아낼 수 있습니다."
+                ))
+                .amount(amount)
+                .build();
+        return tagBoolean(item, footprintTrackerKey, modelData("footprint-tracker"));
+    }
+
+    public boolean isFootprintTracker(ItemStack item) {
+        return hasFlag(item, footprintTrackerKey);
+    }
+
+    public int footprintDurationTicks() {
+        return plugin.getConfig().getInt("blackmarket.footprint-tracker.duration-ticks", 3600);
+    }
+
+    public void markFootprint(UUID uuid) {
+        footprintMarked.put(uuid, System.currentTimeMillis() + footprintDurationTicks() * 50L);
+    }
+
+    public boolean isFootprintMarked(UUID uuid) {
+        Long expiry = footprintMarked.get(uuid);
+        return expiry != null && expiry > System.currentTimeMillis();
+    }
+
+    /** 흔적 파티클 스폰용으로, 현재 표시 중인 UUID 집합을 순회할 때 사용한다. */
+    public Map<UUID, Long> footprintMarkedView() {
+        return footprintMarked;
+    }
+
+    // ----- 흔적 파티클 틱 -----
+
+    private org.bukkit.scheduler.BukkitTask footprintTask;
+
+    public void start() {
+        footprintTask = plugin.getServer().getScheduler().runTaskTimer(plugin, this::tickFootprints, 5L, 5L);
+    }
+
+    public void stop() {
+        if (footprintTask != null) {
+            footprintTask.cancel();
+        }
+    }
+
+    private void tickFootprints() {
+        if (footprintMarked.isEmpty()) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        footprintMarked.entrySet().removeIf(entry -> entry.getValue() <= now);
+        for (UUID uuid : footprintMarked.keySet()) {
+            Player player = plugin.getServer().getPlayer(uuid);
+            if (player == null || !player.isOnline()) {
+                continue;
+            }
+            player.getWorld().spawnParticle(org.bukkit.Particle.DUST, player.getLocation(), 6, 0.2, 0.05, 0.2,
+                    new org.bukkit.Particle.DustOptions(org.bukkit.Color.fromRGB(200, 30, 30), 1.2f));
+        }
+    }
+
+    // ----- 혈흔 나침반 -----
+
+    public ItemStack createBloodCompass(int amount) {
+        ItemStack item = new ItemBuilder(matchOrDefault("blackmarket.blood-compass.material", Material.COMPASS))
+                .name("§4혈흔 나침반")
+                .lore(List.of(
+                        "§7우클릭하면 나를 죽이고 도망간",
+                        "§7상대의 대략적인 현재 위치 방향으로",
+                        "§7바늘이 맞춰집니다.",
+                        "§7(상대가 접속 중이어야 작동)"
+                ))
+                .amount(amount)
+                .glow()
+                .build();
+        return tagBoolean(item, bloodCompassKey, modelData("blood-compass"));
+    }
+
+    public boolean isBloodCompass(ItemStack item) {
+        return hasFlag(item, bloodCompassKey);
+    }
+
+    public double bloodCompassJitterRadius() {
+        return plugin.getConfig().getDouble("blackmarket.blood-compass.jitter-radius", 20.0);
+    }
+
+    public void recordKill(UUID victim, UUID killer) {
+        lastKiller.put(victim, killer);
+    }
+
+    public UUID getLastKiller(UUID victim) {
+        return lastKiller.get(victim);
+    }
+
+    // ----- 소음 차단 포션 -----
+
+    public ItemStack createSilencePotion(int amount) {
+        ItemStack item = new ItemBuilder(matchOrDefault("blackmarket.silence-potion.material", Material.POTION))
+                .name("§8소음 차단 포션")
+                .lore(List.of(
+                        "§7마시면 " + silenceDurationTicks() / 20 + "초 동안 블록을 부수거나",
+                        "§7상자를 열 때 나는 소리/모습이",
+                        "§7주변 다른 유저에게 들키지 않습니다.",
+                        "§c(ProtocolLib 플러그인이 설치되어 있어야",
+                        "§c 실제로 소리/애니메이션이 숨겨집니다)"
+                ))
+                .amount(amount)
+                .build();
+        return tagBoolean(item, silencePotionKey, modelData("silence-potion"));
+    }
+
+    public boolean isSilencePotion(ItemStack item) {
+        return hasFlag(item, silencePotionKey);
+    }
+
+    public int silenceDurationTicks() {
+        return plugin.getConfig().getInt("blackmarket.silence-potion.duration-ticks", 600);
+    }
+
+    public void markSilenced(UUID uuid) {
+        silenced.put(uuid, System.currentTimeMillis() + silenceDurationTicks() * 50L);
+    }
+
+    public boolean isSilenced(UUID uuid) {
+        Long expiry = silenced.get(uuid);
+        return expiry != null && expiry > System.currentTimeMillis();
+    }
+
     // ----- 공통 헬퍼 -----
 
     private Material matchOrDefault(String configPath, Material fallback) {
@@ -256,5 +500,9 @@ public class BlackMarketManager {
 
     public NamespacedKey smokeBombKey() {
         return smokeBombKey;
+    }
+
+    public NamespacedKey footprintTrackerKey() {
+        return footprintTrackerKey;
     }
 }

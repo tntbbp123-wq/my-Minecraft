@@ -34,7 +34,8 @@ public class AdminMenuGUI {
     public static final int SPECIAL_ITEM_SLOT = 16;
     public static final int[] TAKE_ITEM_SLOTS = {
             19, 20, 21, 22, 23, 24, 25, 26,
-            27, 28, 29, 30, 31, 32, 33, 34
+            27, 28, 29, 30, 31, 32, 33, 34,
+            35, 36, 37, 38
     };
     public static final int STOCK_STATUS_SLOT = 40;
 
