@@ -156,6 +156,34 @@ transcend-altar:
   # 표시 크기 배율
   scale: 1.5
 
+# 암시장 아이템 (1단계: 일괄약탈주문서/함정설치키트/화염병/연막탄).
+# /특수아이템소환 <유저> <아이템명> <수량> 으로 지급 (아이템명은 위 각 항목 참고).
+blackmarket:
+  loot-all-scroll:
+    material: PAPER
+    model-data: 500050
+  trap-kit:
+    material: TRIPWIRE_HOOK
+    model-data: 500051
+    # DEBUFF: 강한 독+위더 디버프 부여 / TNT: 강한 폭발(TNT) 즉시 발동
+    mode: DEBUFF
+    poison-duration-seconds: 10
+    wither-duration-seconds: 10
+  molotov:
+    material: SPLASH_POTION
+    model-data: 500052
+    # 착탄 지점 발화/생물 발화 반경(블록)
+    radius: 3.0
+    # 착탄 시 근처 생물에게 붙는 불(틱, 20틱=1초)
+    entity-fire-ticks: 100
+  smoke-bomb:
+    material: SPLASH_POTION
+    model-data: 500053
+    # 연막(실명 효과) 반경(블록)
+    radius: 4.0
+    # 연막 지속시간(틱, 20틱=1초)
+    duration-ticks: 100
+
 # 신화 등급 무기 '레바테인' (/특수아이템소환 <유저> 레바테인 <수량> 으로 지급)
 laevateinn:
   # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 네더라이트 검 기본 아이콘으로 보임)
