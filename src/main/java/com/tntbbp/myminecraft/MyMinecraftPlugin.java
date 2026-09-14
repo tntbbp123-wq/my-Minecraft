@@ -18,6 +18,7 @@ import com.tntbbp.myminecraft.listener.CombatListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
 import com.tntbbp.myminecraft.listener.LaevateinnModelListener;
+import com.tntbbp.myminecraft.listener.ProtocolSilenceListener;
 import com.tntbbp.myminecraft.listener.StarforceListener;
 import com.tntbbp.myminecraft.listener.TranscendAltarBlockListener;
 import com.tntbbp.myminecraft.manager.BlackMarketManager;
@@ -58,6 +59,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private NewsManager newsManager;
     private GeminiNewsClient geminiNewsClient;
     private CombatManager combatManager;
+    private ProtocolSilenceListener protocolSilenceListener;
 
     @Override
     public void onEnable() {
@@ -84,6 +86,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         stockManager.startFluctuationTask();
         infernalBurnManager.start();
         newsManager.startTask();
+        blackMarketManager.start();
 
         TpaCommand tpaCommand = new TpaCommand(this);
         getCommand("텔레포트요청").setExecutor(tpaCommand);
@@ -134,6 +137,15 @@ public class MyMinecraftPlugin extends JavaPlugin {
             getLogger().info("BetterModel이 설치되어 있지 않아 레바테인 3D 모델 표시 기능은 비활성화됩니다.");
         }
 
+        if (getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
+            this.protocolSilenceListener = new ProtocolSilenceListener(this);
+            protocolSilenceListener.register();
+            getLogger().info("ProtocolLib 연동: 소음 차단 포션의 소리/애니메이션 은폐 기능이 활성화되었습니다.");
+        } else {
+            getLogger().info("ProtocolLib이 설치되어 있지 않아 소음 차단 포션은 상태 효과만 적용되고 "
+                    + "소리/애니메이션 은폐는 동작하지 않습니다.");
+        }
+
         getLogger().info("MyMinecraft 플러그인이 활성화되었습니다.");
     }
 
@@ -147,6 +159,12 @@ public class MyMinecraftPlugin extends JavaPlugin {
         }
         if (newsManager != null) {
             newsManager.stopTask();
+        }
+        if (blackMarketManager != null) {
+            blackMarketManager.stop();
+        }
+        if (protocolSilenceListener != null) {
+            protocolSilenceListener.unregister();
         }
         getLogger().info("MyMinecraft 플러그인이 비활성화되었습니다.");
     }

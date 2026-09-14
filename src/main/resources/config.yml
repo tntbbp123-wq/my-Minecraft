@@ -156,7 +156,7 @@ transcend-altar:
   # 표시 크기 배율
   scale: 1.5
 
-# 암시장 아이템 (1단계: 일괄약탈주문서/함정설치키트/화염병/연막탄).
+# 암시장 아이템.
 # /특수아이템소환 <유저> <아이템명> <수량> 으로 지급 (아이템명은 위 각 항목 참고).
 blackmarket:
   loot-all-scroll:
@@ -183,6 +183,28 @@ blackmarket:
     radius: 4.0
     # 연막 지속시간(틱, 20틱=1초)
     duration-ticks: 100
+  density-compass:
+    material: COMPASS
+    model-data: 500054
+    # 스캔 반경(블록). 로드된 청크만 검사함
+    radius: 64
+    # 재사용 대기시간(초)
+    cooldown-seconds: 30
+  footprint-tracker:
+    material: ARROW
+    model-data: 500055
+    # 흔적이 남는 시간(틱, 20틱=1초)
+    duration-ticks: 3600
+  blood-compass:
+    material: COMPASS
+    model-data: 500056
+    # 실제 위치에서 무작위로 어긋나게 하는 반경(블록) — "대략적인" 위치를 표현하기 위함
+    jitter-radius: 20.0
+  silence-potion:
+    material: POTION
+    model-data: 500057
+    # 효과 지속시간(틱, 20틱=1초)
+    duration-ticks: 600
 
 # 신화 등급 무기 '레바테인' (/특수아이템소환 <유저> 레바테인 <수량> 으로 지급)
 laevateinn:
