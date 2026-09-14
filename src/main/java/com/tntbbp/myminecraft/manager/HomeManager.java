@@ -8,8 +8,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class HomeManager {
@@ -49,6 +51,19 @@ public class HomeManager {
             }
         }
         return homes;
+    }
+
+    /** 최소 1개 이상의 홈을 등록해둔 모든 플레이어의 UUID (디스코드 침입 알림에서 사용). */
+    public Set<UUID> allPlayerIdsWithHomes() {
+        Set<UUID> ids = new HashSet<>();
+        for (String key : data.getKeys(false)) {
+            try {
+                ids.add(UUID.fromString(key));
+            } catch (IllegalArgumentException ignored) {
+                // 잘못된 키는 무시
+            }
+        }
+        return ids;
     }
 
     public Location getHome(UUID uuid, String name) {

@@ -61,6 +61,12 @@ commands:
   초월제단설치:
     description: "관리자가 바라보고 있는 블록 위에 초월의 제단 커스텀 블록을 세웁니다."
     usage: "/초월제단설치"
+  디스코드연동:
+    description: "입력한 디스코드 사용자 ID로 인증 코드를 DM 발송합니다."
+    usage: "/디스코드연동 <디스코드 사용자 ID>"
+  디스코드연동확인:
+    description: "DM으로 받은 인증 코드를 입력해 디스코드 계정 연동을 완료합니다."
+    usage: "/디스코드연동확인 <코드>"
 
 permissions:
   myminecraft.admin:
