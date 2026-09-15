@@ -25,7 +25,7 @@ import java.util.List;
 public class AdminMenuGUI {
 
     public static final String TITLE = "§4관리자 메뉴";
-    public static final int SIZE = 45;
+    public static final int SIZE = 54;
 
     public static final int STOCK_GIVE_SLOT = 4;
     public static final int CLOSE_SLOT = 8;
@@ -34,11 +34,11 @@ public class AdminMenuGUI {
     public static final int FAKE_NEWS_SLOT = 14;
     public static final int SPECIAL_ITEM_SLOT = 16;
     public static final int[] TAKE_ITEM_SLOTS = {
-            19, 20, 21, 22, 23, 24, 25, 26,
-            27, 28, 29, 30, 31, 32, 33, 34,
-            35, 36, 37, 38
+            18, 19, 20, 21, 22, 23, 24, 25, 26,
+            27, 28, 29, 30, 31, 32, 33, 34, 35,
+            36, 37, 38, 39, 40, 41, 42, 43, 44
     };
-    public static final int STOCK_STATUS_SLOT = 40;
+    public static final int STOCK_STATUS_SLOT = 49;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
