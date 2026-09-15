@@ -19,43 +19,37 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 코어(팀 거점) 우클릭 시 열리는 상점 GUI.
- * 메인 화면에서 강화석/두루마리/별가루를 바로 구매할 수 있고, "암시장"과 "직업 전직 및 초월"은
- * 별도 메뉴(버튼)로 분리되어 있다.
- */
-public class CoreGUI {
+/** 코어 GUI의 "암시장" 메뉴. 음지형 상점 아이템 8종을 포인트로 구매할 수 있다. */
+public class CoreBlackMarketGUI {
 
-    public static final String TITLE = "§b코어";
-    public static final int SIZE = 45;
+    public static final String TITLE = "§4암시장";
+    public static final int SIZE = 36;
 
-    public static final int BLACK_MARKET_SLOT = 20;
-    public static final int JOB_CHANGE_SLOT = 24;
-    public static final int CLOSE_SLOT = 44;
+    public static final int BACK_SLOT = 31;
 
-    /** SpecialItemCatalog와 동일한 아이템명. */
-    private static final List<String> SHOP_ITEM_NAMES = List.of(
-            "강화석", "별가루", "일반두루마리", "레어두루마리", "에픽두루마리", "레전더리두루마리"
+    private static final List<String> ITEM_NAMES = List.of(
+            "일괄약탈주문서", "함정설치키트", "화염병", "연막탄",
+            "밀도나침반", "발자국추적기", "혈흔나침반", "소음차단포션"
     );
 
-    private static final int[] SHOP_SLOTS = {10, 11, 12, 13, 14, 15};
+    private static final int[] SLOTS = {10, 11, 12, 13, 15, 16, 17, 19};
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
     private final String teamName;
 
-    public CoreGUI(MyMinecraftPlugin plugin, Player player, String teamName) {
+    public CoreBlackMarketGUI(MyMinecraftPlugin plugin, Player player, String teamName) {
         this.plugin = plugin;
         this.player = player;
         this.teamName = teamName;
     }
 
     public void open() {
-        CoreHolder holder = new CoreHolder(teamName);
+        CoreBlackMarketHolder holder = new CoreBlackMarketHolder(teamName);
         Inventory inventory = Bukkit.createInventory(holder, SIZE, TITLE);
         holder.setInventory(inventory);
 
-        ItemStack filler = new ItemBuilder(Material.CYAN_STAINED_GLASS_PANE).name(" ").build();
+        ItemStack filler = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).name(" ").build();
         for (int i = 0; i < SIZE; i++) {
             inventory.setItem(i, filler);
         }
@@ -69,8 +63,8 @@ public class CoreGUI {
         LaevateinnManager laevateinnManager = plugin.getLaevateinnManager();
         DrakenPierceManager drakenPierceManager = plugin.getDrakenPierceManager();
 
-        for (int i = 0; i < SHOP_ITEM_NAMES.size() && i < SHOP_SLOTS.length; i++) {
-            String itemName = SHOP_ITEM_NAMES.get(i);
+        for (int i = 0; i < ITEM_NAMES.size() && i < SLOTS.length; i++) {
+            String itemName = ITEM_NAMES.get(i);
             SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
                     enhanceManager, laevateinnManager, currencyManager, starforceManager, blackMarketManager,
                     drakenPierceManager, itemName, 1);
@@ -84,34 +78,13 @@ public class CoreGUI {
             lore.add("§a가격: §f" + String.format("%,.0f", price) + currencyName);
             lore.add("§7클릭 시 1개 구매");
             ItemStack icon = new ItemBuilder(resolved.item()).lore(lore).build();
-            int slot = SHOP_SLOTS[i];
+            int slot = SLOTS[i];
             inventory.setItem(slot, icon);
             holder.mapItem(slot, itemName);
         }
 
-        inventory.setItem(BLACK_MARKET_SLOT, new ItemBuilder(Material.ENDER_CHEST)
-                .name("§4§l암시장")
-                .lore(List.of(
-                        "§7일반 상점에서 구할 수 없는",
-                        "§7특수 재화·희귀 밀매품을",
-                        "§7구매할 수 있는 음지형 상점입니다.",
-                        "",
-                        "§7클릭하면 암시장 메뉴가 열립니다."
-                ))
-                .build());
-
-        inventory.setItem(JOB_CHANGE_SLOT, new ItemBuilder(Material.TOTEM_OF_UNDYING)
-                .name("§d§l직업 전직 및 초월")
-                .lore(List.of(
-                        "§7일반 직업 계열의 1차/2차 전직 및",
-                        "§7상위 단계로 도약하는 승급소입니다.",
-                        "",
-                        "§8(미구현 - 추후 업데이트 예정)"
-                ))
-                .build());
-
-        inventory.setItem(CLOSE_SLOT, new ItemBuilder(Material.BARRIER)
-                .name("§c닫기")
+        inventory.setItem(BACK_SLOT, new ItemBuilder(Material.ARROW)
+                .name("§7« 코어 메뉴로 돌아가기")
                 .build());
 
         player.openInventory(inventory);

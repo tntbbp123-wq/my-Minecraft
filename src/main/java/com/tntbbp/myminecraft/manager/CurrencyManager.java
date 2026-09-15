@@ -180,4 +180,64 @@ public class CurrencyManager {
         }
         return true;
     }
+
+    /** 인벤토리에 있는 모든 동전을 한 번에 포인트로 환전한다(입금). @return 입금된 총 가치 */
+    public double depositAll(Player player) {
+        PlayerInventory inventory = player.getInventory();
+        double total = 0;
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            ItemStack stack = inventory.getItem(slot);
+            Integer value = getCoinValue(stack);
+            if (value == null) {
+                continue;
+            }
+            total += (double) value * stack.getAmount();
+            inventory.setItem(slot, null);
+        }
+        if (total > 0) {
+            plugin.getEconomyManager().add(player.getUniqueId(), total);
+        }
+        return total;
+    }
+
+    /**
+     * 보유 포인트 전액을 큰 단위 동전부터 채워서 동전으로 환전한다(출금).
+     * 가장 작은 동전 단위보다 적게 남는 금액은 포인트로 그대로 남는다.
+     * @return 실제로 동전으로 환전된 금액
+     */
+    public double withdrawAll(Player player) {
+        EconomyManager economyManager = plugin.getEconomyManager();
+        double balance = economyManager.getBalance(player.getUniqueId());
+        if (balance <= 0 || denominations.isEmpty()) {
+            return 0;
+        }
+
+        List<CoinDenomination> byValueDesc = new ArrayList<>(denominations);
+        byValueDesc.sort(Comparator.comparingInt(CoinDenomination::value).reversed());
+
+        double remaining = balance;
+        double withdrawn = 0;
+        for (CoinDenomination coin : byValueDesc) {
+            int count = (int) (remaining / coin.value());
+            if (count <= 0) {
+                continue;
+            }
+            int remainingCount = count;
+            while (remainingCount > 0) {
+                int batch = Math.min(remainingCount, 64);
+                ItemStack item = createCoin(coin, batch);
+                player.getInventory().addItem(item).values()
+                        .forEach(leftover -> player.getWorld().dropItem(player.getLocation(), leftover));
+                remainingCount -= batch;
+            }
+            double value = (double) count * coin.value();
+            remaining -= value;
+            withdrawn += value;
+        }
+
+        if (withdrawn > 0) {
+            economyManager.subtract(player.getUniqueId(), withdrawn);
+        }
+        return withdrawn;
+    }
 }

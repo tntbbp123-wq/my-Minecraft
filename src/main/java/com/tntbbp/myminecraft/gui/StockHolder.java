@@ -12,7 +12,6 @@ public class StockHolder implements InventoryHolder {
     private Inventory inventory;
     private final UUID owner;
     private final Map<Integer, String> slotToStockId = new HashMap<>();
-    private final Map<Integer, String> slotToCoinId = new HashMap<>();
 
     public StockHolder(UUID owner) {
         this.owner = owner;
@@ -37,13 +36,5 @@ public class StockHolder implements InventoryHolder {
 
     public String getStockId(int slot) {
         return slotToStockId.get(slot);
-    }
-
-    public void mapCoinSlot(int slot, String coinId) {
-        slotToCoinId.put(slot, coinId);
-    }
-
-    public String getCoinId(int slot) {
-        return slotToCoinId.get(slot);
     }
 }

@@ -1,6 +1,7 @@
 package com.tntbbp.myminecraft;
 
 import com.tntbbp.myminecraft.command.AdminMenuCommand;
+import com.tntbbp.myminecraft.command.BankCommand;
 import com.tntbbp.myminecraft.command.EcCommand;
 import com.tntbbp.myminecraft.command.HomeCommand;
 import com.tntbbp.myminecraft.command.NewsCommand;
@@ -130,6 +131,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getCommand("홈삭제").setExecutor(homeCommand);
 
         getCommand("엔더상자").setExecutor(new EcCommand());
+        getCommand("은행").setExecutor(new BankCommand(this));
         getCommand("메뉴").setExecutor(new MenuCommand(this));
         getCommand("로비").setExecutor(new LobbyCommand(this));
         getCommand("스폰").setExecutor(new SpawnCommand(this));

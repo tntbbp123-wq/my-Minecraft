@@ -2,7 +2,7 @@
 
 economy:
   starting-balance: 1000.0
-  currency-name: "포인트"
+  currency-name: "G"
 
 home:
   max-homes: 5

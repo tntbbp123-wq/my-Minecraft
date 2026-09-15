@@ -10,7 +10,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.List;
 
-/** 무기 등급(일반~마스터) 시스템. <초월의 제단>에서 무기를 초월하면 등급이 한 단계 상승한다. */
+/** 무기 등급(일반~신화) 시스템. <초월의 제단>에서 무기를 초월하면 등급이 한 단계 상승한다. */
 public class GradeManager {
 
     public enum Grade {
@@ -18,9 +18,8 @@ public class GradeManager {
         RARE("레어", "9"),
         UNIQUE("유니크", "a"),
         ANCIENT("고대", "6"),
-        LEGEND("레전드", "c"),
-        MYSTIC("미스틱", "d"),
-        MASTER("마스터", "4");
+        LEGEND("전설", "c"),
+        MASTER("신화", "d");
 
         private final String displayName;
         private final String colorCode;
@@ -124,7 +123,7 @@ public class GradeManager {
 
     /**
      * 무기를 한 단계 초월시킨다 (등급 +1, 강화 한계치를 30강까지 해제).
-     * 이미 최고 등급(마스터)이면 아무 것도 하지 않고 false를 반환한다.
+     * 이미 최고 등급(신화)이면 아무 것도 하지 않고 false를 반환한다.
      */
     public boolean transcend(ItemStack item) {
         Grade current = getGrade(item);
