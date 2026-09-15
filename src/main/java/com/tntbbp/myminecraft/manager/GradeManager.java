@@ -10,7 +10,11 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.List;
 
-/** 무기 등급(일반~신화) 시스템. <초월의 제단>에서 무기를 초월하면 등급이 한 단계 상승한다. */
+/**
+ * 무기 등급(일반~신화) 표시 시스템. 등급은 재질(또는 신화 등급 무기의 경우 고정값)로 정해지며,
+ * <초월의 제단>은 등급을 바꾸지 않는다 — 초월은 오직 강화 한계치를 20강에서 30강으로 풀어주는
+ * 역할만 한다 (EnhanceManager.markTranscended 참고).
+ */
 public class GradeManager {
 
     public enum Grade {
@@ -35,16 +39,6 @@ public class GradeManager {
 
         public String colorCode() {
             return colorCode;
-        }
-
-        public boolean isMax() {
-            return this == MASTER;
-        }
-
-        public Grade next() {
-            Grade[] values = values();
-            int nextOrdinal = ordinal() + 1;
-            return nextOrdinal < values.length ? values[nextOrdinal] : this;
         }
     }
 
@@ -122,16 +116,16 @@ public class GradeManager {
     }
 
     /**
-     * 무기를 한 단계 초월시킨다 (등급 +1, 강화 한계치를 30강까지 해제).
-     * 이미 최고 등급(신화)이면 아무 것도 하지 않고 false를 반환한다.
+     * 무기를 초월시켜 강화 한계치를 20강에서 30강으로 해제한다. 등급 자체는 바뀌지 않는다
+     * (신화 등급 무기도 예외 없이 이 과정을 거쳐야 30강까지 강화할 수 있다).
+     * 이미 초월했다면 아무 것도 하지 않고 false를 반환한다.
      */
     public boolean transcend(ItemStack item) {
-        Grade current = getGrade(item);
-        if (current.isMax()) {
+        EnhanceManager enhanceManager = plugin.getEnhanceManager();
+        if (enhanceManager.isTranscended(item)) {
             return false;
         }
-        applyGrade(item, current.next());
-        plugin.getEnhanceManager().markTranscended(item);
+        enhanceManager.markTranscended(item);
         return true;
     }
 }

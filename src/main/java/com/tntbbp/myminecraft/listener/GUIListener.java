@@ -537,11 +537,10 @@ public class GUIListener implements Listener {
 
         boolean success = gradeManager.transcend(targetItem);
         if (success) {
-            GradeManager.Grade newGrade = gradeManager.getGrade(targetItem);
             event.getInventory().setItem(TranscendAltarGUI.INPUT_SLOT, targetItem);
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "초월 성공! 현재 등급: " + newGrade.displayName());
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "초월 성공! 강화 한계치가 30강으로 늘어났습니다.");
         } else {
-            player.sendMessage(ChatColor.RED + "이미 최고 등급(신화)입니다.");
+            player.sendMessage(ChatColor.RED + "이미 초월한 무기입니다.");
         }
         TranscendAltarGUI.refreshProgress(plugin, event.getInventory());
     }

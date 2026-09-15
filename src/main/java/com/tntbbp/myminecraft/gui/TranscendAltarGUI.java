@@ -44,10 +44,10 @@ public class TranscendAltarGUI {
                 .name("§d초월하기")
                 .lore(List.of(
                         "§7왼쪽 칸에 무기를 넣고 클릭하면",
-                        "§7등급이 한 단계 상승합니다.",
-                        "§7(일반 → 레어 → 유니크 → 고대 → 전설 → 신화)",
-                        "§7초월하면 강화 한계치가 20강 → 30강으로 늘어납니다.",
-                        "§c무기만 초월할 수 있으며, 별도 재료/비용은 없습니다."
+                        "§7강화 한계치가 20강에서 30강으로 늘어납니다.",
+                        "§7(등급 자체는 바뀌지 않습니다)",
+                        "§c무기만 초월할 수 있으며, 별도 재료/비용은 없습니다.",
+                        "§c신화 등급 무기도 예외 없이 이 과정을 거쳐야 30강까지 강화 가능합니다."
                 ))
                 .build());
 
@@ -56,9 +56,10 @@ public class TranscendAltarGUI {
         player.openInventory(inventory);
     }
 
-    /** 입력 칸의 아이템 등급/무기 여부를 기준으로 "현재 등급 -> 다음 등급" 진행 표시를 갱신한다. */
+    /** 입력 칸의 아이템 등급/무기 여부/초월 여부를 기준으로 초월 정보 표시를 갱신한다. */
     public static void refreshProgress(MyMinecraftPlugin plugin, Inventory inventory) {
         GradeManager gradeManager = plugin.getGradeManager();
+        EnhanceManager enhanceManager = plugin.getEnhanceManager();
         ItemStack target = inventory.getItem(INPUT_SLOT);
         boolean hasItem = target != null && !target.getType().isAir();
 
@@ -68,19 +69,19 @@ public class TranscendAltarGUI {
         } else if (!EnhanceManager.isWeapon(target.getType())) {
             lore = List.of("§c무기만 초월할 수 있습니다.");
         } else {
-            GradeManager.Grade current = gradeManager.getGrade(target);
-            if (current.isMax()) {
+            GradeManager.Grade grade = gradeManager.getGrade(target);
+            String gradeLine = "§" + grade.colorCode() + grade.displayName();
+            if (enhanceManager.isTranscended(target)) {
                 lore = List.of(
-                        "§" + current.colorCode() + current.displayName(),
-                        "§c이미 최고 등급입니다. 더 이상 초월할 수 없습니다."
+                        gradeLine,
+                        "§c이미 초월했습니다. 강화 한계치가 30강입니다."
                 );
             } else {
-                GradeManager.Grade next = current.next();
                 lore = List.of(
-                        "§" + current.colorCode() + current.displayName()
-                                + " §7━━━━━▶ §" + next.colorCode() + next.displayName(),
+                        gradeLine,
                         "",
-                        "§7초월하면 강화 한계치가 30강까지 늘어납니다."
+                        "§7초월하면 강화 한계치가 20강에서 30강으로 늘어납니다.",
+                        "§7(등급 자체는 바뀌지 않습니다)"
                 );
             }
         }
