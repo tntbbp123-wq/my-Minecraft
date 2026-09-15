@@ -68,37 +68,11 @@ public class GradeManager {
     }
 
     /**
-     * 아직 초월/등급 부여 이력이 없는 무기의 기본 등급을 재질(광물 종류)에 따라 정한다.
-     * 실제 바닐라 공격력 순서(금=나무 &lt; 돌 &lt; 철 &lt; 다이아 &lt; 네더라이트)를 반영했다.
-     * 삼지창/마법 지팡이(활)/철퇴처럼 재질 단계가 없는 무기는 희귀도에 맞춰 고정 등급을 준다.
+     * 아직 등급 부여 이력이 없는 무기의 기본 등급. 바닐라 아이템은 재질과 무관하게 모두
+     * 일반 등급에서 시작한다 (신화 등급은 레바테인/드라켄피어스 같은 전용 커스텀 무기에만
+     * applyGrade로 직접 부여됨).
      */
     public Grade defaultGradeFor(Material type) {
-        String name = type.name();
-        if (name.equals("NETHERITE_SWORD") || name.equals("NETHERITE_AXE")) {
-            return Grade.LEGEND;
-        }
-        if (name.equals("DIAMOND_SWORD") || name.equals("DIAMOND_AXE")) {
-            return Grade.ANCIENT;
-        }
-        if (name.equals("IRON_SWORD") || name.equals("IRON_AXE")) {
-            return Grade.UNIQUE;
-        }
-        if (name.equals("STONE_SWORD") || name.equals("STONE_AXE")) {
-            return Grade.RARE;
-        }
-        if (name.equals("WOODEN_SWORD") || name.equals("WOODEN_AXE")
-                || name.equals("GOLDEN_SWORD") || name.equals("GOLDEN_AXE")) {
-            return Grade.COMMON;
-        }
-        if (type == Material.MACE) {
-            return Grade.LEGEND;
-        }
-        if (type == Material.TRIDENT) {
-            return Grade.ANCIENT;
-        }
-        if (type == Material.BOW || type == Material.CROSSBOW) {
-            return Grade.RARE;
-        }
         return Grade.COMMON;
     }
 
