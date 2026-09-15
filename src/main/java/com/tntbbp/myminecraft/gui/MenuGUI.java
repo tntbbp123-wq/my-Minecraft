@@ -18,6 +18,7 @@ public class MenuGUI {
     public static final int SPAWN_SLOT = 10;
     public static final int ENDER_CHEST_SLOT = 12;
     public static final int STOCK_SLOT = 14;
+    public static final int BANK_SLOT = 13;
     public static final int RANDOM_TP_SLOT = 16;
     public static final int ENHANCE_SLOT = 22;
     public static final int TRANSCEND_SLOT = 20;
@@ -54,6 +55,11 @@ public class MenuGUI {
         inventory.setItem(STOCK_SLOT, new ItemBuilder(Material.EMERALD)
                 .name("§a주식")
                 .lore(List.of("§7클릭하면 주식 거래소를 엽니다."))
+                .build());
+
+        inventory.setItem(BANK_SLOT, new ItemBuilder(Material.GOLD_INGOT)
+                .name("§6은행")
+                .lore(List.of("§7클릭하면 은행(동전 환전/입출금)을 엽니다."))
                 .build());
 
         inventory.setItem(RANDOM_TP_SLOT, new ItemBuilder(Material.ENDER_PEARL)

@@ -210,11 +210,24 @@ public class EnhanceManager {
         return level == null ? 0 : level;
     }
 
+    /**
+     * guaranteed-level(기본 4)강까지는 base-success-percent(기본 100%)로 무조건 성공하고,
+     * 그 이후로는 한 단계 오를 때마다 직전 확률에 decay-multiplier(기본 0.8)를 곱해 감소시킨다.
+     * 계산된 확률이 min-success-percent(기본 0.001%)보다 낮아지면 그 값으로 고정한다.
+     */
     public double successChance(int currentLevel, double scrollBonus) {
         double base = plugin.getConfig().getDouble("enhance.base-success-percent", 100.0);
-        double decrease = plugin.getConfig().getDouble("enhance.decrease-per-level", 8.0);
-        double min = plugin.getConfig().getDouble("enhance.min-success-percent", 15.0);
-        double chance = Math.max(min, base - decrease * currentLevel);
+        int guaranteedLevel = plugin.getConfig().getInt("enhance.guaranteed-level", 4);
+        double decayMultiplier = plugin.getConfig().getDouble("enhance.decay-multiplier", 0.8);
+        double min = plugin.getConfig().getDouble("enhance.min-success-percent", 0.001);
+
+        double chance;
+        if (currentLevel <= guaranteedLevel) {
+            chance = base;
+        } else {
+            chance = base * Math.pow(decayMultiplier, currentLevel - guaranteedLevel);
+            chance = Math.max(chance, min);
+        }
         return Math.min(100.0, chance + scrollBonus);
     }
 

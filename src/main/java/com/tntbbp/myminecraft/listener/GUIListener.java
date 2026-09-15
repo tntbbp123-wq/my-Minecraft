@@ -2,6 +2,7 @@ package com.tntbbp.myminecraft.listener;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.gui.*;
+import com.tntbbp.myminecraft.manager.CoreManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
@@ -58,6 +59,12 @@ public class GUIListener implements Listener {
                 return;
             }
             handleStockClick((Player) event.getWhoClicked(), stockHolder, event.getSlot(), event.getClick());
+        } else if (holder instanceof BankHolder bankHolder) {
+            event.setCancelled(true);
+            if (event.getClickedInventory() != event.getInventory()) {
+                return;
+            }
+            handleBankClick((Player) event.getWhoClicked(), bankHolder, event.getSlot(), event.getClick());
         } else if (holder instanceof EnhanceHolder) {
             handleEnhanceClick(event);
         } else if (holder instanceof TranscendAltarHolder) {
@@ -70,6 +77,18 @@ public class GUIListener implements Listener {
                 return;
             }
             handleAdminMenuClick((Player) event.getWhoClicked(), adminMenuHolder, event.getSlot(), event.getClick());
+        } else if (holder instanceof CoreHolder coreHolder) {
+            event.setCancelled(true);
+            if (event.getClickedInventory() != event.getInventory()) {
+                return;
+            }
+            handleCoreClick((Player) event.getWhoClicked(), coreHolder, event.getSlot());
+        } else if (holder instanceof CoreBlackMarketHolder blackMarketHolder) {
+            event.setCancelled(true);
+            if (event.getClickedInventory() != event.getInventory()) {
+                return;
+            }
+            handleCoreBlackMarketClick((Player) event.getWhoClicked(), blackMarketHolder, event.getSlot());
         }
     }
 
@@ -79,7 +98,8 @@ public class GUIListener implements Listener {
         int topSize = event.getInventory().getSize();
 
         if (holder instanceof MenuHolder || holder instanceof HomeHolder || holder instanceof StockHolder
-                || holder instanceof AdminMenuHolder) {
+                || holder instanceof AdminMenuHolder || holder instanceof CoreHolder || holder instanceof BankHolder
+                || holder instanceof CoreBlackMarketHolder) {
             for (int slot : event.getRawSlots()) {
                 if (slot < topSize) {
                     event.setCancelled(true);
@@ -160,6 +180,7 @@ public class GUIListener implements Listener {
                 player.openInventory(player.getEnderChest());
             }
             case MenuGUI.STOCK_SLOT -> new StockGUI(plugin, player).open();
+            case MenuGUI.BANK_SLOT -> new BankGUI(plugin, player).open();
             case MenuGUI.RANDOM_TP_SLOT -> {
                 player.closeInventory();
                 RandomTeleportManager randomTeleportManager = plugin.getRandomTeleportManager();
@@ -202,12 +223,6 @@ public class GUIListener implements Listener {
     private void handleStockClick(Player player, StockHolder holder, int slot, ClickType clickType) {
         if (slot == StockGUI.BACK_SLOT) {
             new MenuGUI(plugin, player).open();
-            return;
-        }
-
-        String coinId = holder.getCoinId(slot);
-        if (coinId != null) {
-            handleCoinClick(player, coinId, clickType.isLeftClick());
             return;
         }
 
@@ -267,7 +282,47 @@ public class GUIListener implements Listener {
                 player.sendMessage(ChatColor.RED + "해당 동전을 보유하고 있지 않습니다.");
             }
         }
-        new StockGUI(plugin, player).open();
+        new BankGUI(plugin, player).open();
+    }
+
+    private void handleBankClick(Player player, BankHolder holder, int slot, ClickType clickType) {
+        if (slot == BankGUI.BACK_SLOT) {
+            new MenuGUI(plugin, player).open();
+            return;
+        }
+        if (slot == BankGUI.DEPOSIT_ALL_SLOT) {
+            CurrencyManager currencyManager = plugin.getCurrencyManager();
+            EconomyManager economyManager = plugin.getEconomyManager();
+            double deposited = currencyManager.depositAll(player);
+            if (deposited > 0) {
+                player.sendMessage(ChatColor.GREEN + String.format("%,.0f", deposited) + economyManager.currencyName()
+                        + " 입금 완료 (보유 " + economyManager.currencyName() + ": "
+                        + String.format("%,.1f", economyManager.getBalance(player.getUniqueId())) + ")");
+            } else {
+                player.sendMessage(ChatColor.RED + "입금할 동전이 없습니다.");
+            }
+            new BankGUI(plugin, player).open();
+            return;
+        }
+        if (slot == BankGUI.WITHDRAW_ALL_SLOT) {
+            CurrencyManager currencyManager = plugin.getCurrencyManager();
+            EconomyManager economyManager = plugin.getEconomyManager();
+            double withdrawn = currencyManager.withdrawAll(player);
+            if (withdrawn > 0) {
+                player.sendMessage(ChatColor.GREEN + String.format("%,.0f", withdrawn) + economyManager.currencyName()
+                        + " 출금 완료 (보유 " + economyManager.currencyName() + ": "
+                        + String.format("%,.1f", economyManager.getBalance(player.getUniqueId())) + ")");
+            } else {
+                player.sendMessage(ChatColor.RED + "출금할 수 있는 금액이 부족합니다.");
+            }
+            new BankGUI(plugin, player).open();
+            return;
+        }
+
+        String coinId = holder.getCoinId(slot);
+        if (coinId != null) {
+            handleCoinClick(player, coinId, clickType.isLeftClick());
+        }
     }
 
     private void handleAdminMenuClick(Player player, AdminMenuHolder holder, int slot, ClickType clickType) {
@@ -280,7 +335,8 @@ public class GUIListener implements Listener {
         if (giveItemName != null) {
             SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
                     plugin.getEnhanceManager(), plugin.getLaevateinnManager(), plugin.getCurrencyManager(),
-                    plugin.getStarforceManager(), plugin.getBlackMarketManager(), giveItemName, 1);
+                    plugin.getStarforceManager(), plugin.getBlackMarketManager(), plugin.getDrakenPierceManager(),
+                    giveItemName, 1);
             if (resolved == null) {
                 return;
             }
@@ -303,6 +359,67 @@ public class GUIListener implements Listener {
                 + ChatColor.WHITE + suggestedCommand);
         message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, suggestedCommand));
         player.spigot().sendMessage(message);
+    }
+
+    private void handleCoreClick(Player player, CoreHolder holder, int slot) {
+        if (slot == CoreGUI.CLOSE_SLOT) {
+            player.closeInventory();
+            return;
+        }
+        if (slot == CoreGUI.JOB_CHANGE_SLOT) {
+            player.sendMessage(ChatColor.GRAY + "직업 전직 및 초월은 아직 구현되지 않았습니다.");
+            return;
+        }
+        if (slot == CoreGUI.BLACK_MARKET_SLOT) {
+            new CoreBlackMarketGUI(plugin, player, holder.getTeamName()).open();
+            return;
+        }
+
+        String itemName = holder.getItemName(slot);
+        if (itemName == null) {
+            return;
+        }
+        purchaseCoreItem(player, itemName);
+    }
+
+    private void handleCoreBlackMarketClick(Player player, CoreBlackMarketHolder holder, int slot) {
+        if (slot == CoreBlackMarketGUI.BACK_SLOT) {
+            new CoreGUI(plugin, player, holder.getTeamName()).open();
+            return;
+        }
+
+        String itemName = holder.getItemName(slot);
+        if (itemName == null) {
+            return;
+        }
+        purchaseCoreItem(player, itemName);
+    }
+
+    /** 코어(및 암시장) GUI 공용 구매 처리: 포인트를 차감하고 SpecialItemCatalog 기준 아이템을 지급한다. */
+    private void purchaseCoreItem(Player player, String itemName) {
+        CoreManager coreManager = plugin.getCoreManager();
+        EconomyManager economyManager = plugin.getEconomyManager();
+        double price = coreManager.price(itemName);
+        if (!economyManager.subtract(player.getUniqueId(), price)) {
+            player.sendMessage(ChatColor.RED + economyManager.currencyName() + "가 부족합니다. (필요: "
+                    + String.format("%,.0f", price) + ")");
+            return;
+        }
+
+        SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
+                plugin.getEnhanceManager(), plugin.getLaevateinnManager(), plugin.getCurrencyManager(),
+                plugin.getStarforceManager(), plugin.getBlackMarketManager(), plugin.getDrakenPierceManager(),
+                itemName, 1);
+        if (resolved == null) {
+            economyManager.add(player.getUniqueId(), price);
+            return;
+        }
+
+        player.getInventory().addItem(resolved.item()).values()
+                .forEach(leftover -> player.getWorld().dropItem(player.getLocation(), leftover));
+        player.sendMessage(ChatColor.GREEN + resolved.displayName() + " 1개를 구매했습니다. (보유 "
+                + economyManager.currencyName() + ": "
+                + String.format("%,.1f", economyManager.getBalance(player.getUniqueId())) + ")");
     }
 
     private void handleEnhanceClick(InventoryClickEvent event) {
@@ -420,11 +537,10 @@ public class GUIListener implements Listener {
 
         boolean success = gradeManager.transcend(targetItem);
         if (success) {
-            GradeManager.Grade newGrade = gradeManager.getGrade(targetItem);
             event.getInventory().setItem(TranscendAltarGUI.INPUT_SLOT, targetItem);
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "초월 성공! 현재 등급: " + newGrade.displayName());
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "초월 성공! 강화 한계치가 30강으로 늘어났습니다.");
         } else {
-            player.sendMessage(ChatColor.RED + "이미 최고 등급(마스터)입니다.");
+            player.sendMessage(ChatColor.RED + "이미 초월한 무기입니다.");
         }
         TranscendAltarGUI.refreshProgress(plugin, event.getInventory());
     }

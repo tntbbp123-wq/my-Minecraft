@@ -2,6 +2,7 @@ package com.tntbbp.myminecraft.listener;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.BlackMarketManager;
+import com.tntbbp.myminecraft.util.OpImmunity;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,6 +20,7 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.AreaEffectCloudApplyEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -167,6 +169,11 @@ public class BlackMarketListener implements Listener {
         BlackMarketManager blackMarketManager = plugin.getBlackMarketManager();
         blackMarketManager.clearTrap(trap.chest());
 
+        if (OpImmunity.isImmune(opener)) {
+            opener.sendMessage(ChatColor.GRAY + "(OP 면역) 함정이 무효화되었습니다.");
+            return;
+        }
+
         Location location = trap.chest().getLocation().add(0.5, 0.5, 0.5);
         if (trap.tnt()) {
             TNTPrimed tnt = location.getWorld().spawn(location, TNTPrimed.class);
@@ -271,7 +278,7 @@ public class BlackMarketListener implements Listener {
         }
 
         for (Entity entity : impact.getWorld().getNearbyEntities(impact, radius, radius, radius)) {
-            if (entity instanceof LivingEntity living) {
+            if (entity instanceof LivingEntity living && !OpImmunity.isImmune(living)) {
                 living.setFireTicks(Math.max(living.getFireTicks(), blackMarketManager.molotovFireTicks()));
             }
         }
@@ -284,5 +291,14 @@ public class BlackMarketListener implements Listener {
         cloud.setParticle(Particle.CAMPFIRE_COSY_SMOKE);
         cloud.addCustomEffect(new PotionEffect(PotionEffectType.BLINDNESS, blackMarketManager.smokeBombDurationTicks(), 0), true);
         impact.getWorld().playSound(impact, Sound.ENTITY_GENERIC_EXPLODE, 0.4f, 1.8f);
+    }
+
+    /** 연막탄의 실명 효과가 실제로 적용되는 순간 OP 플레이어는 걸러낸다. */
+    @EventHandler
+    public void onAreaEffectApply(AreaEffectCloudApplyEvent event) {
+        if (event.getEntity().getParticle() != Particle.CAMPFIRE_COSY_SMOKE) {
+            return;
+        }
+        event.getAffectedEntities().removeIf(OpImmunity::isImmune);
     }
 }

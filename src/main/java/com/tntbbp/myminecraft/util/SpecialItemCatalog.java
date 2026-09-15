@@ -2,6 +2,7 @@ package com.tntbbp.myminecraft.util;
 
 import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
+import com.tntbbp.myminecraft.manager.DrakenPierceManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.StarforceManager;
@@ -26,7 +27,8 @@ public final class SpecialItemCatalog {
 
     public static Resolved resolve(EnhanceManager enhanceManager, LaevateinnManager laevateinnManager,
                                     CurrencyManager currencyManager, StarforceManager starforceManager,
-                                    BlackMarketManager blackMarketManager, String itemName, int amount) {
+                                    BlackMarketManager blackMarketManager, DrakenPierceManager drakenPierceManager,
+                                    String itemName, int amount) {
         if (itemName.equals("강화석")) {
             return new Resolved(enhanceManager.createEnhanceStone(amount), "강화석");
         }
@@ -37,6 +39,11 @@ public final class SpecialItemCatalog {
             ItemStack item = laevateinnManager.createItem();
             item.setAmount(amount);
             return new Resolved(item, "레바테인");
+        }
+        if (itemName.equals("드라켄피어스")) {
+            ItemStack item = drakenPierceManager.createItem();
+            item.setAmount(amount);
+            return new Resolved(item, "드라켄피어스");
         }
         if (itemName.equals("일괄약탈주문서")) {
             return new Resolved(blackMarketManager.createLootAllScroll(amount), "일괄 약탈 주문서");
@@ -108,6 +115,7 @@ public final class SpecialItemCatalog {
         names.add("강화석");
         names.add("별가루");
         names.add("레바테인");
+        names.add("드라켄피어스");
         names.add("일괄약탈주문서");
         names.add("함정설치키트");
         names.add("화염병");
