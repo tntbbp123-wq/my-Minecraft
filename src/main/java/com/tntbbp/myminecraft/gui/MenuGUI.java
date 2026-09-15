@@ -13,16 +13,19 @@ import java.util.List;
 public class MenuGUI {
 
     public static final String TITLE = "§8메인 메뉴";
-    public static final int SIZE = 27;
+    public static final int SIZE = 54;
 
-    public static final int SPAWN_SLOT = 10;
-    public static final int ENDER_CHEST_SLOT = 12;
-    public static final int STOCK_SLOT = 14;
-    public static final int BANK_SLOT = 13;
-    public static final int RANDOM_TP_SLOT = 16;
-    public static final int ENHANCE_SLOT = 22;
-    public static final int TRANSCEND_SLOT = 20;
-    public static final int STARFORCE_SLOT = 24;
+    // 1줄: 이동/편의
+    public static final int SPAWN_SLOT = 11;
+    public static final int ENDER_CHEST_SLOT = 13;
+    public static final int RANDOM_TP_SLOT = 15;
+    // 2줄: 경제
+    public static final int STOCK_SLOT = 30;
+    public static final int BANK_SLOT = 32;
+    // 3줄: 장비 강화
+    public static final int ENHANCE_SLOT = 38;
+    public static final int TRANSCEND_SLOT = 40;
+    public static final int STARFORCE_SLOT = 42;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
