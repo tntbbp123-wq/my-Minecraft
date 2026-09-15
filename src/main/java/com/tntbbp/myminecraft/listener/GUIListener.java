@@ -280,7 +280,8 @@ public class GUIListener implements Listener {
         if (giveItemName != null) {
             SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
                     plugin.getEnhanceManager(), plugin.getLaevateinnManager(), plugin.getCurrencyManager(),
-                    plugin.getStarforceManager(), plugin.getBlackMarketManager(), giveItemName, 1);
+                    plugin.getStarforceManager(), plugin.getBlackMarketManager(), plugin.getDrakenPierceManager(),
+                    giveItemName, 1);
             if (resolved == null) {
                 return;
             }

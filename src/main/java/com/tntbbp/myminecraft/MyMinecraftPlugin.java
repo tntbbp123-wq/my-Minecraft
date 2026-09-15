@@ -19,6 +19,7 @@ import com.tntbbp.myminecraft.listener.CombatListener;
 import com.tntbbp.myminecraft.listener.CombatStanceKeyListener;
 import com.tntbbp.myminecraft.listener.CombatStanceListener;
 import com.tntbbp.myminecraft.listener.DiscordIntrusionListener;
+import com.tntbbp.myminecraft.listener.DrakenPierceListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
 import com.tntbbp.myminecraft.listener.LaevateinnModelListener;
@@ -31,6 +32,7 @@ import com.tntbbp.myminecraft.manager.CombatStanceManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.DiscordLinkManager;
 import com.tntbbp.myminecraft.manager.DiscordManager;
+import com.tntbbp.myminecraft.manager.DrakenPierceManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.GeminiNewsClient;
@@ -41,6 +43,7 @@ import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.NewsManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
+import com.tntbbp.myminecraft.manager.ShockManager;
 import com.tntbbp.myminecraft.manager.StarforceManager;
 import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.manager.TeleportRequestManager;
@@ -62,6 +65,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private BlackMarketManager blackMarketManager;
     private InfernalBurnManager infernalBurnManager;
     private LaevateinnManager laevateinnManager;
+    private ShockManager shockManager;
+    private DrakenPierceManager drakenPierceManager;
     private CurrencyManager currencyManager;
     private NewsManager newsManager;
     private GeminiNewsClient geminiNewsClient;
@@ -89,6 +94,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.blackMarketManager = new BlackMarketManager(this);
         this.infernalBurnManager = new InfernalBurnManager(this);
         this.laevateinnManager = new LaevateinnManager(this);
+        this.shockManager = new ShockManager(this);
+        this.drakenPierceManager = new DrakenPierceManager(this);
         this.currencyManager = new CurrencyManager(this);
         this.newsManager = new NewsManager(this, stockManager);
         this.geminiNewsClient = new GeminiNewsClient(this);
@@ -99,6 +106,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
         stockManager.startFluctuationTask();
         infernalBurnManager.start();
+        shockManager.start();
         newsManager.startTask();
         blackMarketManager.start();
         discordManager.start();
@@ -138,6 +146,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new GUIListener(this), this);
         getServer().getPluginManager().registerEvents(new LaevateinnListener(this), this);
+        getServer().getPluginManager().registerEvents(new DrakenPierceListener(this), this);
         getServer().getPluginManager().registerEvents(new CombatListener(this), this);
         getServer().getPluginManager().registerEvents(new CombatStanceListener(this), this);
         getServer().getPluginManager().registerEvents(new StarforceListener(this), this);
@@ -182,6 +191,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
         }
         if (infernalBurnManager != null) {
             infernalBurnManager.stop();
+        }
+        if (shockManager != null) {
+            shockManager.stop();
         }
         if (newsManager != null) {
             newsManager.stopTask();
@@ -254,6 +266,14 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public LaevateinnManager getLaevateinnManager() {
         return laevateinnManager;
+    }
+
+    public ShockManager getShockManager() {
+        return shockManager;
+    }
+
+    public DrakenPierceManager getDrakenPierceManager() {
+        return drakenPierceManager;
     }
 
     public CurrencyManager getCurrencyManager() {

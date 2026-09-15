@@ -268,3 +268,47 @@ laevateinn:
     burn-duration-seconds: 10
     burn-damage-per-second: 4.0
     magma-duration-seconds: 8
+
+# 신화 등급 무기 '드라켄피어스' (/특수아이템소환 <유저> 드라켄피어스 <수량> 으로 지급)
+draken-pierce:
+  # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 삼지창 기본 아이콘으로 보임)
+  model-data: 500021
+  # 근접 공격력 (툴팁/실제 데미지 계산에 쓰이는 최종 공격력 수치)
+  attack-damage: 11.0
+  # 항상 적용되는 고정 방어관통(%). 스타포스로 붙인 방어관통과는 별개로 중첩 적용됨
+  defense-penetration-percent: 45.0
+  # 감전(둔화) 디버프 공통 설정
+  shock:
+    # 둔화(Slowness) 효과 단계 (0 = 둔화 I)
+    slow-amplifier: 1
+  # 드라켄 라이트닝 (F키 발동) - 전방 적을 맞히면 번개가 주변으로 연쇄
+  lightning:
+    cooldown-seconds: 20
+    range: 10.0
+    cone-angle-degrees: 50.0
+    damage: 9.0
+    # 최초 적중 대상 기준, 추가로 연쇄되는 최대 인원
+    chain-count: 3
+    # 연쇄가 다음 대상을 찾는 반경(블록)
+    chain-radius: 4.0
+    # 연쇄로 옮겨붙을 때마다 적용되는 피해 배율 (최초 적중 대비)
+    chain-damage-multiplier: 0.6
+    shock-duration-seconds: 5
+    shock-damage-per-second: 2.5
+  # 드라코닉 메타모포시스 (Q키 발동) - 번개 폭발 후 쌍단검으로 일시 변형
+  metamorphosis:
+    cooldown-seconds: 25
+    # 변형 지속시간(초). 이동속도/공격속도 상승도 이 시간 동안 유지됨
+    duration-seconds: 7
+    # 변형 중 무기에 적용되는 CustomModelData (리소스팩 미적용 서버/전용 텍스처 미포함 시 원래 모습 그대로 보임)
+    model-data: 500022
+    # 발동 시 전방 번개 폭발의 범위/각도/피해
+    burst-range: 4.0
+    burst-cone-angle-degrees: 140.0
+    burst-damage: 6.0
+    shock-duration-seconds: 4
+    shock-damage-per-second: 2.0
+    # 변형 중 이동속도 효과 단계 (0 = 신속 I)
+    speed-amplifier: 2
+    # 변형 중 무기에 임시로 더해지는 공격속도 수치
+    attack-speed-bonus: 0.6
