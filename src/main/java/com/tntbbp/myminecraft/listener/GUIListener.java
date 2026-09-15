@@ -2,6 +2,7 @@ package com.tntbbp.myminecraft.listener;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.gui.*;
+import com.tntbbp.myminecraft.manager.CoreManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
@@ -70,6 +71,12 @@ public class GUIListener implements Listener {
                 return;
             }
             handleAdminMenuClick((Player) event.getWhoClicked(), adminMenuHolder, event.getSlot(), event.getClick());
+        } else if (holder instanceof CoreHolder coreHolder) {
+            event.setCancelled(true);
+            if (event.getClickedInventory() != event.getInventory()) {
+                return;
+            }
+            handleCoreClick((Player) event.getWhoClicked(), coreHolder, event.getSlot());
         }
     }
 
@@ -79,7 +86,7 @@ public class GUIListener implements Listener {
         int topSize = event.getInventory().getSize();
 
         if (holder instanceof MenuHolder || holder instanceof HomeHolder || holder instanceof StockHolder
-                || holder instanceof AdminMenuHolder) {
+                || holder instanceof AdminMenuHolder || holder instanceof CoreHolder) {
             for (int slot : event.getRawSlots()) {
                 if (slot < topSize) {
                     event.setCancelled(true);
@@ -304,6 +311,46 @@ public class GUIListener implements Listener {
                 + ChatColor.WHITE + suggestedCommand);
         message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, suggestedCommand));
         player.spigot().sendMessage(message);
+    }
+
+    private void handleCoreClick(Player player, CoreHolder holder, int slot) {
+        if (slot == CoreGUI.CLOSE_SLOT) {
+            player.closeInventory();
+            return;
+        }
+        if (slot == CoreGUI.JOB_CHANGE_SLOT) {
+            player.sendMessage(ChatColor.GRAY + "직업의 전직은 아직 구현되지 않았습니다.");
+            return;
+        }
+
+        String itemName = holder.getItemName(slot);
+        if (itemName == null) {
+            return;
+        }
+
+        CoreManager coreManager = plugin.getCoreManager();
+        EconomyManager economyManager = plugin.getEconomyManager();
+        double price = coreManager.price(itemName);
+        if (!economyManager.subtract(player.getUniqueId(), price)) {
+            player.sendMessage(ChatColor.RED + economyManager.currencyName() + "가 부족합니다. (필요: "
+                    + String.format("%,.0f", price) + ")");
+            return;
+        }
+
+        SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
+                plugin.getEnhanceManager(), plugin.getLaevateinnManager(), plugin.getCurrencyManager(),
+                plugin.getStarforceManager(), plugin.getBlackMarketManager(), plugin.getDrakenPierceManager(),
+                itemName, 1);
+        if (resolved == null) {
+            economyManager.add(player.getUniqueId(), price);
+            return;
+        }
+
+        player.getInventory().addItem(resolved.item()).values()
+                .forEach(leftover -> player.getWorld().dropItem(player.getLocation(), leftover));
+        player.sendMessage(ChatColor.GREEN + resolved.displayName() + " 1개를 구매했습니다. (보유 "
+                + economyManager.currencyName() + ": "
+                + String.format("%,.1f", economyManager.getBalance(player.getUniqueId())) + ")");
     }
 
     private void handleEnhanceClick(InventoryClickEvent event) {

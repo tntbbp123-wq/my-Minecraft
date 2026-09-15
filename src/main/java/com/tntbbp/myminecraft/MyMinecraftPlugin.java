@@ -11,6 +11,7 @@ import com.tntbbp.myminecraft.command.LobbyCommand;
 import com.tntbbp.myminecraft.command.MenuCommand;
 import com.tntbbp.myminecraft.command.RtCommand;
 import com.tntbbp.myminecraft.command.SpawnCommand;
+import com.tntbbp.myminecraft.command.TeamCommand;
 import com.tntbbp.myminecraft.command.TpaCommand;
 import com.tntbbp.myminecraft.command.DiscordLinkCommand;
 import com.tntbbp.myminecraft.command.TranscendAltarPlaceCommand;
@@ -18,6 +19,7 @@ import com.tntbbp.myminecraft.listener.BlackMarketListener;
 import com.tntbbp.myminecraft.listener.CombatListener;
 import com.tntbbp.myminecraft.listener.CombatStanceKeyListener;
 import com.tntbbp.myminecraft.listener.CombatStanceListener;
+import com.tntbbp.myminecraft.listener.CoreBlockListener;
 import com.tntbbp.myminecraft.listener.DiscordIntrusionListener;
 import com.tntbbp.myminecraft.listener.DrakenPierceListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
@@ -29,6 +31,7 @@ import com.tntbbp.myminecraft.listener.TranscendAltarBlockListener;
 import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.CombatManager;
 import com.tntbbp.myminecraft.manager.CombatStanceManager;
+import com.tntbbp.myminecraft.manager.CoreManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.DiscordLinkManager;
 import com.tntbbp.myminecraft.manager.DiscordManager;
@@ -46,6 +49,7 @@ import com.tntbbp.myminecraft.manager.RandomTeleportManager;
 import com.tntbbp.myminecraft.manager.ShockManager;
 import com.tntbbp.myminecraft.manager.StarforceManager;
 import com.tntbbp.myminecraft.manager.StockManager;
+import com.tntbbp.myminecraft.manager.TeamManager;
 import com.tntbbp.myminecraft.manager.TeleportRequestManager;
 import com.tntbbp.myminecraft.manager.TranscendAltarBlockManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -76,6 +80,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private CombatStanceKeyListener combatStanceKeyListener;
     private DiscordManager discordManager;
     private DiscordLinkManager discordLinkManager;
+    private TeamManager teamManager;
+    private CoreManager coreManager;
 
     @Override
     public void onEnable() {
@@ -103,6 +109,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.combatStanceManager = new CombatStanceManager(this);
         this.discordManager = new DiscordManager(this);
         this.discordLinkManager = new DiscordLinkManager(this);
+        this.teamManager = new TeamManager(this);
+        this.coreManager = new CoreManager(this);
 
         stockManager.startFluctuationTask();
         infernalBurnManager.start();
@@ -154,6 +162,20 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlackMarketListener(this), this);
 
         getCommand("초월제단설치").setExecutor(new TranscendAltarPlaceCommand(this));
+
+        TeamCommand teamCommand = new TeamCommand(this);
+        getCommand("팀생성").setExecutor(teamCommand);
+        getCommand("팀생성").setTabCompleter(teamCommand);
+        getCommand("팀원추가").setExecutor(teamCommand);
+        getCommand("팀원추가").setTabCompleter(teamCommand);
+        getCommand("팀원삭제").setExecutor(teamCommand);
+        getCommand("팀원삭제").setTabCompleter(teamCommand);
+        getCommand("팀삭제").setExecutor(teamCommand);
+        getCommand("팀삭제").setTabCompleter(teamCommand);
+        getCommand("팀정보").setExecutor(teamCommand);
+        getCommand("팀정보").setTabCompleter(teamCommand);
+        getServer().getPluginManager().registerEvents(new CoreBlockListener(this), this);
+        getServer().addRecipe(coreManager.recipe());
 
         DiscordLinkCommand discordLinkCommand = new DiscordLinkCommand(this);
         getCommand("디스코드연동").setExecutor(discordLinkCommand);
@@ -302,5 +324,13 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public DiscordLinkManager getDiscordLinkManager() {
         return discordLinkManager;
+    }
+
+    public TeamManager getTeamManager() {
+        return teamManager;
+    }
+
+    public CoreManager getCoreManager() {
+        return coreManager;
     }
 }
