@@ -31,7 +31,7 @@ public class EconomyManager {
     }
 
     public String currencyName() {
-        return plugin.getConfig().getString("economy.currency-name", "포인트");
+        return plugin.getConfig().getString("economy.currency-name", "G");
     }
 
     public double getBalance(UUID uuid) {

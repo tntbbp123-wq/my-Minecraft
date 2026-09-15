@@ -2,6 +2,7 @@ package com.tntbbp.myminecraft.manager;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.model.BurnState;
+import com.tntbbp.myminecraft.util.OpImmunity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -51,6 +52,9 @@ public class InfernalBurnManager {
 
     /** durationSeconds 동안, 초당 damagePerSecond 만큼 방어력 무시 피해를 입히는 저주를 건다. 이미 걸려 있다면 갱신한다. */
     public void applyBurn(LivingEntity target, UUID sourceId, int durationSeconds, double damagePerSecond) {
+        if (OpImmunity.isImmune(target)) {
+            return;
+        }
         burning.put(target.getUniqueId(), new BurnState(sourceId, durationSeconds * TICK_INTERVAL, damagePerSecond));
         target.setFireTicks(Math.max(target.getFireTicks(), TICK_INTERVAL * 2));
     }

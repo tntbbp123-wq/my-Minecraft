@@ -10,7 +10,11 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.List;
 
-/** 무기 등급(일반~마스터) 시스템. <초월의 제단>에서 무기를 초월하면 등급이 한 단계 상승한다. */
+/**
+ * 무기 등급(일반~신화) 표시 시스템. 등급은 재질(또는 신화 등급 무기의 경우 고정값)로 정해지며,
+ * <초월의 제단>은 등급을 바꾸지 않는다 — 초월은 오직 강화 한계치를 20강에서 30강으로 풀어주는
+ * 역할만 한다 (EnhanceManager.markTranscended 참고).
+ */
 public class GradeManager {
 
     public enum Grade {
@@ -18,9 +22,8 @@ public class GradeManager {
         RARE("레어", "9"),
         UNIQUE("유니크", "a"),
         ANCIENT("고대", "6"),
-        LEGEND("레전드", "c"),
-        MYSTIC("미스틱", "d"),
-        MASTER("마스터", "4");
+        LEGEND("전설", "c"),
+        MASTER("신화", "d");
 
         private final String displayName;
         private final String colorCode;
@@ -36,16 +39,6 @@ public class GradeManager {
 
         public String colorCode() {
             return colorCode;
-        }
-
-        public boolean isMax() {
-            return this == MASTER;
-        }
-
-        public Grade next() {
-            Grade[] values = values();
-            int nextOrdinal = ordinal() + 1;
-            return nextOrdinal < values.length ? values[nextOrdinal] : this;
         }
     }
 
@@ -75,37 +68,11 @@ public class GradeManager {
     }
 
     /**
-     * 아직 초월/등급 부여 이력이 없는 무기의 기본 등급을 재질(광물 종류)에 따라 정한다.
-     * 실제 바닐라 공격력 순서(금=나무 &lt; 돌 &lt; 철 &lt; 다이아 &lt; 네더라이트)를 반영했다.
-     * 삼지창/마법 지팡이(활)/철퇴처럼 재질 단계가 없는 무기는 희귀도에 맞춰 고정 등급을 준다.
+     * 아직 등급 부여 이력이 없는 무기의 기본 등급. 바닐라 아이템은 재질과 무관하게 모두
+     * 일반 등급에서 시작한다 (신화 등급은 레바테인/드라켄피어스 같은 전용 커스텀 무기에만
+     * applyGrade로 직접 부여됨).
      */
     public Grade defaultGradeFor(Material type) {
-        String name = type.name();
-        if (name.equals("NETHERITE_SWORD") || name.equals("NETHERITE_AXE")) {
-            return Grade.LEGEND;
-        }
-        if (name.equals("DIAMOND_SWORD") || name.equals("DIAMOND_AXE")) {
-            return Grade.ANCIENT;
-        }
-        if (name.equals("IRON_SWORD") || name.equals("IRON_AXE")) {
-            return Grade.UNIQUE;
-        }
-        if (name.equals("STONE_SWORD") || name.equals("STONE_AXE")) {
-            return Grade.RARE;
-        }
-        if (name.equals("WOODEN_SWORD") || name.equals("WOODEN_AXE")
-                || name.equals("GOLDEN_SWORD") || name.equals("GOLDEN_AXE")) {
-            return Grade.COMMON;
-        }
-        if (type == Material.MACE) {
-            return Grade.LEGEND;
-        }
-        if (type == Material.TRIDENT) {
-            return Grade.ANCIENT;
-        }
-        if (type == Material.BOW || type == Material.CROSSBOW) {
-            return Grade.RARE;
-        }
         return Grade.COMMON;
     }
 
@@ -123,16 +90,16 @@ public class GradeManager {
     }
 
     /**
-     * 무기를 한 단계 초월시킨다 (등급 +1, 강화 한계치를 30강까지 해제).
-     * 이미 최고 등급(마스터)이면 아무 것도 하지 않고 false를 반환한다.
+     * 무기를 초월시켜 강화 한계치를 20강에서 30강으로 해제한다. 등급 자체는 바뀌지 않는다
+     * (신화 등급 무기도 예외 없이 이 과정을 거쳐야 30강까지 강화할 수 있다).
+     * 이미 초월했다면 아무 것도 하지 않고 false를 반환한다.
      */
     public boolean transcend(ItemStack item) {
-        Grade current = getGrade(item);
-        if (current.isMax()) {
+        EnhanceManager enhanceManager = plugin.getEnhanceManager();
+        if (enhanceManager.isTranscended(item)) {
             return false;
         }
-        applyGrade(item, current.next());
-        plugin.getEnhanceManager().markTranscended(item);
+        enhanceManager.markTranscended(item);
         return true;
     }
 }

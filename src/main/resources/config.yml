@@ -2,7 +2,7 @@
 
 economy:
   starting-balance: 1000.0
-  currency-name: "포인트"
+  currency-name: "G"
 
 home:
   max-homes: 5
@@ -118,9 +118,14 @@ enhance:
       color: 6
       model-data: 500013
       bonus-percent: 45.0
+  # 성공 확률: guaranteed-level강까지는 base-success-percent로 무조건 성공하고, 그 이후로는
+  # 한 단계 강화할 때마다 직전 확률에 decay-multiplier를 곱해 감소한다 (기본: 0강~4강 100%,
+  # 5강부터 직전 확률의 80%씩 — 10강 26.214% / 15강 8.590% / 20강 2.815% / 30강 0.302%).
+  # 계산된 확률이 min-success-percent보다 낮아지면 그 값으로 고정된다.
   base-success-percent: 100.0
-  decrease-per-level: 8.0
-  min-success-percent: 15.0
+  guaranteed-level: 4
+  decay-multiplier: 0.8
+  min-success-percent: 0.001
   # 기본 강화 한계치. <초월의 제단>에서 초월한 장비는 transcended-max-level까지 강화 가능.
   max-level: 20
   transcended-max-level: 30
@@ -268,3 +273,74 @@ laevateinn:
     burn-duration-seconds: 10
     burn-damage-per-second: 4.0
     magma-duration-seconds: 8
+
+# 신화 등급 무기 '드라켄피어스' (/특수아이템소환 <유저> 드라켄피어스 <수량> 으로 지급)
+draken-pierce:
+  # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 삼지창 기본 아이콘으로 보임)
+  model-data: 500021
+  # 근접 공격력 (툴팁/실제 데미지 계산에 쓰이는 최종 공격력 수치)
+  attack-damage: 11.0
+  # 항상 적용되는 고정 방어관통(%). 스타포스로 붙인 방어관통과는 별개로 중첩 적용됨
+  defense-penetration-percent: 45.0
+  # 감전(둔화) 디버프 공통 설정
+  shock:
+    # 둔화(Slowness) 효과 단계 (0 = 둔화 I)
+    slow-amplifier: 1
+  # 드라켄 라이트닝 (F키 발동) - 전방 적을 맞히면 번개가 주변으로 연쇄
+  lightning:
+    cooldown-seconds: 20
+    range: 10.0
+    cone-angle-degrees: 50.0
+    damage: 9.0
+    # 최초 적중 대상 기준, 추가로 연쇄되는 최대 인원
+    chain-count: 3
+    # 연쇄가 다음 대상을 찾는 반경(블록)
+    chain-radius: 4.0
+    # 연쇄로 옮겨붙을 때마다 적용되는 피해 배율 (최초 적중 대비)
+    chain-damage-multiplier: 0.6
+    shock-duration-seconds: 5
+    shock-damage-per-second: 2.5
+  # 드라코닉 메타모포시스 (Q키 발동) - 번개 폭발 후 쌍단검으로 일시 변형
+  metamorphosis:
+    cooldown-seconds: 25
+    # 변형 지속시간(초). 이동속도/공격속도 상승도 이 시간 동안 유지됨
+    duration-seconds: 7
+    # 변형 중 무기에 적용되는 CustomModelData (리소스팩 미적용 서버/전용 텍스처 미포함 시 원래 모습 그대로 보임)
+    model-data: 500022
+    # 발동 시 전방 번개 폭발의 범위/각도/피해
+    burst-range: 4.0
+    burst-cone-angle-degrees: 140.0
+    burst-damage: 6.0
+    shock-duration-seconds: 4
+    shock-damage-per-second: 2.0
+    # 변형 중 이동속도 효과 단계 (0 = 신속 I)
+    speed-amplifier: 2
+    # 변형 중 무기에 임시로 더해지는 공격속도 수치
+    attack-speed-bonus: 0.6
+
+# 코어 (팀 거점 겸 상점). 신호기(Beacon)를 변형해 만들어져 있어, 제작한 뒤 바닥에 설치하면
+# 실제 신호기 블록이 되고 그 위치가 설치한 사람의 팀 거점(홈)이 된다. 우클릭하면 바닐라
+# 신호기 GUI 대신 전용 상점 GUI가 열린다. 제작법: 네더별-드래곤의 숨결-네더별 /
+# 바다의 심장-유리-바다의 심장 / 철블럭-철블럭-철블럭 (3x3, 신호기와 유사한 배치).
+# /팀생성 으로 팀을 만들면 팀장에게 코어 1개가 자동 지급된다.
+core:
+  # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 신호기 기본 아이콘으로 보임)
+  model-data: 500040
+  # 상점에서 아이템을 살 때 차감되는 포인트(economy.starting-balance와 같은 재화) 가격.
+  # 키는 /특수아이템소환 과 동일한 아이템명을 사용한다.
+  shop:
+    prices:
+      강화석: 50.0
+      별가루: 80.0
+      일반두루마리: 100.0
+      레어두루마리: 250.0
+      에픽두루마리: 600.0
+      레전더리두루마리: 1500.0
+      일괄약탈주문서: 300.0
+      함정설치키트: 200.0
+      화염병: 80.0
+      연막탄: 60.0
+      밀도나침반: 150.0
+      발자국추적기: 150.0
+      혈흔나침반: 200.0
+      소음차단포션: 120.0

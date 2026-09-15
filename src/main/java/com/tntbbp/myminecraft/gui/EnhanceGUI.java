@@ -100,7 +100,7 @@ public class EnhanceGUI {
             lore = List.of(
                     progressLine,
                     "",
-                    "§7성공 확률: §f" + String.format("%.1f", chance) + "%"
+                    "§7성공 확률: §f" + String.format("%.3f", chance) + "%"
                             + (useScroll ? " §d(두루마리 +" + String.format("%.0f", scrollBonus) + "%)" : ""),
                     "§7필요 강화석: §b" + requiredStones + "개",
                     "§7필요 비용: §6" + String.format("%,.0f", cost) + "상당의 동전"

@@ -83,10 +83,9 @@ public class LaevateinnManager {
         }
         item.setItemMeta(meta);
 
-        // 레바테인은 신화 등급 무기이므로 처음부터 최고 등급(마스터)으로 지급되고, 강화 한계치도
-        // 바로 30강까지 열려 있다 (초월의 제단에서 다시 초월할 필요가 없다).
+        // 레바테인은 신화 등급 무기이므로 처음부터 등급은 신화로 표시되지만, 강화 한계치를
+        // 30강까지 풀려면 다른 무기와 마찬가지로 초월의 제단을 거쳐야 한다 (자동 초월 없음).
         plugin.getGradeManager().applyGrade(item, GradeManager.Grade.MASTER);
-        plugin.getEnhanceManager().markTranscended(item);
         return item;
     }
 
