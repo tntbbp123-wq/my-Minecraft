@@ -118,9 +118,14 @@ enhance:
       color: 6
       model-data: 500013
       bonus-percent: 45.0
+  # 성공 확률: guaranteed-level강까지는 base-success-percent로 무조건 성공하고, 그 이후로는
+  # 한 단계 강화할 때마다 직전 확률에 decay-multiplier를 곱해 감소한다 (기본: 0강~4강 100%,
+  # 5강부터 직전 확률의 80%씩 — 10강 26.214% / 15강 8.590% / 20강 2.815% / 30강 0.302%).
+  # 계산된 확률이 min-success-percent보다 낮아지면 그 값으로 고정된다.
   base-success-percent: 100.0
-  decrease-per-level: 8.0
-  min-success-percent: 15.0
+  guaranteed-level: 4
+  decay-multiplier: 0.8
+  min-success-percent: 0.001
   # 기본 강화 한계치. <초월의 제단>에서 초월한 장비는 transcended-max-level까지 강화 가능.
   max-level: 20
   transcended-max-level: 30
