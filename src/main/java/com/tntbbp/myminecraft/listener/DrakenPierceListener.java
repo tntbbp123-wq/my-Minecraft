@@ -2,6 +2,7 @@ package com.tntbbp.myminecraft.listener;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.DrakenPierceManager;
+import com.tntbbp.myminecraft.util.OpImmunity;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -68,6 +69,9 @@ public class DrakenPierceListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onMeleeDamage(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player attacker) || !(event.getEntity() instanceof LivingEntity)) {
+            return;
+        }
+        if (OpImmunity.isImmune(event.getEntity())) {
             return;
         }
 

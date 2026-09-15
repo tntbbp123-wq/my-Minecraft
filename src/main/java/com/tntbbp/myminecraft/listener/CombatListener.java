@@ -81,6 +81,9 @@ public class CombatListener implements Listener {
         }
 
         combatManager.untag(player.getUniqueId());
+        if (player.isOp()) {
+            return;
+        }
         if (player.isOnline() && player.getHealth() > 0) {
             player.setHealth(0.0);
         }

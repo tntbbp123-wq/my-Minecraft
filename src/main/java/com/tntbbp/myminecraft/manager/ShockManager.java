@@ -2,6 +2,7 @@ package com.tntbbp.myminecraft.manager;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.model.ShockState;
+import com.tntbbp.myminecraft.util.OpImmunity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -44,6 +45,9 @@ public class ShockManager {
 
     /** durationSeconds 동안, 초당 damagePerSecond 만큼 방어력 무시 피해를 입히며 둔화를 유지시키는 감전을 건다. */
     public void applyShock(LivingEntity target, UUID sourceId, int durationSeconds, double damagePerSecond, int slowAmplifier) {
+        if (OpImmunity.isImmune(target)) {
+            return;
+        }
         shocked.put(target.getUniqueId(), new ShockState(sourceId, durationSeconds * TICK_INTERVAL, damagePerSecond, slowAmplifier));
         target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, TICK_INTERVAL * 2, Math.max(0, slowAmplifier), false, true, true));
     }
