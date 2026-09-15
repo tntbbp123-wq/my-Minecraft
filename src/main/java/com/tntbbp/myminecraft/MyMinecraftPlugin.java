@@ -16,6 +16,8 @@ import com.tntbbp.myminecraft.command.DiscordLinkCommand;
 import com.tntbbp.myminecraft.command.TranscendAltarPlaceCommand;
 import com.tntbbp.myminecraft.listener.BlackMarketListener;
 import com.tntbbp.myminecraft.listener.CombatListener;
+import com.tntbbp.myminecraft.listener.CombatStanceKeyListener;
+import com.tntbbp.myminecraft.listener.CombatStanceListener;
 import com.tntbbp.myminecraft.listener.DiscordIntrusionListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
@@ -25,6 +27,7 @@ import com.tntbbp.myminecraft.listener.StarforceListener;
 import com.tntbbp.myminecraft.listener.TranscendAltarBlockListener;
 import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.CombatManager;
+import com.tntbbp.myminecraft.manager.CombatStanceManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.DiscordLinkManager;
 import com.tntbbp.myminecraft.manager.DiscordManager;
@@ -63,7 +66,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private NewsManager newsManager;
     private GeminiNewsClient geminiNewsClient;
     private CombatManager combatManager;
+    private CombatStanceManager combatStanceManager;
     private ProtocolSilenceListener protocolSilenceListener;
+    private CombatStanceKeyListener combatStanceKeyListener;
     private DiscordManager discordManager;
     private DiscordLinkManager discordLinkManager;
 
@@ -88,6 +93,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.newsManager = new NewsManager(this, stockManager);
         this.geminiNewsClient = new GeminiNewsClient(this);
         this.combatManager = new CombatManager(this);
+        this.combatStanceManager = new CombatStanceManager(this);
         this.discordManager = new DiscordManager(this);
         this.discordLinkManager = new DiscordLinkManager(this);
 
@@ -133,6 +139,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GUIListener(this), this);
         getServer().getPluginManager().registerEvents(new LaevateinnListener(this), this);
         getServer().getPluginManager().registerEvents(new CombatListener(this), this);
+        getServer().getPluginManager().registerEvents(new CombatStanceListener(this), this);
         getServer().getPluginManager().registerEvents(new StarforceListener(this), this);
         getServer().getPluginManager().registerEvents(new TranscendAltarBlockListener(this), this);
         getServer().getPluginManager().registerEvents(new BlackMarketListener(this), this);
@@ -155,9 +162,14 @@ public class MyMinecraftPlugin extends JavaPlugin {
             this.protocolSilenceListener = new ProtocolSilenceListener(this);
             protocolSilenceListener.register();
             getLogger().info("ProtocolLib 연동: 소음 차단 포션의 소리/애니메이션 은폐 기능이 활성화되었습니다.");
+
+            this.combatStanceKeyListener = new CombatStanceKeyListener(this);
+            combatStanceKeyListener.register();
+            getLogger().info("ProtocolLib 연동: 웅크리기+L(도전과제 화면 열기)로 전투모드 진입/해제 기능이 활성화되었습니다.");
         } else {
             getLogger().info("ProtocolLib이 설치되어 있지 않아 소음 차단 포션은 상태 효과만 적용되고 "
                     + "소리/애니메이션 은폐는 동작하지 않습니다.");
+            getLogger().info("ProtocolLib이 설치되어 있지 않아 웅크리기+L 전투모드 진입 기능은 동작하지 않습니다.");
         }
 
         getLogger().info("MyMinecraft 플러그인이 활성화되었습니다.");
@@ -179,6 +191,12 @@ public class MyMinecraftPlugin extends JavaPlugin {
         }
         if (protocolSilenceListener != null) {
             protocolSilenceListener.unregister();
+        }
+        if (combatStanceKeyListener != null) {
+            combatStanceKeyListener.unregister();
+        }
+        if (combatStanceManager != null) {
+            combatStanceManager.restoreAll();
         }
         if (discordManager != null) {
             discordManager.stop();
@@ -252,6 +270,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public CombatManager getCombatManager() {
         return combatManager;
+    }
+
+    public CombatStanceManager getCombatStanceManager() {
+        return combatStanceManager;
     }
 
     public DiscordManager getDiscordManager() {
