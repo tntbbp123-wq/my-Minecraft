@@ -69,6 +69,7 @@ public class CombatListener implements Listener {
     public void onDeath(EntityDeathEvent event) {
         if (event.getEntity() instanceof Player player) {
             plugin.getCombatManager().untag(player.getUniqueId());
+            plugin.getCombatMusicManager().clear(player);
         }
     }
 
@@ -81,6 +82,7 @@ public class CombatListener implements Listener {
         }
 
         combatManager.untag(player.getUniqueId());
+        plugin.getCombatMusicManager().clear(player);
         if (player.isOp()) {
             return;
         }

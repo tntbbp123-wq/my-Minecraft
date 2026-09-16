@@ -23,8 +23,9 @@ public class DiscordManager {
     }
 
     public void start() {
-        String token = plugin.getConfig().getString("discord.bot-token", "");
-        if (token == null || token.isBlank()) {
+        // 설정값은 평문일 수도 있고 env:/file:/enc: 로 감춰둔 형태일 수도 있다 (SecretResolver 참고).
+        String token = plugin.getSecretResolver().resolve(plugin.getConfig().getString("discord.bot-token", ""));
+        if (token.isBlank()) {
             plugin.getLogger().info("discord.bot-token이 비어있어 디스코드 알림 기능은 비활성화됩니다.");
             return;
         }

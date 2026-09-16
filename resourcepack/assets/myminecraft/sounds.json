@@ -1,0 +1,12 @@
+{
+  "music.combat": {
+    "category": "music",
+    "subtitle": "전투 음악",
+    "sounds": [
+      {
+        "name": "myminecraft:music/combat",
+        "stream": true
+      }
+    ]
+  }
+}

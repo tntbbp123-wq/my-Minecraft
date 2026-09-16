@@ -1,0 +1,60 @@
+name: Release
+
+# v로 시작하는 태그(예: v1.1.21)를 올리면 플러그인을 빌드해 릴리스를 만들고,
+# 서버 관리자가 바로 받을 수 있도록 jar / 소스 jar / 리소스팩을 첨부한다.
+on:
+  push:
+    tags:
+      - 'v*'
+  # 태그를 안 올리고 수동으로 돌리고 싶을 때를 위한 진입점
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '릴리스로 만들 태그 (예: v1.1.21)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Java 21 준비
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: 태그와 pom.xml 버전 확인
+        id: version
+        env:
+          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+        run: |
+          POM_VERSION=$(mvn -q --batch-mode -DforceStdout help:evaluate -Dexpression=project.version)
+          if [ "v$POM_VERSION" != "$TAG" ]; then
+            echo "::error::태그($TAG)와 pom.xml 버전($POM_VERSION)이 다릅니다. pom.xml의 <version>을 올렸는지 확인하세요."
+            exit 1
+          fi
+          echo "version=$POM_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: 빌드
+        run: mvn --batch-mode --no-transfer-progress clean package
+
+      - name: 릴리스 생성 및 파일 첨부
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "$TAG" \
+            --title "MyMinecraft $TAG" \
+            --generate-notes \
+            "target/MyMinecraft-$VERSION.jar#플러그인 (plugins/ 폴더에 넣으세요)" \
+            "target/MyMinecraft-$VERSION-sources.jar#소스 코드 (코드 확인용)" \
+            "MyMinecraft-ResourcePack.zip#리소스팩 (선택, 전용 아이템 텍스처)"
