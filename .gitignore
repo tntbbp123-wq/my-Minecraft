@@ -1,9 +1,6 @@
 target/
 *.class
 
-# 음원 파일은 저장소에 올리지 않는다. 라이선스가 배포까지 허용하지 않을 수 있고, 용량도 크다.
-# 서버 운영자가 각자 resourcepack/assets/myminecraft/sounds/ 아래에 직접 넣는다 (README 참고).
-*.ogg
 dependency-reduced-pom.xml
 .idea/
 *.iml

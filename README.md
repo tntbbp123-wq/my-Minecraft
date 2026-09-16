@@ -11,7 +11,7 @@ Paper 서버용 유틸리티 플러그인입니다. (대상: Paper 1.21.x, Java 
 |---|---|
 | `MyMinecraft-<버전>.jar` | **플러그인 본체.** 서버의 `plugins/` 폴더에 넣으세요 |
 | `MyMinecraft-<버전>-sources.jar` | **소스 코드.** 코드를 확인하거나 IDE에 소스를 연결할 때 씁니다 |
-| `MyMinecraft-ResourcePack.zip` | 리소스팩 (선택). 전용 아이템 텍스처용 — 아래 "리소스팩" 항목 참고 |
+| `MyMinecraft-ResourcePack.zip` | 리소스팩 (선택). **전용 아이템 텍스처 + 전투 브금** — 아래 "리소스팩" 항목 참고 |
 
 **설치 순서**
 
@@ -361,7 +361,8 @@ Gemini 기준으로 구현했습니다. 필요하면 `GeminiNewsClient.java`를 
 
 `resourcepack/` 폴더(및 루트의 `MyMinecraft-ResourcePack.zip`)는 강화석, 두루마리 4등급,
 레바테인, 화폐 동전 5종, 강화 GUI의 레벨별 진행 표시 화살표(10종)가 전용 아트워크로 보이도록
-만든 클라이언트 리소스팩입니다. `CustomModelData`로 동작하므로 리소스팩을 적용하지 않은
+만든 클라이언트 리소스팩입니다. **전투 브금도 이 팩 하나에 함께 들어 있습니다** (위 "전투 음악"
+항목 참고) — 팩은 하나뿐이므로 이 URL만 지정하면 텍스처와 브금이 모두 적용됩니다. `CustomModelData`로 동작하므로 리소스팩을 적용하지 않은
 플레이어에게는 원래 아이콘(강화석→자수정 조각, 두루마리→종이, 레바테인→네더라이트 검,
 동전→구리/철/금 주괴·다이아몬드·네더라이트 주괴, 진행 표시→기본 화살표)으로만 보이고
 기능에는 영향이 없습니다.
@@ -373,7 +374,7 @@ Gemini 기준으로 구현했습니다. 필요하면 `GeminiNewsClient.java`를 
 
 ```
 resource-pack=https://raw.githubusercontent.com/tntbbp123-wq/my-Minecraft/main/MyMinecraft-ResourcePack.zip
-resource-pack-sha1=18f75bbe719896532ad41eabd49c38cda01611ff
+resource-pack-sha1=3f3906bd8b0e4b6a332ec65f61ed251bd6538c66
 ```
 
 Minecraft 1.21.2 이후로는 아이템 텍스처 분기가 `assets/<ns>/models/item/*.json`의 `overrides`
@@ -397,41 +398,46 @@ resource-pack-prompt={"text":"이 서버는 필수 리소스팩이 있습니다.
 PvP 전투 태그가 걸려 있는 동안 전투 음악을 재생할 수 있습니다. 소리가 **플레이어를 따라다니는
 방식(비위치 재생)**이라 도망쳐도 끊기지 않고, 전투가 끝나거나 사망하면 즉시 멈춥니다.
 
-**음원 파일은 이 저장소에 포함되어 있지 않습니다.** 음원마다 라이선스 조건이 다르고, 사용 허가가
-곧 재배포 허가는 아니기 때문입니다. 서버 운영자가 직접 넣어야 합니다.
+**기본 음원이 리소스팩에 포함되어 있습니다.** 아래 "리소스팩" 항목의 URL을 그대로 쓰면 됩니다.
 
-**넣는 방법**
+**켜는 방법** — `config.yml`에서 기능을 활성화하기만 하면 됩니다.
+
+```yaml
+combat:
+  music:
+    enabled: true
+    track-length-seconds: 142   # 기본 음원 길이 (2분 21초)
+    volume: 0.7
+```
+
+리소스팩을 적용하지 않은 플레이어에게는 **아무 소리도 나지 않을 뿐** 다른 영향은 없습니다.
+
+**다른 음원으로 바꾸려면**
 
 1. 음원을 **OGG Vorbis**로 변환합니다. 마인크래프트는 MP3를 재생하지 못합니다.
    ```
    ffmpeg -i 원본.mp3 -vn -c:a libvorbis -q:a 3 -ar 44100 combat.ogg
    ```
-2. 변환한 파일을 아래 경로에 넣습니다 (`sounds.json`은 이미 저장소에 있습니다).
-   ```
-   resourcepack/assets/myminecraft/sounds/music/combat.ogg
-   ```
-3. 리소스팩 zip을 다시 만들고 해시를 계산합니다.
+2. `resourcepack/assets/myminecraft/sounds/music/combat.ogg`를 교체합니다.
+3. zip을 다시 만들고 해시를 갱신합니다.
    ```
    cd resourcepack && zip -r ../MyMinecraft-ResourcePack.zip . -x '.*' && cd ..
    sha1sum MyMinecraft-ResourcePack.zip
    ```
-4. `server.properties`의 `resource-pack-sha1`을 새 해시로 갱신하고, zip을 플레이어가 받을 수 있는
-   곳에 올립니다.
-5. `config.yml`에서 기능을 켭니다. **트랙 길이를 실제 음원 길이(초)로 맞춰야** 긴 전투에서
-   음악이 끊기지 않고 이어집니다.
-   ```yaml
-   combat:
-     music:
-       enabled: true
-       track-length-seconds: 142   # 음원 길이에 맞추세요
-       volume: 0.7
-   ```
+4. `server.properties`의 `resource-pack-sha1`과 `config.yml`의 `track-length-seconds`
+   (**실제 음원 길이(초)**)를 맞춰줍니다. 이 값이 틀리면 긴 전투에서 음악이 끊기거나 겹칩니다.
+5. `resourcepack/CREDITS.txt`의 출처 표기도 새 음원에 맞게 고칩니다.
 
-리소스팩을 적용하지 않은 플레이어에게는 **아무 소리도 나지 않을 뿐** 다른 영향은 없습니다.
+### 음원 출처
 
-> **음원 출처 표기**: 무료 음원도 대부분 출처 표기가 조건입니다. 사용하는 음원의 표기 문구를
-> `resourcepack/CREDITS.txt`에 적어두세요. 또한 "사용 허가"와 "재배포 허가"는 다르므로,
-> 음원이 든 리소스팩을 공개 배포하기 전에 라이선스를 다시 확인하시기 바랍니다.
+```
+Resurgence by Ghostrifter Official
+Free To Use YouTube license
+https://breakingcopyright.com/song/ghostrifter-official-resurgence
+```
+
+이 음원은 **출처 표기를 조건으로** 사용이 허용됩니다. 리소스팩 안의 `CREDITS.txt`에도 같은 내용이
+들어 있습니다. 음원을 교체하실 때는 새 음원의 라이선스 조건을 직접 확인하시기 바랍니다.
 
 ## BetterModel 3D 모델 연동 (선택 사항)
 
