@@ -419,6 +419,54 @@ raid-boss:
       radius: 20.0
       darkness-refresh-seconds: 3
 
+  # '종말룡 엔더드래곤' - 규격 외 스펙의 파괴신형 보스.
+  # 바닐라 엔더드래곤 AI는 엔드의 출구 포탈을 찾아다니도록 만들어져 있어 다른 월드에서는
+  # 원점(0,0) 쪽으로 날아가 버린다. 그래서 AI를 끄고 플러그인이 위치와 패턴을 직접 조종한다.
+  # 낙하 지점의 지형은 일부러 파괴하지 않는다 (월드를 되돌릴 수 없게 망가뜨리지 않기 위해).
+  apocalypse-dragon:
+    max-health: 1200.0
+    attack-damage: 15.0
+    engage-range: 40.0
+    # 지면으로부터 떠 있는 높이(블록)
+    hover-height: 7.0
+    # 한 번의 판정(0.5초)마다 이동하는 거리(블록). 높이면 더 빠르게 따라붙는다
+    move-speed: 1.2
+    # 종말의 포효 (패시브) - 방어력을 무시하는 상시 피해와 넉백
+    roar:
+      radius: 20.0
+      # 0.5초마다 들어가는 방어무시 피해
+      damage-per-tick: 1.5
+      # 공중으로 밀어올리는 세기
+      lift: 0.25
+    # 멸망의 브레스 - 전방 부채꼴 화염. 방어구 내구도를 크게 깎는다
+    breath:
+      cooldown-seconds: 15
+      range: 18.0
+      cone-angle-degrees: 70.0
+      damage: 18.0
+      fire-ticks: 120
+      # 방어구에 주는 내구도 피해. 장비가 완전히 사라지지는 않고 내구도 1은 남는다
+      armor-damage: 200
+    # 천공의 추락 - 체력 75%/50%/25%에서 한 번씩 발동
+    dive:
+      rise-height: 25.0
+      # 착지 지점을 미리 보여주는 시간(틱). 이 시간 안에 피해야 한다
+      telegraph-ticks: 40
+      shockwave-radius: 8.0
+      shockwave-damage: 30.0
+      knock-up: 1.4
+    # 공간 분할 (궁극기) - 체력이 이 비율 이하가 되면 균열이 열리고 회복이 차단된다
+    rift:
+      health-threshold: 0.3
+      count: 8
+      # 균열이 생성되는 범위(블록, 소환 지점 기준)
+      spread: 25.0
+      # 균열 하나의 반경과 피해
+      radius: 3.0
+      damage: 3.0
+      # 이 거리 안에 있는 플레이어는 회복이 차단된다
+      heal-block-radius: 30.0
+
 # 코어 (팀 거점 겸 상점). 신호기(Beacon)를 변형해 만들어져 있어, 제작한 뒤 바닥에 설치하면
 # 실제 신호기 블록이 되고 그 위치가 설치한 사람의 팀 거점(홈)이 된다. 우클릭하면 바닐라
 # 신호기 GUI 대신 전용 상점 GUI가 열린다. 제작법: 네더별-드래곤의 숨결-네더별 /

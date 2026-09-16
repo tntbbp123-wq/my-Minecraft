@@ -212,6 +212,11 @@ public abstract class RaidBoss {
     public void onAuxEntityHit(Entity aux, Player attacker) {
     }
 
+    /** true면 이 플레이어의 회복이 차단된다 (공간 분할 등). */
+    public boolean blocksHealing(Player player) {
+        return false;
+    }
+
     /** 보스가 실제로 사망했을 때 호출된다. */
     public void onDeath() {
     }

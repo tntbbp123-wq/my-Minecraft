@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -71,6 +72,20 @@ public class RaidBossListener implements Listener {
 
         event.setCancelled(true);
         boss.onAuxEntityHit(event.getEntity(), attacker);
+    }
+
+    /** 회복을 막는 보스가 하나라도 있으면 회복을 취소한다 ('종말룡'의 공간 분할). */
+    @EventHandler(ignoreCancelled = true)
+    public void onRegainHealth(EntityRegainHealthEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        for (RaidBoss boss : plugin.getRaidBossManager().activeBosses()) {
+            if (boss.blocksHealing(player)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
     }
 
     // ----- 사고 정지 중 행동 차단 ('기억할 수 없는 자'의 응시) -----
