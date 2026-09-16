@@ -1,5 +1,6 @@
 package com.tntbbp.myminecraft;
 
+import com.github.retrooper.packetevents.PacketEvents;
 import com.tntbbp.myminecraft.command.AdminMenuCommand;
 import com.tntbbp.myminecraft.command.BankCommand;
 import com.tntbbp.myminecraft.command.EcCommand;
@@ -62,6 +63,7 @@ import com.tntbbp.myminecraft.manager.TeamManager;
 import com.tntbbp.myminecraft.manager.TeleportRequestManager;
 import com.tntbbp.myminecraft.manager.TranscendAltarBlockManager;
 import com.tntbbp.myminecraft.util.SecretResolver;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MyMinecraftPlugin extends JavaPlugin {
@@ -87,8 +89,6 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private CombatManager combatManager;
     private CombatMusicManager combatMusicManager;
     private CombatStanceManager combatStanceManager;
-    private ProtocolSilenceListener protocolSilenceListener;
-    private CombatStanceKeyListener combatStanceKeyListener;
     private DiscordManager discordManager;
     private DiscordLinkManager discordLinkManager;
     private TeamManager teamManager;
@@ -96,7 +96,13 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private RaidBossManager raidBossManager;
     private SecretResolver secretResolver;
     private GleipnirManager gleipnirManager;
-    private GleipnirKeyListener gleipnirKeyListener;
+
+    /** PacketEvents는 서버가 켜지기 전 단계에서 먼저 준비해야 패킷을 놓치지 않는다. */
+    @Override
+    public void onLoad() {
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+        PacketEvents.getAPI().load();
+    }
 
     @Override
     public void onEnable() {
@@ -218,25 +224,12 @@ public class MyMinecraftPlugin extends JavaPlugin {
             getLogger().info("BetterModel이 설치되어 있지 않아 레바테인 3D 모델 표시 기능은 비활성화됩니다.");
         }
 
-        if (getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
-            this.protocolSilenceListener = new ProtocolSilenceListener(this);
-            protocolSilenceListener.register();
-            getLogger().info("ProtocolLib 연동: 소음 차단 포션의 소리/애니메이션 은폐 기능이 활성화되었습니다.");
-
-            this.combatStanceKeyListener = new CombatStanceKeyListener(this);
-            combatStanceKeyListener.register();
-            getLogger().info("ProtocolLib 연동: 웅크리기+L(도전과제 화면 열기)로 전투모드 진입/해제 기능이 활성화되었습니다.");
-
-            this.gleipnirKeyListener = new GleipnirKeyListener(this);
-            gleipnirKeyListener.register();
-            getLogger().info("ProtocolLib 연동: 글레이프니르의 L키(절대봉인) 기능이 활성화되었습니다.");
-        } else {
-            getLogger().info("ProtocolLib이 설치되어 있지 않아 소음 차단 포션은 상태 효과만 적용되고 "
-                    + "소리/애니메이션 은폐는 동작하지 않습니다.");
-            getLogger().info("ProtocolLib이 설치되어 있지 않아 웅크리기+L 전투모드 진입 기능은 동작하지 않습니다.");
-            getLogger().info("ProtocolLib이 설치되어 있지 않아 글레이프니르의 절대봉인(L키)은 동작하지 않습니다. "
-                    + "봉인(F)과 속박(Q)은 정상 동작합니다.");
-        }
+        // PacketEvents는 jar에 포함되어 있어 별도 설치 없이 항상 쓸 수 있다.
+        PacketEvents.getAPI().init();
+        PacketEvents.getAPI().getEventManager().registerListener(new ProtocolSilenceListener(this));
+        PacketEvents.getAPI().getEventManager().registerListener(new CombatStanceKeyListener(this));
+        PacketEvents.getAPI().getEventManager().registerListener(new GleipnirKeyListener(this));
+        getLogger().info("패킷 기능 활성화: 소음 차단 포션 은폐 / 웅크리기+L 전투모드 / 글레이프니르 절대봉인(L키)");
 
         getLogger().info("MyMinecraft 플러그인이 활성화되었습니다.");
     }
@@ -258,15 +251,6 @@ public class MyMinecraftPlugin extends JavaPlugin {
         if (blackMarketManager != null) {
             blackMarketManager.stop();
         }
-        if (protocolSilenceListener != null) {
-            protocolSilenceListener.unregister();
-        }
-        if (combatStanceKeyListener != null) {
-            combatStanceKeyListener.unregister();
-        }
-        if (gleipnirKeyListener != null) {
-            gleipnirKeyListener.unregister();
-        }
         if (combatStanceManager != null) {
             combatStanceManager.restoreAll();
         }
@@ -278,6 +262,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
         }
         if (combatMusicManager != null) {
             combatMusicManager.stop();
+        }
+        if (PacketEvents.getAPI() != null && PacketEvents.getAPI().isInitialized()) {
+            PacketEvents.getAPI().terminate();
         }
         getLogger().info("MyMinecraft 플러그인이 비활성화되었습니다.");
     }

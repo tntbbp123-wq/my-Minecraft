@@ -439,9 +439,7 @@ public class BlackMarketManager {
                 .lore(List.of(
                         "§7마시면 " + silenceDurationTicks() / 20 + "초 동안 블록을 부수거나",
                         "§7상자를 열 때 나는 소리/모습이",
-                        "§7주변 다른 유저에게 들키지 않습니다.",
-                        "§c(ProtocolLib 플러그인이 설치되어 있어야",
-                        "§c 실제로 소리/애니메이션이 숨겨집니다)"
+                        "§7주변 다른 유저에게 들키지 않습니다."
                 ))
                 .amount(amount)
                 .build();

@@ -1,57 +1,58 @@
 package com.tntbbp.myminecraft.listener;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.wrappers.BlockPosition;
+import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
+import com.github.retrooper.packetevents.util.Vector3i;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockAction;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEffect;
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.Optional;
-
 /**
- * ProtocolLib으로 소음 차단 포션 효과 중인 플레이어 근처의 블록 파괴/상자 여는
- * 소리·애니메이션 패킷을 다른 플레이어에게는 전송하지 않도록 가로챈다.
- * ProtocolLib이 설치되어 있을 때만 등록되며(softdepend), 이 클래스 자체는 ProtocolLib
- * 클래스에 직접 의존하므로 ProtocolLib이 없을 때는 절대 인스턴스화하면 안 된다.
+ * 소음 차단 포션 효과 중인 플레이어 근처에서 발생한 블록 파괴/상자 여는 소리·애니메이션 패킷을
+ * 다른 플레이어에게 전송하지 않도록 가로챈다.
+ *
+ * <p>PacketEvents는 jar에 함께 포함되므로 별도 설치 없이 항상 동작한다.
  */
-public class ProtocolSilenceListener extends PacketAdapter {
+public class ProtocolSilenceListener extends PacketListenerAbstract {
 
     private static final double SUPPRESS_RADIUS_SQUARED = 12.0 * 12.0;
 
     private final MyMinecraftPlugin plugin;
 
     public ProtocolSilenceListener(MyMinecraftPlugin plugin) {
-        super(plugin, ListenerPriority.NORMAL, PacketType.Play.Server.WORLD_EVENT, PacketType.Play.Server.BLOCK_ACTION);
+        super(PacketListenerPriority.NORMAL);
         this.plugin = plugin;
     }
 
-    public void register() {
-        ProtocolLibrary.getProtocolManager().addPacketListener(this);
-    }
-
-    public void unregister() {
-        ProtocolManager manager = ProtocolLibrary.getProtocolManager();
-        if (manager != null) {
-            manager.removePacketListener(this);
-        }
-    }
-
     @Override
-    public void onPacketSending(PacketEvent event) {
-        Player receiver = event.getPlayer();
-        BlackMarketManager blackMarketManager = plugin.getBlackMarketManager();
+    public void onPacketSend(PacketSendEvent event) {
+        PacketTypeCommon type = event.getPacketType();
 
-        Optional<BlockPosition> position = event.getPacket().getBlockPositionModifier().optionRead(0);
-        if (position.isEmpty()) {
+        Vector3i position;
+        if (type == PacketType.Play.Server.EFFECT) {
+            position = new WrapperPlayServerEffect(event).getPosition();
+        } else if (type == PacketType.Play.Server.BLOCK_ACTION) {
+            position = new WrapperPlayServerBlockAction(event).getBlockPosition();
+        } else {
             return;
         }
-        Location eventLocation = position.get().toLocation(receiver.getWorld());
+        if (position == null) {
+            return;
+        }
+
+        Player receiver = event.getPlayer();
+        if (receiver == null) {
+            return;
+        }
+
+        BlackMarketManager blackMarketManager = plugin.getBlackMarketManager();
+        Location eventLocation = new Location(receiver.getWorld(), position.getX(), position.getY(), position.getZ());
 
         for (Player silencedPlayer : plugin.getServer().getOnlinePlayers()) {
             if (silencedPlayer.equals(receiver) || !blackMarketManager.isSilenced(silencedPlayer.getUniqueId())) {
