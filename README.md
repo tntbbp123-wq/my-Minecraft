@@ -2,6 +2,55 @@
 
 Paper 서버용 유틸리티 플러그인입니다. (대상: Paper 1.21.x, Java 21)
 
+## 다운로드 / 설치
+
+빌드할 필요 없이 [**Releases**](https://github.com/tntbbp123-wq/my-Minecraft/releases/latest) 페이지에서
+바로 받을 수 있습니다. 릴리스마다 파일 3개가 첨부됩니다.
+
+| 파일 | 용도 |
+|---|---|
+| `MyMinecraft-<버전>.jar` | **플러그인 본체.** 서버의 `plugins/` 폴더에 넣으세요 |
+| `MyMinecraft-<버전>-sources.jar` | **소스 코드.** 코드를 확인하거나 IDE에 소스를 연결할 때 씁니다 |
+| `MyMinecraft-ResourcePack.zip` | 리소스팩 (선택). 전용 아이템 텍스처용 — 아래 "리소스팩" 항목 참고 |
+
+**설치 순서**
+
+1. `MyMinecraft-<버전>.jar`를 서버의 `plugins/` 폴더에 넣습니다. 기존에 다른 버전의 jar가 남아
+   있으면 반드시 지우거나 옮겨주세요 (두 개가 동시에 로드되면 충돌합니다).
+2. 서버를 한 번 켰다 끄면 `plugins/MyMinecraft/config.yml`이 생성됩니다. 아래 "설정" 항목을 보고
+   필요한 값을 조정한 뒤 다시 켜세요.
+3. (선택) 아래 기능들은 다른 플러그인이 있어야 동작합니다. **없어도 나머지 기능은 정상 동작합니다.**
+
+| 기능 | 필요한 플러그인 | 없을 때 |
+|---|---|---|
+| 전투모드(웅크리기+L), 소음 차단 포션의 소리 은폐 | [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) | 해당 기능만 비활성화 |
+| 레바테인 3D 모델 | [BetterModel](https://github.com/toxicity188/BetterModel) 2.2.0 (Java 21 호환 버전) | 모델만 표시 안 됨 |
+| AI 뉴스 자동 생성 | Google Gemini API 키 (무료) | `AI:` 없이 직접 쓴 뉴스만 사용 |
+| 디스코드 침입 알림 | 디스코드 봇 토큰 | 해당 기능만 비활성화 |
+
+> **업데이트할 때 주의:** `config.yml`은 이미 파일이 있으면 새 항목이 자동으로 추가되지 않습니다.
+> 새 버전에서 추가된 설정(예: `raid-boss`)이나 바뀐 기본값(예: `combat.tag-seconds`)을 쓰려면
+> 서버의 `config.yml`을 직접 수정하거나, 백업 후 삭제하고 다시 생성시켜야 합니다.
+
+## 코드 확인
+
+소스를 직접 읽어보려면 위의 `-sources.jar`를 받거나, 이 저장소의
+[`src/main/java`](src/main/java/com/tntbbp/myminecraft)를 보면 됩니다. 패키지 구성은 아래와 같습니다.
+
+| 경로 | 역할 |
+|---|---|
+| `MyMinecraftPlugin.java` | 진입점. 매니저 생성과 명령어·리스너 등록이 전부 여기 모여 있습니다 |
+| `manager/` | 상태와 로직, YAML 저장 담당 (경제·홈·주식·강화·팀 등) |
+| `gui/` | GUI 화면과 각 GUI를 구분하는 전용 `InventoryHolder` |
+| `listener/` | 이벤트 처리. `GUIListener`가 모든 GUI 클릭을 분기합니다 |
+| `command/` | 명령어 실행부와 탭 자동완성 |
+| `raid/` | 레이드 보스 공용 뼈대(`RaidBoss`)와 개별 보스 |
+| `model/`, `util/` | 데이터 객체와 공용 헬퍼 |
+
+특정 기능이 어디 있는지 찾을 때는 `manager/`에서 이름이 같은 파일을 먼저 보면 빠릅니다
+(예: 강화 → `EnhanceManager`, 주식 → `StockManager`). 커스텀 아이템은 모두
+`PersistentDataContainer` 태그로 식별하고 외형은 `CustomModelData`로 처리합니다.
+
 ## 기능
 
 - `/텔레포트요청 <플레이어>`, `/텔레포트수락`, `/텔레포트거절` — 플레이어 간 텔레포트 요청
@@ -201,7 +250,22 @@ mvn clean package
 ```
 
 빌드 결과물은 `target/MyMinecraft-<버전>.jar` 형태로 생성됩니다 (버전은 `pom.xml`의
-`<version>`). 서버의 `plugins/` 폴더에 넣으면 됩니다.
+`<version>`). 서버의 `plugins/` 폴더에 넣으면 됩니다. 코드 확인용 소스 jar
+(`target/MyMinecraft-<버전>-sources.jar`)도 함께 만들어집니다.
+
+### 릴리스 만들기
+
+`pom.xml`의 `<version>`을 올려 커밋한 뒤 그 버전의 태그를 올리면, GitHub Actions
+(`.github/workflows/release.yml`)가 자동으로 빌드해 릴리스를 만들고 jar / 소스 jar /
+리소스팩을 첨부합니다.
+
+```
+git tag v1.1.21
+git push origin v1.1.21
+```
+
+태그와 `pom.xml`의 버전이 다르면 워크플로가 일부러 실패하니, 버전을 먼저 올렸는지 확인하세요.
+(태그 없이 Actions 탭에서 "Release" 워크플로를 수동 실행할 수도 있습니다.)
 
 업데이트할 때마다 `pom.xml`의 `<version>`을 올려서 jar 파일 이름이 매번 달라지도록 합니다.
 이렇게 하면 서버에 어느 버전이 적용되어 있는지, 새 jar로 제대로 교체됐는지 파일명만 보고
