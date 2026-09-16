@@ -7,12 +7,15 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.EquipmentSlotGroup;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -243,7 +246,7 @@ public class EnhanceManager {
         return Math.random() * 100.0 < chance;
     }
 
-    public void applyEnhance(ItemStack item, int previousLevel, int newLevel) {
+    public void applyEnhance(ItemStack item, int newLevel) {
         ItemMeta meta = item.getItemMeta();
         meta.getPersistentDataContainer().set(levelKey, PersistentDataType.INTEGER, newLevel);
 
@@ -253,7 +256,7 @@ public class EnhanceManager {
         meta.setLore(lore);
 
         if (isWeapon(item.getType())) {
-            applyWeaponStatBonus(meta, previousLevel, newLevel);
+            applyWeaponStatBonus(meta, item.getType(), newLevel);
         } else {
             Enchantment enchantment = enchantmentFor(item.getType());
             if (enchantment != null && newLevel > 0) {
@@ -263,29 +266,53 @@ public class EnhanceManager {
         item.setItemMeta(meta);
     }
 
-    /** 무기 강화 시 부여되는 기본 공격력/공격속도 보너스를 재계산해서 다시 적용한다 (이전 레벨의 보너스를 정확히 제거 후 새로 부여). */
-    private void applyWeaponStatBonus(ItemMeta meta, int previousLevel, int newLevel) {
+    /** 무기 강화 시 부여되는 기본 공격력/공격속도 보너스를 레벨 기준으로 다시 계산해 적용한다. */
+    private void applyWeaponStatBonus(ItemMeta meta, Material type, int newLevel) {
         double damagePerLevel = plugin.getConfig().getDouble("enhance.attack-damage-per-level", 0.5);
         double speedPerLevel = plugin.getConfig().getDouble("enhance.attack-speed-per-level", 0.02);
 
-        if (previousLevel > 0) {
-            meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier(
-                    attackDamageModifierKey, damagePerLevel * previousLevel,
-                    AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
-            meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(
-                    attackSpeedModifierKey, speedPerLevel * previousLevel,
-                    AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
+        rebuildAttribute(meta, type, Attribute.GENERIC_ATTACK_DAMAGE, attackDamageModifierKey,
+                damagePerLevel * newLevel);
+        rebuildAttribute(meta, type, Attribute.GENERIC_ATTACK_SPEED, attackSpeedModifierKey,
+                speedPerLevel * newLevel);
+
+        // 레바테인/드라켄피어스처럼 전용 무기는 자체 lore에 수치를 적어두느라 속성 표시를 꺼두는데,
+        // 강화하면 그 lore가 실제 수치와 어긋나므로 강화 시점부터는 실제 속성을 보여준다.
+        meta.removeItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+    }
+
+    /**
+     * 해당 속성의 수정자를 통째로 다시 만든다. 강화 보너스(ourKey)는 레벨 기준으로 새로 계산하고,
+     * 그 외의 기존 수정자(전용 무기의 고정 공격력 등)는 그대로 보존한다.
+     *
+     * <p>1.20.5부터는 아이템에 수정자를 하나라도 직접 넣는 순간 attribute_modifiers 컴포넌트가
+     * 생기면서 <b>재질의 기본 공격력/공격속도가 통째로 대체</b>된다. 그래서 강화 전까지 암묵적으로
+     * 적용되던 기본값이 사라져 툴팁에 수치가 안 보이게 되므로, 보존할 수정자가 하나도 없으면
+     * 재질 기본값을 명시적으로 복사해 넣어준다.
+     */
+    private void rebuildAttribute(ItemMeta meta, Material type, Attribute attribute,
+                                  NamespacedKey ourKey, double bonus) {
+        List<AttributeModifier> preserved = new ArrayList<>();
+        Collection<AttributeModifier> existing = meta.getAttributeModifiers(attribute);
+        if (existing != null) {
+            for (AttributeModifier modifier : existing) {
+                if (!ourKey.equals(modifier.getKey())) {
+                    preserved.add(modifier);
+                }
+            }
+        }
+        if (preserved.isEmpty()) {
+            preserved.addAll(type.getDefaultAttributeModifiers(EquipmentSlot.HAND).get(attribute));
         }
 
-        if (newLevel <= 0) {
-            return;
+        meta.removeAttributeModifier(attribute);
+        for (AttributeModifier modifier : preserved) {
+            meta.addAttributeModifier(attribute, modifier);
         }
-        meta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier(
-                attackDamageModifierKey, damagePerLevel * newLevel,
-                AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
-        meta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(
-                attackSpeedModifierKey, speedPerLevel * newLevel,
-                AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
+        if (bonus > 0) {
+            meta.addAttributeModifier(attribute, new AttributeModifier(
+                    ourKey, bonus, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
+        }
     }
 
     /** 다른 매니저(초월의 제단 등)에서도 "이 아이템이 무기인가"를 같은 기준으로 판단할 수 있도록 공개. */

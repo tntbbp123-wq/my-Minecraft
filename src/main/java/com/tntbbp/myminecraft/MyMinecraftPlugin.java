@@ -10,6 +10,7 @@ import com.tntbbp.myminecraft.command.StockAddCommand;
 import com.tntbbp.myminecraft.command.StockGiveCommand;
 import com.tntbbp.myminecraft.command.LobbyCommand;
 import com.tntbbp.myminecraft.command.MenuCommand;
+import com.tntbbp.myminecraft.command.RaidBossCommand;
 import com.tntbbp.myminecraft.command.RtCommand;
 import com.tntbbp.myminecraft.command.SpawnCommand;
 import com.tntbbp.myminecraft.command.TeamCommand;
@@ -27,6 +28,7 @@ import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
 import com.tntbbp.myminecraft.listener.LaevateinnModelListener;
 import com.tntbbp.myminecraft.listener.ProtocolSilenceListener;
+import com.tntbbp.myminecraft.listener.RaidBossListener;
 import com.tntbbp.myminecraft.listener.StarforceListener;
 import com.tntbbp.myminecraft.listener.TranscendAltarBlockListener;
 import com.tntbbp.myminecraft.manager.BlackMarketManager;
@@ -46,6 +48,7 @@ import com.tntbbp.myminecraft.manager.InfernalBurnManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.NewsManager;
+import com.tntbbp.myminecraft.manager.RaidBossManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
 import com.tntbbp.myminecraft.manager.ShockManager;
 import com.tntbbp.myminecraft.manager.StarforceManager;
@@ -83,6 +86,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private DiscordLinkManager discordLinkManager;
     private TeamManager teamManager;
     private CoreManager coreManager;
+    private RaidBossManager raidBossManager;
 
     @Override
     public void onEnable() {
@@ -112,6 +116,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.discordLinkManager = new DiscordLinkManager(this);
         this.teamManager = new TeamManager(this);
         this.coreManager = new CoreManager(this);
+        this.raidBossManager = new RaidBossManager(this);
 
         stockManager.startFluctuationTask();
         infernalBurnManager.start();
@@ -119,6 +124,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         newsManager.startTask();
         blackMarketManager.start();
         discordManager.start();
+        raidBossManager.start();
 
         TpaCommand tpaCommand = new TpaCommand(this);
         getCommand("텔레포트요청").setExecutor(tpaCommand);
@@ -162,6 +168,11 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new StarforceListener(this), this);
         getServer().getPluginManager().registerEvents(new TranscendAltarBlockListener(this), this);
         getServer().getPluginManager().registerEvents(new BlackMarketListener(this), this);
+        getServer().getPluginManager().registerEvents(new RaidBossListener(this), this);
+
+        RaidBossCommand raidBossCommand = new RaidBossCommand(this);
+        getCommand("레이드보스").setExecutor(raidBossCommand);
+        getCommand("레이드보스").setTabCompleter(raidBossCommand);
 
         getCommand("초월제단설치").setExecutor(new TranscendAltarPlaceCommand(this));
 
@@ -236,6 +247,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
         }
         if (discordManager != null) {
             discordManager.stop();
+        }
+        if (raidBossManager != null) {
+            raidBossManager.stop();
         }
         getLogger().info("MyMinecraft 플러그인이 비활성화되었습니다.");
     }
@@ -334,5 +348,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public CoreManager getCoreManager() {
         return coreManager;
+    }
+
+    public RaidBossManager getRaidBossManager() {
+        return raidBossManager;
     }
 }

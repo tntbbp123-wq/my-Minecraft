@@ -490,7 +490,7 @@ public class GUIListener implements Listener {
         boolean success = enhanceManager.rollSuccess(currentLevel, scrollBonus);
         if (success) {
             int newLevel = currentLevel + 1;
-            enhanceManager.applyEnhance(targetItem, currentLevel, newLevel);
+            enhanceManager.applyEnhance(targetItem, newLevel);
             event.getInventory().setItem(EnhanceGUI.INPUT_SLOT, targetItem);
             player.sendMessage(ChatColor.GREEN + "강화 성공! 현재 강화 레벨: +" + newLevel);
         } else {
