@@ -6,6 +6,7 @@ import com.tntbbp.myminecraft.manager.CoreManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.DrakenPierceManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
+import com.tntbbp.myminecraft.manager.GleipnirManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.StarforceManager;
 import com.tntbbp.myminecraft.util.ItemBuilder;
@@ -62,12 +63,13 @@ public class CoreBlackMarketGUI {
         BlackMarketManager blackMarketManager = plugin.getBlackMarketManager();
         LaevateinnManager laevateinnManager = plugin.getLaevateinnManager();
         DrakenPierceManager drakenPierceManager = plugin.getDrakenPierceManager();
+        GleipnirManager gleipnirManager = plugin.getGleipnirManager();
 
         for (int i = 0; i < ITEM_NAMES.size() && i < SLOTS.length; i++) {
             String itemName = ITEM_NAMES.get(i);
             SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
                     enhanceManager, laevateinnManager, currencyManager, starforceManager, blackMarketManager,
-                    drakenPierceManager, itemName, 1);
+                    drakenPierceManager, gleipnirManager, itemName, 1);
             if (resolved == null) {
                 continue;
             }

@@ -25,6 +25,8 @@ import com.tntbbp.myminecraft.listener.CombatStanceListener;
 import com.tntbbp.myminecraft.listener.CoreBlockListener;
 import com.tntbbp.myminecraft.listener.DiscordIntrusionListener;
 import com.tntbbp.myminecraft.listener.DrakenPierceListener;
+import com.tntbbp.myminecraft.listener.GleipnirKeyListener;
+import com.tntbbp.myminecraft.listener.GleipnirListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
 import com.tntbbp.myminecraft.listener.LaevateinnModelListener;
@@ -44,6 +46,7 @@ import com.tntbbp.myminecraft.manager.DrakenPierceManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
 import com.tntbbp.myminecraft.manager.GeminiNewsClient;
+import com.tntbbp.myminecraft.manager.GleipnirManager;
 import com.tntbbp.myminecraft.manager.GradeManager;
 import com.tntbbp.myminecraft.manager.HomeManager;
 import com.tntbbp.myminecraft.manager.InfernalBurnManager;
@@ -92,6 +95,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private CoreManager coreManager;
     private RaidBossManager raidBossManager;
     private SecretResolver secretResolver;
+    private GleipnirManager gleipnirManager;
+    private GleipnirKeyListener gleipnirKeyListener;
 
     @Override
     public void onEnable() {
@@ -123,6 +128,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.discordLinkManager = new DiscordLinkManager(this);
         this.teamManager = new TeamManager(this);
         this.coreManager = new CoreManager(this);
+        this.gleipnirManager = new GleipnirManager(this);
         this.raidBossManager = new RaidBossManager(this);
 
         stockManager.startFluctuationTask();
@@ -177,6 +183,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TranscendAltarBlockListener(this), this);
         getServer().getPluginManager().registerEvents(new BlackMarketListener(this), this);
         getServer().getPluginManager().registerEvents(new RaidBossListener(this), this);
+        getServer().getPluginManager().registerEvents(new GleipnirListener(this), this);
 
         RaidBossCommand raidBossCommand = new RaidBossCommand(this);
         getCommand("레이드보스").setExecutor(raidBossCommand);
@@ -219,10 +226,16 @@ public class MyMinecraftPlugin extends JavaPlugin {
             this.combatStanceKeyListener = new CombatStanceKeyListener(this);
             combatStanceKeyListener.register();
             getLogger().info("ProtocolLib 연동: 웅크리기+L(도전과제 화면 열기)로 전투모드 진입/해제 기능이 활성화되었습니다.");
+
+            this.gleipnirKeyListener = new GleipnirKeyListener(this);
+            gleipnirKeyListener.register();
+            getLogger().info("ProtocolLib 연동: 글레이프니르의 L키(절대봉인) 기능이 활성화되었습니다.");
         } else {
             getLogger().info("ProtocolLib이 설치되어 있지 않아 소음 차단 포션은 상태 효과만 적용되고 "
                     + "소리/애니메이션 은폐는 동작하지 않습니다.");
             getLogger().info("ProtocolLib이 설치되어 있지 않아 웅크리기+L 전투모드 진입 기능은 동작하지 않습니다.");
+            getLogger().info("ProtocolLib이 설치되어 있지 않아 글레이프니르의 절대봉인(L키)은 동작하지 않습니다. "
+                    + "봉인(F)과 속박(Q)은 정상 동작합니다.");
         }
 
         getLogger().info("MyMinecraft 플러그인이 활성화되었습니다.");
@@ -250,6 +263,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
         }
         if (combatStanceKeyListener != null) {
             combatStanceKeyListener.unregister();
+        }
+        if (gleipnirKeyListener != null) {
+            gleipnirKeyListener.unregister();
         }
         if (combatStanceManager != null) {
             combatStanceManager.restoreAll();
@@ -372,5 +388,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public SecretResolver getSecretResolver() {
         return secretResolver;
+    }
+
+    public GleipnirManager getGleipnirManager() {
+        return gleipnirManager;
     }
 }

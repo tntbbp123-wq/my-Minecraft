@@ -336,7 +336,7 @@ public class GUIListener implements Listener {
             SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
                     plugin.getEnhanceManager(), plugin.getLaevateinnManager(), plugin.getCurrencyManager(),
                     plugin.getStarforceManager(), plugin.getBlackMarketManager(), plugin.getDrakenPierceManager(),
-                    giveItemName, 1);
+                    plugin.getGleipnirManager(), giveItemName, 1);
             if (resolved == null) {
                 return;
             }
@@ -409,7 +409,7 @@ public class GUIListener implements Listener {
         SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
                 plugin.getEnhanceManager(), plugin.getLaevateinnManager(), plugin.getCurrencyManager(),
                 plugin.getStarforceManager(), plugin.getBlackMarketManager(), plugin.getDrakenPierceManager(),
-                itemName, 1);
+                plugin.getGleipnirManager(), itemName, 1);
         if (resolved == null) {
             economyManager.add(player.getUniqueId(), price);
             return;
