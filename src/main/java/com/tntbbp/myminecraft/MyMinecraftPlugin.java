@@ -25,11 +25,15 @@ import com.tntbbp.myminecraft.listener.CombatStanceKeyListener;
 import com.tntbbp.myminecraft.listener.CombatStanceListener;
 import com.tntbbp.myminecraft.listener.CoreBlockListener;
 import com.tntbbp.myminecraft.listener.DiscordIntrusionListener;
+import com.tntbbp.myminecraft.listener.BalmungListener;
+import com.tntbbp.myminecraft.listener.CurseListener;
 import com.tntbbp.myminecraft.listener.DrakenPierceListener;
 import com.tntbbp.myminecraft.listener.GleipnirKeyListener;
 import com.tntbbp.myminecraft.listener.GleipnirListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
+import com.tntbbp.myminecraft.listener.JahaShingeomListener;
 import com.tntbbp.myminecraft.listener.LaevateinnListener;
+import com.tntbbp.myminecraft.listener.SainchamsagumListener;
 import com.tntbbp.myminecraft.listener.LaevateinnModelListener;
 import com.tntbbp.myminecraft.listener.ProtocolSilenceListener;
 import com.tntbbp.myminecraft.listener.RaidBossListener;
@@ -43,6 +47,8 @@ import com.tntbbp.myminecraft.manager.CoreManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.DiscordLinkManager;
 import com.tntbbp.myminecraft.manager.DiscordManager;
+import com.tntbbp.myminecraft.manager.BalmungManager;
+import com.tntbbp.myminecraft.manager.CurseManager;
 import com.tntbbp.myminecraft.manager.DrakenPierceManager;
 import com.tntbbp.myminecraft.manager.EconomyManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
@@ -51,12 +57,14 @@ import com.tntbbp.myminecraft.manager.GleipnirManager;
 import com.tntbbp.myminecraft.manager.GradeManager;
 import com.tntbbp.myminecraft.manager.HomeManager;
 import com.tntbbp.myminecraft.manager.InfernalBurnManager;
+import com.tntbbp.myminecraft.manager.JahaShingeomManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.LocationsManager;
 import com.tntbbp.myminecraft.manager.NewsManager;
 import com.tntbbp.myminecraft.manager.RaidBossManager;
 import com.tntbbp.myminecraft.manager.RandomTeleportManager;
 import com.tntbbp.myminecraft.manager.ShockManager;
+import com.tntbbp.myminecraft.manager.SainchamsagumManager;
 import com.tntbbp.myminecraft.manager.StarforceManager;
 import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.manager.TeamManager;
@@ -83,6 +91,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private LaevateinnManager laevateinnManager;
     private ShockManager shockManager;
     private DrakenPierceManager drakenPierceManager;
+    private CurseManager curseManager;
+    private SainchamsagumManager sainchamsagumManager;
+    private BalmungManager balmungManager;
+    private JahaShingeomManager jahaShingeomManager;
     private CurrencyManager currencyManager;
     private NewsManager newsManager;
     private GeminiNewsClient geminiNewsClient;
@@ -124,6 +136,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.laevateinnManager = new LaevateinnManager(this);
         this.shockManager = new ShockManager(this);
         this.drakenPierceManager = new DrakenPierceManager(this);
+        this.curseManager = new CurseManager(this);
+        this.sainchamsagumManager = new SainchamsagumManager(this);
+        this.balmungManager = new BalmungManager(this);
+        this.jahaShingeomManager = new JahaShingeomManager(this);
         this.currencyManager = new CurrencyManager(this);
         this.newsManager = new NewsManager(this, stockManager);
         this.geminiNewsClient = new GeminiNewsClient(this);
@@ -140,6 +156,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
         stockManager.startFluctuationTask();
         infernalBurnManager.start();
         shockManager.start();
+        curseManager.start();
+        sainchamsagumManager.start();
         newsManager.startTask();
         blackMarketManager.start();
         discordManager.start();
@@ -183,6 +201,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GUIListener(this), this);
         getServer().getPluginManager().registerEvents(new LaevateinnListener(this), this);
         getServer().getPluginManager().registerEvents(new DrakenPierceListener(this), this);
+        getServer().getPluginManager().registerEvents(new CurseListener(this), this);
+        getServer().getPluginManager().registerEvents(new SainchamsagumListener(this), this);
+        getServer().getPluginManager().registerEvents(new BalmungListener(this), this);
+        getServer().getPluginManager().registerEvents(new JahaShingeomListener(this), this);
         getServer().getPluginManager().registerEvents(new CombatListener(this), this);
         getServer().getPluginManager().registerEvents(new CombatStanceListener(this), this);
         getServer().getPluginManager().registerEvents(new StarforceListener(this), this);
@@ -244,6 +266,12 @@ public class MyMinecraftPlugin extends JavaPlugin {
         }
         if (shockManager != null) {
             shockManager.stop();
+        }
+        if (curseManager != null) {
+            curseManager.stop();
+        }
+        if (sainchamsagumManager != null) {
+            sainchamsagumManager.stop();
         }
         if (newsManager != null) {
             newsManager.stopTask();
@@ -327,6 +355,22 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public DrakenPierceManager getDrakenPierceManager() {
         return drakenPierceManager;
+    }
+
+    public CurseManager getCurseManager() {
+        return curseManager;
+    }
+
+    public SainchamsagumManager getSainchamsagumManager() {
+        return sainchamsagumManager;
+    }
+
+    public BalmungManager getBalmungManager() {
+        return balmungManager;
+    }
+
+    public JahaShingeomManager getJahaShingeomManager() {
+        return jahaShingeomManager;
     }
 
     public CurrencyManager getCurrencyManager() {

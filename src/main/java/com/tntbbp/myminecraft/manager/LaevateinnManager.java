@@ -2,21 +2,20 @@ package com.tntbbp.myminecraft.manager;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.util.ItemBuilder;
+import com.tntbbp.myminecraft.util.SkillTargets;
+import com.tntbbp.myminecraft.util.WeaponAttributes;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -30,7 +29,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/** 신화 등급 무기 '레바테인'의 아이템 정의와 '라그나로크의 숨결' 액티브 능력. */
+/**
+ * 신화 등급 무기 '레바테인(Lævateinn)'.
+ *
+ * <ul>
+ *   <li>패시브 <b>붉은 나뭇가지의 지옥화</b> — 때릴 때마다 '업화'가 중첩되어 초당 피해가 커진다</li>
+ *   <li>[F] <b>수르트의 불길</b> — 전방 화염 폭풍, 화상 + 치유 차단</li>
+ *   <li>[웅크리기+우클릭] <b>라그나로크</b> — 시전 중 상태이상 면역, 물로도 꺼지지 않는 화염 저주</li>
+ * </ul>
+ */
 public class LaevateinnManager {
 
     private record BlockSnapshot(Location location, BlockData data) {
@@ -39,6 +46,7 @@ public class LaevateinnManager {
     private final MyMinecraftPlugin plugin;
     private final NamespacedKey itemKey;
     private final Map<UUID, Long> abilityCooldowns = new HashMap<>();
+    private final Map<UUID, Long> ragnarokCooldowns = new HashMap<>();
 
     public LaevateinnManager(MyMinecraftPlugin plugin) {
         this.plugin = plugin;
@@ -54,10 +62,20 @@ public class LaevateinnManager {
                         "§d§l신화 (Mythic) §8| §7무기 §8| §7공격력 §c" + formatNumber(attackDamage)
                                 + " §8| §7공격속도 §e1.6",
                         "",
-                        "§6[F] §f라그나로크의 숨결 §7(재사용 " + abilityCooldownSeconds() + "초)",
-                        "§7 전방에 화염을 내뿜어 광역 피해+띄우기+화상, 땅을 잠시 마그마로 바꿈",
-                        "§c영원한 불꽃 §7(적중 시) §7다량의 물로만 꺼지는 불꽃 부여",
-                        "§c지옥의 화상 §7(적중 시) §7방어무시 지속피해 + 치유 효과 감소",
+                        "§c[패시브] §f붉은 나뭇가지의 지옥화 §7(Laev's Scourge)",
+                        "§7 때릴 때마다 §6업화§7가 최대 §f" + karmaMaxStacks() + "중첩§7까지 쌓여",
+                        "§7 중첩당 초당 §c" + formatNumber(karmaDamagePerSecondPerStack()) + " §7방어무시 피해",
+                        "",
+                        "§6[F] §f수르트의 불길 §7(Surtr's Flame · 재사용 " + abilityCooldownSeconds() + "초)",
+                        "§7 전방에 화염 폭풍을 뿜어 광역 피해+띄우기+화상, 땅을 잠시 마그마로 바꿈",
+                        "§7 적중 시 " + flameHealBlockSeconds() + "초간 §f치유·회복 효과 차단§7(중화)",
+                        "",
+                        "§6[웅크리기+우클릭] §f라그나로크 §7(Ragnarok · 재사용 "
+                                + ragnarokCooldownSeconds() + "초)",
+                        "§7 전방을 초토화하고 시전 중 모든 상태 이상 면역",
+                        "§7 §c영원불멸의 화염§7: " + ragnarokBurnSeconds() + "초간 초당 §c"
+                                + formatNumber(ragnarokBurnDamagePerSecond()) + " §7방어무시 피해",
+                        "§7 (물로도 꺼지지 않는다)",
                         "",
                         "§7\"로키가 담금질하고 수르트가 종말에 휘두를 태고의 마검\""
                 ))
@@ -70,12 +88,8 @@ public class LaevateinnManager {
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ATTRIBUTES);
         meta.addEnchant(Enchantment.FIRE_ASPECT, 2, true);
 
-        AttributeModifier attackDamageModifier = new AttributeModifier(
-                new NamespacedKey(plugin, "laevateinn_attack_damage"),
-                attackDamage - 1.0, // 맨손 기본 공격력(1.0)을 더하면 툴팁상 공격력이 attackDamage가 됨
-                AttributeModifier.Operation.ADD_NUMBER,
-                EquipmentSlotGroup.MAINHAND);
-        meta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, attackDamageModifier);
+        WeaponAttributes.applyBase(meta, Material.NETHERITE_SWORD, attackDamage,
+                new NamespacedKey(plugin, "laevateinn_attack_damage"));
 
         int modelData = plugin.getConfig().getInt("laevateinn.model-data", 0);
         if (modelData != 0) {
@@ -101,17 +115,25 @@ public class LaevateinnManager {
         return flag != null && flag == (byte) 1;
     }
 
-    // ----- 온히트: 지옥의 화상 -----
+    // ----- 패시브: 업화 (Karma) -----
 
-    public int onHitBurnDurationSeconds() {
-        return plugin.getConfig().getInt("laevateinn.onhit.burn-duration-seconds", 6);
+    public int karmaDurationSeconds() {
+        return plugin.getConfig().getInt("laevateinn.karma.duration-seconds", 6);
     }
 
-    public double onHitBurnDamagePerSecond() {
-        return plugin.getConfig().getDouble("laevateinn.onhit.burn-damage-per-second", 3.0);
+    public double karmaDamagePerSecondPerStack() {
+        return plugin.getConfig().getDouble("laevateinn.karma.damage-per-second-per-stack", 1.5);
     }
 
-    // ----- 라그나로크의 숨결 -----
+    public int karmaMaxStacks() {
+        return plugin.getConfig().getInt("laevateinn.karma.max-stacks", 5);
+    }
+
+    // ----- [F] 수르트의 불길 -----
+
+    public int flameHealBlockSeconds() {
+        return plugin.getConfig().getInt("laevateinn.ability.heal-block-seconds", 5);
+    }
 
     public int abilityCooldownSeconds() {
         return plugin.getConfig().getInt("laevateinn.ability.cooldown-seconds", 120);
@@ -126,7 +148,7 @@ public class LaevateinnManager {
         return Math.max(0, remaining);
     }
 
-    public boolean useBreathOfRagnarok(Player caster) {
+    public boolean useSurtrFlame(Player caster) {
         if (remainingCooldownSeconds(caster.getUniqueId()) > 0) {
             return false;
         }
@@ -168,6 +190,7 @@ public class LaevateinnManager {
             launch.setY(Math.max(launch.getY(), 0) + launchPower);
             target.setVelocity(launch);
             burnManager.applyBurn(target, caster.getUniqueId(), burnDuration, burnDps);
+            plugin.getCurseManager().applyCurse(target, "수르트의 불길", 0.0, 100.0, -1, flameHealBlockSeconds());
         }
 
         List<BlockSnapshot> changed = scorchGround(world, eye, direction, range, coneAngle);
@@ -183,6 +206,69 @@ public class LaevateinnManager {
                 }
             }, magmaDuration * 20L);
         }
+
+        return true;
+    }
+
+    // ----- [웅크리기+우클릭] 라그나로크 -----
+
+    public int ragnarokCooldownSeconds() {
+        return plugin.getConfig().getInt("laevateinn.ragnarok.cooldown-seconds", 120);
+    }
+
+    public int ragnarokBurnSeconds() {
+        return plugin.getConfig().getInt("laevateinn.ragnarok.burn-duration-seconds", 12);
+    }
+
+    public double ragnarokBurnDamagePerSecond() {
+        return plugin.getConfig().getDouble("laevateinn.ragnarok.burn-damage-per-second", 5.0);
+    }
+
+    public long remainingRagnarokCooldownSeconds(UUID uuid) {
+        Long last = ragnarokCooldowns.get(uuid);
+        if (last == null) {
+            return 0;
+        }
+        return Math.max(0, ragnarokCooldownSeconds() - (System.currentTimeMillis() - last) / 1000);
+    }
+
+    public boolean useRagnarok(Player caster) {
+        if (remainingRagnarokCooldownSeconds(caster.getUniqueId()) > 0) {
+            return false;
+        }
+        ragnarokCooldowns.put(caster.getUniqueId(), System.currentTimeMillis());
+
+        double range = plugin.getConfig().getDouble("laevateinn.ragnarok.range", 10.0);
+        double coneAngle = plugin.getConfig().getDouble("laevateinn.ragnarok.cone-angle-degrees", 150.0);
+        double damage = plugin.getConfig().getDouble("laevateinn.ragnarok.damage", 18.0);
+        int castTicks = plugin.getConfig().getInt("laevateinn.ragnarok.cast-ticks", 20);
+
+        CurseManager curseManager = plugin.getCurseManager();
+        curseManager.grantImmunity(caster, castTicks + 20);
+
+        World world = caster.getWorld();
+        Location eye = caster.getEyeLocation();
+        world.playSound(eye, Sound.ENTITY_WITHER_SPAWN, 1.4f, 0.7f);
+
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (!caster.isOnline()) {
+                return;
+            }
+            World castWorld = caster.getWorld();
+            Location castEye = caster.getEyeLocation();
+            Vector direction = castEye.getDirection().normalize();
+
+            castWorld.playSound(castEye, Sound.ENTITY_GENERIC_EXPLODE, 2.0f, 0.5f);
+            castWorld.spawnParticle(Particle.EXPLOSION_EMITTER, castEye.clone().add(direction.clone().multiply(3)), 3);
+            spawnBreathParticles(castWorld, castEye, direction, range);
+
+            InfernalBurnManager burnManager = plugin.getInfernalBurnManager();
+            for (LivingEntity target : SkillTargets.inCone(castWorld, castEye, direction, range, coneAngle, caster)) {
+                curseManager.dealTrueDamage(target, caster, damage);
+                burnManager.applyEternalBurn(target, caster.getUniqueId(),
+                        ragnarokBurnSeconds(), ragnarokBurnDamagePerSecond());
+            }
+        }, castTicks);
 
         return true;
     }

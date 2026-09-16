@@ -286,11 +286,13 @@ laevateinn:
   heal-reduction-percent: 50.0
   # 이 시간(틱, 20틱=1초) 이상 연속으로 물에 젖어 있으면 지옥의 화상이 해제됩니다.
   water-extinguish-ticks: 60
-  # 공격 적중 시 부여되는 지옥의 화상
-  onhit:
-    burn-duration-seconds: 6
-    burn-damage-per-second: 3.0
-  # 라그나로크의 숨결 (F키 발동)
+  # [패시브] 붉은 나뭇가지의 지옥화 - 평타를 맞힐 때마다 '업화'가 한 겹씩 쌓인다.
+  # 중첩당 초당 피해가 늘어나며, 때릴 때마다 지속시간이 갱신된다 (방어력 무시).
+  karma:
+    duration-seconds: 6
+    damage-per-second-per-stack: 1.5
+    max-stacks: 5
+  # [F] 수르트의 불길 - 전방 화염 폭풍. 땅을 잠시 마그마로 바꾸고 치유를 차단한다.
   ability:
     cooldown-seconds: 120
     range: 8.0
@@ -300,6 +302,112 @@ laevateinn:
     burn-duration-seconds: 10
     burn-damage-per-second: 4.0
     magma-duration-seconds: 8
+    # 적중한 대상의 치유/회복 효과를 완전히 차단하는 시간(초)
+    heal-block-seconds: 5
+  # [웅크리기+우클릭] 라그나로크 - 시전 중 모든 상태 이상 면역.
+  # '영원불멸의 화염'은 방어력을 무시하고, 물에 들어가도 꺼지지 않는다.
+  ragnarok:
+    cooldown-seconds: 120
+    # 기운을 모으는 시간(틱). 이 동안 상태 이상 면역이다.
+    cast-ticks: 20
+    range: 10.0
+    cone-angle-degrees: 150.0
+    # 방어력을 무시하는 즉발 피해
+    damage: 18.0
+    burn-duration-seconds: 12
+    burn-damage-per-second: 5.0
+
+# 신화 등급 무기 '사인참사검(四寅斬邪劍)' (/특수아이템소환 <유저> 사인참사검 <수량> 으로 지급)
+sainchamsagum:
+  # CustomModelData 값. 아직 리소스팩에 이 무기의 전용 텍스처가 없어서 지금은 네더라이트 검
+  # 기본 아이콘으로 보인다 (번호만 미리 잡아둔 것). 나중에 텍스처를 추가하면 이 번호로 연결하면 된다.
+  model-data: 500023
+  attack-damage: 13.0
+  # [패시브] 사기침노 - 검을 든 동안 반경 안의 적에게 둔화와 채굴 피로를 계속 건다.
+  # 채굴 피로는 마인크래프트에서 공격 속도도 함께 떨어뜨린다 (단계당 -10%).
+  aura:
+    radius: 7.0
+    slow-amplifier: 0
+    mining-fatigue-amplifier: 0
+  # [F] 인시의 참격 - 전방을 베고 '벽사의 저주'(방어력·회복량 감소)를 남긴다.
+  slash:
+    cooldown-seconds: 18
+    range: 6.0
+    cone-angle-degrees: 90.0
+    damage: 14.0
+    curse-duration-seconds: 8
+    curse-defense-reduce-percent: 50.0
+    curse-heal-reduce-percent: 50.0
+  # [웅크리기+우클릭] 칠성강림 - 연속 참격. 시전 중 모든 상태 이상 면역.
+  # 마지막 참격만 방어무시 고정 피해 + 침묵 + 제압을 건다.
+  ultimate:
+    cooldown-seconds: 90
+    strikes: 7
+    strike-interval-ticks: 8
+    range: 7.0
+    cone-angle-degrees: 70.0
+    damage-per-strike: 6.0
+    final-fixed-damage: 14.0
+    final-silence-seconds: 4
+    final-stun-seconds: 2
+
+# 신화 등급 무기 '발뭉(Balmung)' (/특수아이템소환 <유저> 발뭉 <수량> 으로 지급)
+balmung:
+  # 사인참사검과 동일 — 전용 텍스처가 생기기 전까지는 네더라이트 검 기본 아이콘으로 보인다.
+  model-data: 500024
+  attack-damage: 14.0
+  # [패시브] 용살의 긍지 - 상대 방어력이 높을수록 방어관통이 올라간다.
+  # 관통률(%) = base + (상대 방어력 수치 x penetration-per-armor-point), 최대 max 까지.
+  # 다이아 풀세트(방어력 20)면 10 + 20x3 = 70% → 상한에 걸려 70%.
+  pride:
+    base-penetration-percent: 10.0
+    penetration-per-armor-point: 3.0
+    max-penetration-percent: 70.0
+    # 때릴 때마다 상대가 입은 갑주 4부위의 내구도를 이만큼 추가로 깎는다 (0이면 끔)
+    armor-durability-damage: 3
+  # [F] 그람의 참격 - 전방 직선을 관통하는 검기. '파프니르의 저주'(둔화+치유 차단)를 건다.
+  gram:
+    cooldown-seconds: 20
+    range: 14.0
+    # 직선의 굵기(반지름). 클수록 빗맞히기 어렵다.
+    half-width: 1.2
+    damage: 15.0
+    curse-duration-seconds: 6
+    curse-slow-amplifier: 2
+  # [웅크리기+우클릭] 발뭉의 종말 - 넓은 부채꼴 검기 폭발. 시전 중 모든 상태 이상 면역.
+  doom:
+    cooldown-seconds: 100
+    cast-ticks: 20
+    range: 9.0
+    cone-angle-degrees: 140.0
+    damage: 12.0
+    # 방어력을 무시하는 추가 고정 피해
+    fixed-damage: 10.0
+    stun-seconds: 2
+
+# 신화 등급 무기 '자하신검(紫霞神劍)' (/특수아이템소환 <유저> 자하신검 <수량> 으로 지급)
+jaha-shingeom:
+  # 사인참사검과 동일 — 전용 텍스처가 생기기 전까지는 네더라이트 검 기본 아이콘으로 보인다.
+  model-data: 500025
+  attack-damage: 12.0
+  # [패시브] 자하의 숨결
+  passive:
+    # 검을 손에 든 동안에만 붙는 이동속도 보너스(%)
+    movement-speed-percent: 12.0
+    # 평타 1회가 2회 타격으로 판정된다. 두 번째 타격의 배율.
+    # 1.0 = 요청서 그대로 "완전한 2회 타격"(사실상 평타 2배). 0으로 두면 이 패시브를 끈다.
+    second-hit-multiplier: 1.0
+    # 평타 넉백 배율 (1.0 = 바닐라와 동일)
+    knockback-multiplier: 1.25
+  # [F 또는 웅크리기+우클릭] 낙매성우 - 시전 후 window-seconds 안에 적을 때리면
+  # 그 일격이 total-hits 연타로 폭발한다. 추가타는 전부 방어력을 무시한다.
+  plum-rain:
+    cooldown-seconds: 60
+    window-seconds: 3
+    total-hits: 7
+    # 최초 1타를 뺀 나머지 6타 각각의 배율. 1.0으로 두면 요청서 그대로 '완전한 7연타'가 되는데,
+    # 공격력 12 기준 한 번에 80 이상이 들어가 사실상 즉사기가 된다. 기본값은 0.6.
+    extra-hit-multiplier: 0.6
 
 # 신화 등급 무기 '드라켄피어스' (/특수아이템소환 <유저> 드라켄피어스 <수량> 으로 지급)
 draken-pierce:
