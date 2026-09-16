@@ -7,6 +7,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+import java.util.Map;
+
 /**
  * config.yml에 평문으로 적어둔 디스코드 봇 토큰을 enc: 형식으로 바꿔준다.
  *
@@ -17,7 +19,10 @@ import org.bukkit.command.CommandSender;
  */
 public class SecretEncryptCommand implements CommandExecutor {
 
-    private static final String TOKEN_PATH = "discord.bot-token";
+    /** 감출 수 있는 설정 키 목록. 값이 아니라 "어느 항목인지"만 인자로 받는다. */
+    private static final Map<String, String> TARGETS = Map.of(
+            "discord", "discord.bot-token",
+            "ai", "ai.api-key");
 
     private final MyMinecraftPlugin plugin;
 
@@ -31,19 +36,23 @@ public class SecretEncryptCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + "권한이 없습니다.");
             return true;
         }
-        if (args.length > 0) {
-            sender.sendMessage(ChatColor.RED + "토큰을 직접 입력하지 마세요. 채팅 로그와 콘솔에 평문으로 남습니다.");
-            sender.sendMessage(ChatColor.YELLOW + "config.yml의 " + TOKEN_PATH + " 에 토큰을 적어둔 뒤 "
-                    + "/" + label + " 만 입력하면 됩니다.");
+
+        String target = args.length > 0 ? args[0].toLowerCase() : "discord";
+        String path = TARGETS.get(target);
+        if (path == null) {
+            sender.sendMessage(ChatColor.RED + "알 수 없는 항목입니다. 사용 가능: "
+                    + String.join(", ", TARGETS.keySet()));
+            sender.sendMessage(ChatColor.GRAY + "사용법: /" + label + " <discord|ai>");
+            sender.sendMessage(ChatColor.GRAY + "값을 직접 입력하지 마세요 — 채팅 로그와 콘솔에 평문으로 남습니다.");
             return true;
         }
 
         SecretResolver resolver = plugin.getSecretResolver();
-        String raw = plugin.getConfig().getString(TOKEN_PATH, "");
+        String raw = plugin.getConfig().getString(path, "");
 
         if (raw == null || raw.isBlank()) {
-            sender.sendMessage(ChatColor.RED + "config.yml의 " + TOKEN_PATH + " 가 비어있습니다.");
-            sender.sendMessage(ChatColor.GRAY + "먼저 토큰을 적고 서버를 재시작하거나 리로드한 뒤 다시 시도하세요.");
+            sender.sendMessage(ChatColor.RED + "config.yml의 " + path + " 가 비어있습니다.");
+            sender.sendMessage(ChatColor.GRAY + "먼저 값을 적고 서버를 재시작한 뒤 다시 시도하세요.");
             return true;
         }
         if (resolver.isManaged(raw)) {
@@ -59,7 +68,7 @@ public class SecretEncryptCommand implements CommandExecutor {
             return true;
         }
 
-        sender.sendMessage(ChatColor.GREEN + "아래 값을 config.yml의 " + TOKEN_PATH + " 에 그대로 붙여넣고 서버를 재시작하세요.");
+        sender.sendMessage(ChatColor.GREEN + "아래 값을 config.yml의 " + path + " 에 그대로 붙여넣고 서버를 재시작하세요.");
         sender.sendMessage(ChatColor.WHITE + encrypted);
         sender.sendMessage(ChatColor.GRAY + "복호화에는 plugins/MyMinecraft/secret.key 가 필요합니다. "
                 + "이 파일이 함께 유출되면 암호화한 의미가 없으니 백업/공유 시 주의하세요.");

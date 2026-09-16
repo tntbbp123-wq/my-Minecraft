@@ -93,6 +93,12 @@ news:
 ai:
   enabled: false
   provider: "gemini"
+  # 디스코드 봇 토큰과 같은 형식을 지원한다.
+  #   "실제키"            - 평문 그대로
+  #   "env:이름"          - 환경변수에서 읽음 (값이 어느 파일에도 남지 않아 가장 안전)
+  #   "file:/경로/파일"   - 다른 파일에서 읽음
+  #   "enc:..."           - plugins/MyMinecraft/secret.key 로 복호화
+  # API 키는 요금이 청구될 수 있으니 유출되지 않게 주의하고, 새어나갔다면 즉시 폐기·재발급하세요.
   api-key: ""
   model: "gemini-2.5-flash"
 
