@@ -59,7 +59,7 @@ public class GleipnirManager {
     // ----- 아이템 -----
 
     public ItemStack createItem() {
-        ItemStack item = new ItemBuilder(Material.CHAIN)
+        ItemStack item = new ItemBuilder(Material.LEAD)
                 .name("§f§l글레이프니르 §7(Gleipnir)")
                 .lore(List.of(
                         "§d§l신화 (Mythic) §8| §7구속 §8| §7공격력 §c0",
