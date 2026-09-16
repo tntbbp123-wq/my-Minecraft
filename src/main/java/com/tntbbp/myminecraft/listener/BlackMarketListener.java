@@ -9,8 +9,8 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.block.Container;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -28,6 +28,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -131,7 +132,10 @@ public class BlackMarketListener implements Listener {
 
     private void handleTrapKit(Player player, Block chestBlock, ItemStack kit) {
         BlackMarketManager blackMarketManager = plugin.getBlackMarketManager();
-        blackMarketManager.installTrap(chestBlock, player.getUniqueId());
+        if (!blackMarketManager.installTrap(chestBlock, player.getUniqueId())) {
+            player.sendMessage(ChatColor.RED + "이 블록에는 함정을 설치할 수 없습니다.");
+            return;
+        }
         consumeOne(player, kit);
         player.sendMessage(ChatColor.DARK_RED + "이 상자에 함정을 설치했습니다.");
     }
@@ -167,14 +171,14 @@ public class BlackMarketListener implements Listener {
             return;
         }
         BlackMarketManager blackMarketManager = plugin.getBlackMarketManager();
-        blackMarketManager.clearTrap(trap.chest());
+        blackMarketManager.clearTrap(trap.container());
 
         if (OpImmunity.isImmune(opener)) {
             opener.sendMessage(ChatColor.GRAY + "(OP 면역) 함정이 무효화되었습니다.");
             return;
         }
 
-        Location location = trap.chest().getLocation().add(0.5, 0.5, 0.5);
+        Location location = trap.container().getLocation().add(0.5, 0.5, 0.5);
         if (trap.tnt()) {
             TNTPrimed tnt = location.getWorld().spawn(location, TNTPrimed.class);
             tnt.setFuseTicks(20);
@@ -198,13 +202,22 @@ public class BlackMarketListener implements Listener {
         if (!(event.getPlayer() instanceof Player player)) {
             return;
         }
-        if (!(event.getInventory().getHolder() instanceof Chest chest)) {
+        Block trapBlock = trapBlockOf(event.getInventory().getHolder());
+        if (trapBlock == null) {
             return;
         }
-        BlackMarketManager.TrapInfo trap = plugin.getBlackMarketManager().findTrap(chest.getBlock());
+        BlackMarketManager.TrapInfo trap = plugin.getBlackMarketManager().findTrap(trapBlock);
         if (trap != null) {
             triggerTrap(player, trap);
         }
+    }
+
+    /** 더블 상자는 홀더가 Container가 아니라 DoubleChest라서, 한쪽 반의 블록을 대신 돌려준다. */
+    private Block trapBlockOf(InventoryHolder holder) {
+        if (holder instanceof DoubleChest doubleChest) {
+            return doubleChest.getLeftSide() instanceof Container leftSide ? leftSide.getBlock() : null;
+        }
+        return holder instanceof Container container ? container.getBlock() : null;
     }
 
     private void consumeOne(Player player, ItemStack item) {
