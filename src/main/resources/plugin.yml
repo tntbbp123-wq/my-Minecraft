@@ -85,6 +85,9 @@ commands:
   은행:
     description: "은행 GUI를 엽니다 (동전 구매/판매, 전부입금/전부출금)."
     usage: "/은행"
+  레이드보스:
+    description: "관리자가 레이드 보스를 소환/제거하고 현황을 확인합니다."
+    usage: "/레이드보스 <소환|제거|목록> [보스ID]"
 
 permissions:
   myminecraft.admin:

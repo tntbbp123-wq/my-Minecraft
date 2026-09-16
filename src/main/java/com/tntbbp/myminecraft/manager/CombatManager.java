@@ -17,7 +17,7 @@ public class CombatManager {
     }
 
     public int tagSeconds() {
-        return plugin.getConfig().getInt("combat.tag-seconds", 15);
+        return plugin.getConfig().getInt("combat.tag-seconds", 45);
     }
 
     public void tag(UUID uuid) {

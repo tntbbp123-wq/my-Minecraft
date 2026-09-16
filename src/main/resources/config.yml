@@ -14,7 +14,7 @@ tpa:
 combat:
   # 전투 중에는 관리자(myminecraft.admin)를 제외한 모든 명령어 사용이 막힙니다.
   # 전투 중 상태로 접속을 종료하면 즉시 사망 처리됩니다.
-  tag-seconds: 15
+  tag-seconds: 45
 
 randomtp:
   # 중심(월드 스폰 좌표)으로부터 이 반경(블록) 안에서만 이동합니다.
@@ -317,6 +317,53 @@ draken-pierce:
     speed-amplifier: 2
     # 변형 중 무기에 임시로 더해지는 공격속도 수치
     attack-speed-bonus: 0.6
+
+# 레이드 보스. /레이드보스 소환 <보스ID> 로 관리자가 직접 소환한다.
+raid-boss:
+  # '끝없는 기사' - 체력이 0이 되면 죽는 대신 쓰러지고, 주변에 떨어지는 '영혼의 파편'을
+  # knockdown.duration-seconds 안에 전부 파괴해야만 진짜로 처치된다. 못 부수면 검기를
+  # 방출하며 체력을 모두 회복하고 부활한다 (페이즈 반복).
+  eternal-knight:
+    max-health: 600.0
+    # 패턴이 대상을 탐색하는 반경(블록)
+    engage-range: 24.0
+    # 불멸의 의지 - 체력이 닳을수록, 그리고 부활할수록 이동속도/공격력이 상승한다.
+    will:
+      base-movement-speed: 0.28
+      movement-speed-per-lost-ratio: 0.12
+      movement-speed-per-knockdown: 0.03
+      base-attack-damage: 9.0
+      attack-damage-per-lost-ratio: 6.0
+      attack-damage-per-knockdown: 2.0
+    # 연속 참격 - 전방 부채꼴을 빠르게 연타한다.
+    combo:
+      cooldown-seconds: 8
+      strike-count: 5
+      strike-interval-ticks: 5
+      range: 4.5
+      cone-angle-degrees: 100.0
+      damage-per-strike: 5.0
+    # 반격 태세 - 자세를 잡는 동안 근접 공격을 하면 카운터 피해와 스턴이 돌아온다.
+    counter:
+      cooldown-seconds: 18
+      duration-seconds: 4
+      damage: 14.0
+      stun-seconds: 2
+    # 처형자의 돌진 - 일직선으로 돌진하며 경로상 대상의 방패를 사용 불가로 만든다.
+    charge:
+      cooldown-seconds: 12
+      speed: 1.6
+      duration-ticks: 20
+      hit-radius: 2.5
+      damage: 12.0
+      shield-disable-seconds: 5
+    # 불사의 육체 / 영혼의 파편 (처치 기믹)
+    knockdown:
+      duration-seconds: 6
+      fragment-count: 4
+      fragment-radius: 4.0
+      revive-wave-radius: 6.0
+      revive-wave-damage: 16.0
 
 # 코어 (팀 거점 겸 상점). 신호기(Beacon)를 변형해 만들어져 있어, 제작한 뒤 바닥에 설치하면
 # 실제 신호기 블록이 되고 그 위치가 설치한 사람의 팀 거점(홈)이 된다. 우클릭하면 바닐라
