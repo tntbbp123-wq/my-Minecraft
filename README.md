@@ -349,6 +349,47 @@ resource-pack-prompt={"text":"이 서버는 필수 리소스팩이 있습니다.
 해시는 `sha1sum MyMinecraft-ResourcePack.zip` 로 확인할 수 있습니다. 서버를 재시작하면
 접속하는 플레이어에게 리소스팩 적용 여부를 묻는 창이 뜹니다.
 
+## 전투 음악 (선택 사항)
+
+PvP 전투 태그가 걸려 있는 동안 전투 음악을 재생할 수 있습니다. 소리가 **플레이어를 따라다니는
+방식(비위치 재생)**이라 도망쳐도 끊기지 않고, 전투가 끝나거나 사망하면 즉시 멈춥니다.
+
+**음원 파일은 이 저장소에 포함되어 있지 않습니다.** 음원마다 라이선스 조건이 다르고, 사용 허가가
+곧 재배포 허가는 아니기 때문입니다. 서버 운영자가 직접 넣어야 합니다.
+
+**넣는 방법**
+
+1. 음원을 **OGG Vorbis**로 변환합니다. 마인크래프트는 MP3를 재생하지 못합니다.
+   ```
+   ffmpeg -i 원본.mp3 -vn -c:a libvorbis -q:a 3 -ar 44100 combat.ogg
+   ```
+2. 변환한 파일을 아래 경로에 넣습니다 (`sounds.json`은 이미 저장소에 있습니다).
+   ```
+   resourcepack/assets/myminecraft/sounds/music/combat.ogg
+   ```
+3. 리소스팩 zip을 다시 만들고 해시를 계산합니다.
+   ```
+   cd resourcepack && zip -r ../MyMinecraft-ResourcePack.zip . -x '.*' && cd ..
+   sha1sum MyMinecraft-ResourcePack.zip
+   ```
+4. `server.properties`의 `resource-pack-sha1`을 새 해시로 갱신하고, zip을 플레이어가 받을 수 있는
+   곳에 올립니다.
+5. `config.yml`에서 기능을 켭니다. **트랙 길이를 실제 음원 길이(초)로 맞춰야** 긴 전투에서
+   음악이 끊기지 않고 이어집니다.
+   ```yaml
+   combat:
+     music:
+       enabled: true
+       track-length-seconds: 142   # 음원 길이에 맞추세요
+       volume: 0.7
+   ```
+
+리소스팩을 적용하지 않은 플레이어에게는 **아무 소리도 나지 않을 뿐** 다른 영향은 없습니다.
+
+> **음원 출처 표기**: 무료 음원도 대부분 출처 표기가 조건입니다. 사용하는 음원의 표기 문구를
+> `resourcepack/CREDITS.txt`에 적어두세요. 또한 "사용 허가"와 "재배포 허가"는 다르므로,
+> 음원이 든 리소스팩을 공개 배포하기 전에 라이선스를 다시 확인하시기 바랍니다.
+
 ## BetterModel 3D 모델 연동 (선택 사항)
 
 레바테인을 손에 들면 [BetterModel](https://github.com/toxicity188/BetterModel)이

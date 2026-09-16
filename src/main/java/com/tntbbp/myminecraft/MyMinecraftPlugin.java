@@ -34,6 +34,7 @@ import com.tntbbp.myminecraft.listener.StarforceListener;
 import com.tntbbp.myminecraft.listener.TranscendAltarBlockListener;
 import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.CombatManager;
+import com.tntbbp.myminecraft.manager.CombatMusicManager;
 import com.tntbbp.myminecraft.manager.CombatStanceManager;
 import com.tntbbp.myminecraft.manager.CoreManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
@@ -81,6 +82,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private NewsManager newsManager;
     private GeminiNewsClient geminiNewsClient;
     private CombatManager combatManager;
+    private CombatMusicManager combatMusicManager;
     private CombatStanceManager combatStanceManager;
     private ProtocolSilenceListener protocolSilenceListener;
     private CombatStanceKeyListener combatStanceKeyListener;
@@ -115,6 +117,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.newsManager = new NewsManager(this, stockManager);
         this.geminiNewsClient = new GeminiNewsClient(this);
         this.combatManager = new CombatManager(this);
+        this.combatMusicManager = new CombatMusicManager(this, combatManager);
         this.combatStanceManager = new CombatStanceManager(this);
         this.discordManager = new DiscordManager(this);
         this.discordLinkManager = new DiscordLinkManager(this);
@@ -129,6 +132,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         blackMarketManager.start();
         discordManager.start();
         raidBossManager.start();
+        combatMusicManager.start();
 
         TpaCommand tpaCommand = new TpaCommand(this);
         getCommand("텔레포트요청").setExecutor(tpaCommand);
@@ -256,6 +260,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
         if (raidBossManager != null) {
             raidBossManager.stop();
         }
+        if (combatMusicManager != null) {
+            combatMusicManager.stop();
+        }
         getLogger().info("MyMinecraft 플러그인이 비활성화되었습니다.");
     }
 
@@ -333,6 +340,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public CombatManager getCombatManager() {
         return combatManager;
+    }
+
+    public CombatMusicManager getCombatMusicManager() {
+        return combatMusicManager;
     }
 
     public CombatStanceManager getCombatStanceManager() {
