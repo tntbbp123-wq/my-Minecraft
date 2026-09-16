@@ -3,6 +3,7 @@ package com.tntbbp.myminecraft.command;
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.RaidBossManager;
 import com.tntbbp.myminecraft.raid.EternalKnight;
+import com.tntbbp.myminecraft.raid.OblivionEntity;
 import com.tntbbp.myminecraft.raid.RaidBoss;
 import com.tntbbp.myminecraft.util.TabCompletions;
 import org.bukkit.ChatColor;
@@ -76,6 +77,8 @@ public class RaidBossCommand implements CommandExecutor, TabCompleter {
                 + ChatColor.GRAY + " (체력 " + (int) boss.maxHealth() + ")");
         if (bossId.equalsIgnoreCase(EternalKnight.ID)) {
             EternalKnight.patternSummary().forEach(player::sendMessage);
+        } else if (bossId.equalsIgnoreCase(OblivionEntity.ID)) {
+            OblivionEntity.patternSummary().forEach(player::sendMessage);
         }
     }
 

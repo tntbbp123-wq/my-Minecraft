@@ -3,6 +3,7 @@ package com.tntbbp.myminecraft.listener;
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.RaidBossManager;
 import com.tntbbp.myminecraft.raid.RaidBoss;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -10,6 +11,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 
 /** 레이드 보스 본체와 보조 엔티티(영혼의 파편 등)에 대한 피해/사망을 해당 보스에게 전달한다. */
 public class RaidBossListener implements Listener {
@@ -64,6 +71,62 @@ public class RaidBossListener implements Listener {
 
         event.setCancelled(true);
         boss.onAuxEntityHit(event.getEntity(), attacker);
+    }
+
+    // ----- 사고 정지 중 행동 차단 ('기억할 수 없는 자'의 응시) -----
+
+    /** 이동은 포션 효과로도 거의 막히지만, 순간이동성 이동까지 확실히 묶기 위해 좌표 이동만 되돌린다. */
+    @EventHandler(ignoreCancelled = true)
+    public void onMindBrokenMove(PlayerMoveEvent event) {
+        if (!plugin.getRaidBossManager().isMindBroken(event.getPlayer().getUniqueId())) {
+            return;
+        }
+        Location from = event.getFrom();
+        Location to = event.getTo();
+        if (to == null || (from.getBlockX() == to.getBlockX() && from.getBlockZ() == to.getBlockZ()
+                && from.getBlockY() == to.getBlockY())) {
+            return;
+        }
+        // 시점 회전은 그대로 두고 위치만 고정한다.
+        event.setTo(new Location(from.getWorld(), from.getX(), from.getY(), from.getZ(),
+                to.getYaw(), to.getPitch()));
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onMindBrokenCommand(PlayerCommandPreprocessEvent event) {
+        if (plugin.getRaidBossManager().isMindBroken(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage("§8사고가 정지되어 아무것도 할 수 없습니다.");
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onMindBrokenChat(AsyncPlayerChatEvent event) {
+        if (plugin.getRaidBossManager().isMindBroken(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    /** 우클릭 스킬, 레바테인/드라켄피어스의 F·Q 키 발동을 모두 막는다. */
+    @EventHandler(ignoreCancelled = true)
+    public void onMindBrokenInteract(PlayerInteractEvent event) {
+        if (plugin.getRaidBossManager().isMindBroken(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onMindBrokenSwapHands(PlayerSwapHandItemsEvent event) {
+        if (plugin.getRaidBossManager().isMindBroken(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onMindBrokenDrop(PlayerDropItemEvent event) {
+        if (plugin.getRaidBossManager().isMindBroken(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler

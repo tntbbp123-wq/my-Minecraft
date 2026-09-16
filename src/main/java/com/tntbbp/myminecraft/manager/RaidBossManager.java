@@ -2,7 +2,9 @@ package com.tntbbp.myminecraft.manager;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.raid.EternalKnight;
+import com.tntbbp.myminecraft.raid.OblivionEntity;
 import com.tntbbp.myminecraft.raid.RaidBoss;
+import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -25,12 +27,16 @@ public class RaidBossManager {
     private static final long TICK_INTERVAL = 10L;
 
     /** 소환 명령어에서 쓸 수 있는 보스 식별자 목록. */
-    public static final List<String> BOSS_IDS = List.of(EternalKnight.ID);
+    public static final List<String> BOSS_IDS = List.of(EternalKnight.ID, OblivionEntity.ID);
 
     private final MyMinecraftPlugin plugin;
     private final NamespacedKey bossIdKey;
     private final Map<UUID, RaidBoss> bossesByEntityId = new HashMap<>();
     private final Map<UUID, RaidBoss> bossesByAuxId = new HashMap<>();
+
+    /** '사고 정지' 상태인 플레이어와 해제 시각. 보스가 걸고, RaidBossListener가 실제 차단을 맡는다. */
+    private final Map<UUID, Long> mindBreakUntilMillis = new HashMap<>();
+
     private BukkitTask task;
 
     public RaidBossManager(MyMinecraftPlugin plugin) {
@@ -74,6 +80,7 @@ public class RaidBossManager {
     private RaidBoss create(String id) {
         return switch (id.toLowerCase()) {
             case EternalKnight.ID -> new EternalKnight(plugin);
+            case OblivionEntity.ID -> new OblivionEntity(plugin);
             default -> null;
         };
     }
@@ -115,7 +122,27 @@ public class RaidBossManager {
         }
         bossesByEntityId.clear();
         bossesByAuxId.clear();
+        mindBreakUntilMillis.clear();
         return bosses.size();
+    }
+
+    // ----- 사고 정지 (기억할 수 없는 자) -----
+
+    /** 지정한 시간(초) 동안 이동·명령어·채팅·스킬 사용을 막는다. */
+    public void applyMindBreak(Player player, int seconds) {
+        mindBreakUntilMillis.put(player.getUniqueId(), System.currentTimeMillis() + seconds * 1000L);
+    }
+
+    public boolean isMindBroken(UUID uuid) {
+        Long until = mindBreakUntilMillis.get(uuid);
+        if (until == null) {
+            return false;
+        }
+        if (until <= System.currentTimeMillis()) {
+            mindBreakUntilMillis.remove(uuid);
+            return false;
+        }
+        return true;
     }
 
     public int activeCount() {
