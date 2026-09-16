@@ -1,11 +1,10 @@
 package com.tntbbp.myminecraft.listener;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
+import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientAdvancementTab;
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.GleipnirManager;
 import org.bukkit.ChatColor;
@@ -16,37 +15,31 @@ import org.bukkit.inventory.ItemStack;
  * L키(도전과제 화면 열기)를 글레이프니르의 '절대봉인' 발동 키로 쓴다.
  *
  * <p>전투모드는 <b>웅크리기 + L</b>이므로, 여기서는 웅크리지 않은 상태의 L만 처리해 충돌을 피한다.
- * ProtocolLib이 설치되어 있을 때만 등록되며, 이 클래스는 ProtocolLib 클래스에 직접 의존하므로
- * ProtocolLib이 없을 때는 절대 인스턴스화하면 안 된다.
  */
-public class GleipnirKeyListener extends PacketAdapter {
+public class GleipnirKeyListener extends PacketListenerAbstract {
 
     private final MyMinecraftPlugin plugin;
 
     public GleipnirKeyListener(MyMinecraftPlugin plugin) {
-        super(plugin, ListenerPriority.NORMAL, PacketType.Play.Client.ADVANCEMENTS);
+        super(PacketListenerPriority.NORMAL);
         this.plugin = plugin;
     }
 
-    public void register() {
-        ProtocolLibrary.getProtocolManager().addPacketListener(this);
-    }
-
-    public void unregister() {
-        ProtocolManager manager = ProtocolLibrary.getProtocolManager();
-        if (manager != null) {
-            manager.removePacketListener(this);
-        }
-    }
-
     @Override
-    public void onPacketReceiving(PacketEvent event) {
-        Object action = event.getPacket().getModifier().read(0);
-        if (action == null || !"OPENED_TAB".equals(action.toString())) {
+    public void onPacketReceive(PacketReceiveEvent event) {
+        if (event.getPacketType() != PacketType.Play.Client.ADVANCEMENT_TAB) {
+            return;
+        }
+        if (new WrapperPlayClientAdvancementTab(event).getAction()
+                != WrapperPlayClientAdvancementTab.Action.OPENED_TAB) {
             return;
         }
 
         Player player = event.getPlayer();
+        if (player == null) {
+            return;
+        }
+
         // 패킷은 네트워크 스레드에서 오므로 실제 처리는 메인 스레드로 넘긴다.
         plugin.getServer().getScheduler().runTask(plugin, () -> {
             if (!player.isOnline() || player.isSneaking()) {
