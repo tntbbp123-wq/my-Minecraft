@@ -88,6 +88,9 @@ commands:
   레이드보스:
     description: "관리자가 레이드 보스를 소환/제거하고 현황을 확인합니다."
     usage: "/레이드보스 <소환|제거|목록> [보스ID]"
+  토큰암호화:
+    description: "config.yml에 평문으로 적어둔 디스코드 봇 토큰을 enc: 형식으로 바꿔줍니다."
+    usage: "/토큰암호화"
 
 permissions:
   myminecraft.admin:

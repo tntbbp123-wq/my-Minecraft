@@ -12,6 +12,7 @@ import com.tntbbp.myminecraft.command.LobbyCommand;
 import com.tntbbp.myminecraft.command.MenuCommand;
 import com.tntbbp.myminecraft.command.RaidBossCommand;
 import com.tntbbp.myminecraft.command.RtCommand;
+import com.tntbbp.myminecraft.command.SecretEncryptCommand;
 import com.tntbbp.myminecraft.command.SpawnCommand;
 import com.tntbbp.myminecraft.command.TeamCommand;
 import com.tntbbp.myminecraft.command.TpaCommand;
@@ -56,6 +57,7 @@ import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.manager.TeamManager;
 import com.tntbbp.myminecraft.manager.TeleportRequestManager;
 import com.tntbbp.myminecraft.manager.TranscendAltarBlockManager;
+import com.tntbbp.myminecraft.util.SecretResolver;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MyMinecraftPlugin extends JavaPlugin {
@@ -87,11 +89,13 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private TeamManager teamManager;
     private CoreManager coreManager;
     private RaidBossManager raidBossManager;
+    private SecretResolver secretResolver;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
 
+        this.secretResolver = new SecretResolver(this);
         this.economyManager = new EconomyManager(this);
         this.homeManager = new HomeManager(this);
         this.locationsManager = new LocationsManager(this);
@@ -193,6 +197,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         DiscordLinkCommand discordLinkCommand = new DiscordLinkCommand(this);
         getCommand("디스코드연동").setExecutor(discordLinkCommand);
         getCommand("디스코드연동확인").setExecutor(discordLinkCommand);
+        getCommand("토큰암호화").setExecutor(new SecretEncryptCommand(this));
         getServer().getPluginManager().registerEvents(new DiscordIntrusionListener(this), this);
 
         if (getServer().getPluginManager().isPluginEnabled("BetterModel")) {
@@ -352,5 +357,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public RaidBossManager getRaidBossManager() {
         return raidBossManager;
+    }
+
+    public SecretResolver getSecretResolver() {
+        return secretResolver;
     }
 }
