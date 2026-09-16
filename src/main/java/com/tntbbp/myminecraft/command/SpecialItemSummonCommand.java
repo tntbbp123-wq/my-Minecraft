@@ -5,6 +5,7 @@ import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.DrakenPierceManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
+import com.tntbbp.myminecraft.manager.GleipnirManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.StarforceManager;
 import com.tntbbp.myminecraft.util.SpecialItemCatalog;
@@ -31,6 +32,7 @@ public class SpecialItemSummonCommand implements CommandExecutor, TabCompleter {
     private final StarforceManager starforceManager;
     private final BlackMarketManager blackMarketManager;
     private final DrakenPierceManager drakenPierceManager;
+    private final GleipnirManager gleipnirManager;
 
     public SpecialItemSummonCommand(MyMinecraftPlugin plugin) {
         this.enhanceManager = plugin.getEnhanceManager();
@@ -39,6 +41,7 @@ public class SpecialItemSummonCommand implements CommandExecutor, TabCompleter {
         this.starforceManager = plugin.getStarforceManager();
         this.blackMarketManager = plugin.getBlackMarketManager();
         this.drakenPierceManager = plugin.getDrakenPierceManager();
+        this.gleipnirManager = plugin.getGleipnirManager();
     }
 
     @Override
@@ -74,7 +77,7 @@ public class SpecialItemSummonCommand implements CommandExecutor, TabCompleter {
 
         SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
                 enhanceManager, laevateinnManager, currencyManager, starforceManager, blackMarketManager,
-                drakenPierceManager, itemName, amount);
+                drakenPierceManager, gleipnirManager, itemName, amount);
         if (resolved == null) {
             sender.sendMessage(ChatColor.RED + "알 수 없는 아이템명입니다. 사용 가능: "
                     + String.join(", ", SpecialItemCatalog.allItemNames(enhanceManager, currencyManager)));

@@ -5,6 +5,7 @@ import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
 import com.tntbbp.myminecraft.manager.DrakenPierceManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
+import com.tntbbp.myminecraft.manager.GleipnirManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.NewsManager;
 import com.tntbbp.myminecraft.manager.StarforceManager;
@@ -121,12 +122,13 @@ public class AdminMenuGUI {
         StarforceManager starforceManager = plugin.getStarforceManager();
         BlackMarketManager blackMarketManager = plugin.getBlackMarketManager();
         DrakenPierceManager drakenPierceManager = plugin.getDrakenPierceManager();
+        GleipnirManager gleipnirManager = plugin.getGleipnirManager();
         List<String> itemNames = SpecialItemCatalog.allItemNames(enhanceManager, currencyManager);
         for (int i = 0; i < itemNames.size() && i < TAKE_ITEM_SLOTS.length; i++) {
             String itemName = itemNames.get(i);
             SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
                     enhanceManager, laevateinnManager, currencyManager, starforceManager, blackMarketManager,
-                    drakenPierceManager, itemName, 1);
+                    drakenPierceManager, gleipnirManager, itemName, 1);
             if (resolved == null) {
                 continue;
             }

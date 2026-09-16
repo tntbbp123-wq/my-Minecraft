@@ -47,6 +47,11 @@ public class CombatStanceManager {
     /** 쿨다운을 통과했다면 진입/해제를 전환한다. */
     public void toggle(Player player) {
         UUID uuid = player.getUniqueId();
+        // 봉인 중에는 전투모드에 새로 진입할 수 없다 (이미 진입한 상태의 해제는 허용).
+        if (!isInStance(uuid) && plugin.getGleipnirManager().isSealed(uuid)) {
+            player.sendMessage("§7봉인되어 전투모드에 진입할 수 없습니다.");
+            return;
+        }
         long now = System.currentTimeMillis();
         Long last = lastToggleMillis.get(uuid);
         if (last != null && now - last < toggleCooldownMillis()) {
@@ -163,6 +168,10 @@ public class CombatStanceManager {
 
     /** 스킬 슬롯 우클릭 시 실제 효과를 여기서 구현한다 (현재는 자리표시자). */
     public void executeSkill(Player player, int slot) {
+        if (plugin.getGleipnirManager().isSealed(player.getUniqueId())) {
+            player.sendMessage("§7봉인되어 스킬을 쓸 수 없습니다.");
+            return;
+        }
         player.sendMessage("§7[전투모드] 스킬 " + (slot + 1) + "은(는) 아직 구현되지 않았습니다.");
     }
 }

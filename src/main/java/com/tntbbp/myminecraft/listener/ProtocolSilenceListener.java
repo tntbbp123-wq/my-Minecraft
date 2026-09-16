@@ -38,7 +38,7 @@ public class ProtocolSilenceListener extends PacketAdapter {
     public void unregister() {
         ProtocolManager manager = ProtocolLibrary.getProtocolManager();
         if (manager != null) {
-            manager.removePacketListeners(plugin);
+            manager.removePacketListener(this);
         }
     }
 

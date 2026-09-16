@@ -35,6 +35,12 @@ public class LaevateinnListener implements Listener {
         }
 
         event.setCancelled(true);
+        if (plugin.getGleipnirManager().isSealed(player.getUniqueId())) {
+            player.sendMessage(ChatColor.GRAY + "봉인되어 스킬을 쓸 수 없습니다. ("
+                    + plugin.getGleipnirManager().remainingSealSeconds(player.getUniqueId()) + "초)");
+            return;
+        }
+
         long remaining = laevateinnManager.remainingCooldownSeconds(player.getUniqueId());
         if (remaining > 0) {
             player.sendMessage(ChatColor.RED + "라그나로크의 숨결 재사용 대기 중입니다. (" + remaining + "초)");
