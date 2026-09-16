@@ -8,7 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Chest;
+import org.bukkit.block.Container;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
@@ -126,66 +126,66 @@ public class BlackMarketManager {
     }
 
     /**
-     * 상자에 함정을 설치한다. 이미 다른 함정이 있으면 덮어쓴다.
+     * 상자/배럴/셜커 상자 등 컨테이너에 함정을 설치한다. 이미 다른 함정이 있으면 덮어쓴다.
      * 블록 재질(일반 상자/덫 상자)은 그대로 두고 PDC 태그만 붙인다 — 재질을 바꾸면
      * 상자 내용물이 사라지는 문제가 있어서, 실제 발동 로직은 재질과 무관하게 동작한다.
+     *
+     * @return 설치에 성공하면 true, 컨테이너가 아니라 설치할 수 없으면 false
      */
-    public void installTrap(Block chestBlock, UUID owner) {
-        if (!(chestBlock.getState() instanceof Chest chest)) {
-            return;
+    public boolean installTrap(Block containerBlock, UUID owner) {
+        if (!(containerBlock.getState() instanceof Container container)) {
+            return false;
         }
-        chest.getPersistentDataContainer().set(trapOwnerKey, PersistentDataType.STRING, owner.toString());
-        chest.getPersistentDataContainer().set(trapModeKey, PersistentDataType.STRING, isTntMode() ? "TNT" : "DEBUFF");
-        chest.update();
+        container.getPersistentDataContainer().set(trapOwnerKey, PersistentDataType.STRING, owner.toString());
+        container.getPersistentDataContainer().set(trapModeKey, PersistentDataType.STRING, isTntMode() ? "TNT" : "DEBUFF");
+        container.update();
+        return true;
     }
 
     /** 이 블록(또는 더블 상자의 반대편)에 함정이 걸려 있는지, 걸려 있다면 어떤 설정인지 반환한다. */
-    public TrapInfo findTrap(Block chestBlock) {
-        if (!(chestBlock.getState() instanceof Chest chest)) {
+    public TrapInfo findTrap(Block containerBlock) {
+        if (!(containerBlock.getState() instanceof Container container)) {
             return null;
         }
-        TrapInfo direct = readTrap(chest);
+        TrapInfo direct = readTrap(container);
         if (direct != null) {
             return direct;
         }
-        if (chest.getInventory().getHolder() instanceof DoubleChest doubleChest) {
+        if (container.getInventory().getHolder() instanceof DoubleChest doubleChest) {
             TrapInfo left = asTrapInfo(doubleChest.getLeftSide());
             if (left != null) {
                 return left;
             }
-            TrapInfo right = asTrapInfo(doubleChest.getRightSide());
-            if (right != null) {
-                return right;
-            }
+            return asTrapInfo(doubleChest.getRightSide());
         }
         return null;
     }
 
     private TrapInfo asTrapInfo(InventoryHolder holder) {
-        return holder instanceof Chest sideChest ? readTrap(sideChest) : null;
+        return holder instanceof Container sideContainer ? readTrap(sideContainer) : null;
     }
 
-    private TrapInfo readTrap(Chest chest) {
-        String ownerRaw = chest.getPersistentDataContainer().get(trapOwnerKey, PersistentDataType.STRING);
+    private TrapInfo readTrap(Container container) {
+        String ownerRaw = container.getPersistentDataContainer().get(trapOwnerKey, PersistentDataType.STRING);
         if (ownerRaw == null) {
             return null;
         }
-        String mode = chest.getPersistentDataContainer().get(trapModeKey, PersistentDataType.STRING);
+        String mode = container.getPersistentDataContainer().get(trapModeKey, PersistentDataType.STRING);
         try {
-            return new TrapInfo(chest, UUID.fromString(ownerRaw), "TNT".equalsIgnoreCase(mode));
+            return new TrapInfo(container, UUID.fromString(ownerRaw), "TNT".equalsIgnoreCase(mode));
         } catch (IllegalArgumentException ex) {
             return null;
         }
     }
 
     /** 함정을 1회용으로 해제한다 (발동 후 호출). */
-    public void clearTrap(Chest chest) {
-        chest.getPersistentDataContainer().remove(trapOwnerKey);
-        chest.getPersistentDataContainer().remove(trapModeKey);
-        chest.update();
+    public void clearTrap(Container container) {
+        container.getPersistentDataContainer().remove(trapOwnerKey);
+        container.getPersistentDataContainer().remove(trapModeKey);
+        container.update();
     }
 
-    public record TrapInfo(Chest chest, UUID owner, boolean tnt) {
+    public record TrapInfo(Container container, UUID owner, boolean tnt) {
     }
 
     // ----- 화염병 -----
