@@ -1,9 +1,11 @@
 package com.tntbbp.myminecraft.manager;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
+import com.tntbbp.myminecraft.raid.ApocalypseDragon;
 import com.tntbbp.myminecraft.raid.EternalKnight;
 import com.tntbbp.myminecraft.raid.OblivionEntity;
 import com.tntbbp.myminecraft.raid.RaidBoss;
+import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -27,7 +29,8 @@ public class RaidBossManager {
     private static final long TICK_INTERVAL = 10L;
 
     /** 소환 명령어에서 쓸 수 있는 보스 식별자 목록. */
-    public static final List<String> BOSS_IDS = List.of(EternalKnight.ID, OblivionEntity.ID);
+    public static final List<String> BOSS_IDS =
+            List.of(EternalKnight.ID, OblivionEntity.ID, ApocalypseDragon.ID);
 
     private final MyMinecraftPlugin plugin;
     private final NamespacedKey bossIdKey;
@@ -81,6 +84,7 @@ public class RaidBossManager {
         return switch (id.toLowerCase()) {
             case EternalKnight.ID -> new EternalKnight(plugin);
             case OblivionEntity.ID -> new OblivionEntity(plugin);
+            case ApocalypseDragon.ID -> new ApocalypseDragon(plugin);
             default -> null;
         };
     }
@@ -91,8 +95,18 @@ public class RaidBossManager {
         return boss == null ? null : boss.displayName();
     }
 
+    /**
+     * 엔더드래곤은 머리/날개/꼬리가 각각 별도의 파트 엔티티라 피격 이벤트가 파트로 올 수 있다.
+     * 그럴 때는 본체로 바꿔서 찾는다.
+     */
     public RaidBoss byEntity(Entity entity) {
-        return entity == null ? null : bossesByEntityId.get(entity.getUniqueId());
+        if (entity == null) {
+            return null;
+        }
+        if (entity instanceof ComplexEntityPart part) {
+            entity = part.getParent();
+        }
+        return bossesByEntityId.get(entity.getUniqueId());
     }
 
     public RaidBoss byAuxEntity(Entity entity) {

@@ -42,8 +42,9 @@ public class GeminiNewsClient {
                 && !apiKey().isBlank();
     }
 
+    /** 설정값은 평문일 수도 있고 env:/file:/enc: 로 감춰둔 형태일 수도 있다 (SecretResolver 참고). */
     private String apiKey() {
-        return plugin.getConfig().getString("ai.api-key", "");
+        return plugin.getSecretResolver().resolve(plugin.getConfig().getString("ai.api-key", ""));
     }
 
     private String model() {

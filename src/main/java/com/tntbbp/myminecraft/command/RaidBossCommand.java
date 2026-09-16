@@ -2,6 +2,7 @@ package com.tntbbp.myminecraft.command;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.RaidBossManager;
+import com.tntbbp.myminecraft.raid.ApocalypseDragon;
 import com.tntbbp.myminecraft.raid.EternalKnight;
 import com.tntbbp.myminecraft.raid.OblivionEntity;
 import com.tntbbp.myminecraft.raid.RaidBoss;
@@ -79,6 +80,8 @@ public class RaidBossCommand implements CommandExecutor, TabCompleter {
             EternalKnight.patternSummary().forEach(player::sendMessage);
         } else if (bossId.equalsIgnoreCase(OblivionEntity.ID)) {
             OblivionEntity.patternSummary().forEach(player::sendMessage);
+        } else if (bossId.equalsIgnoreCase(ApocalypseDragon.ID)) {
+            ApocalypseDragon.patternSummary().forEach(player::sendMessage);
         }
     }
 
