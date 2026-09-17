@@ -1,14 +1,7 @@
 package com.tntbbp.myminecraft.gui;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
-import com.tntbbp.myminecraft.manager.BlackMarketManager;
-import com.tntbbp.myminecraft.manager.CurrencyManager;
-import com.tntbbp.myminecraft.manager.DrakenPierceManager;
-import com.tntbbp.myminecraft.manager.EnhanceManager;
-import com.tntbbp.myminecraft.manager.GleipnirManager;
-import com.tntbbp.myminecraft.manager.LaevateinnManager;
 import com.tntbbp.myminecraft.manager.NewsManager;
-import com.tntbbp.myminecraft.manager.StarforceManager;
 import com.tntbbp.myminecraft.manager.StockManager;
 import com.tntbbp.myminecraft.model.Stock;
 import com.tntbbp.myminecraft.util.ItemBuilder;
@@ -115,20 +108,10 @@ public class AdminMenuGUI {
                 ))
                 .build());
         holder.mapCommand(SPECIAL_ITEM_SLOT, "/특수아이템소환 ");
-
-        EnhanceManager enhanceManager = plugin.getEnhanceManager();
-        LaevateinnManager laevateinnManager = plugin.getLaevateinnManager();
-        CurrencyManager currencyManager = plugin.getCurrencyManager();
-        StarforceManager starforceManager = plugin.getStarforceManager();
-        BlackMarketManager blackMarketManager = plugin.getBlackMarketManager();
-        DrakenPierceManager drakenPierceManager = plugin.getDrakenPierceManager();
-        GleipnirManager gleipnirManager = plugin.getGleipnirManager();
-        List<String> itemNames = SpecialItemCatalog.allItemNames(enhanceManager, currencyManager);
+        List<String> itemNames = SpecialItemCatalog.allItemNames(plugin);
         for (int i = 0; i < itemNames.size() && i < TAKE_ITEM_SLOTS.length; i++) {
             String itemName = itemNames.get(i);
-            SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
-                    enhanceManager, laevateinnManager, currencyManager, starforceManager, blackMarketManager,
-                    drakenPierceManager, gleipnirManager, itemName, 1);
+            SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(plugin, itemName, 1);
             if (resolved == null) {
                 continue;
             }
