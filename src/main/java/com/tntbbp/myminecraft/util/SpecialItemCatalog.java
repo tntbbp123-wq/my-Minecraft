@@ -1,9 +1,9 @@
 package com.tntbbp.myminecraft.util;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
-import com.tntbbp.myminecraft.manager.BlackMarketManager;
-import com.tntbbp.myminecraft.manager.CurrencyManager;
-import com.tntbbp.myminecraft.manager.EnhanceManager;
+import com.tntbbp.myminecraft.manager.economy.BlackMarketManager;
+import com.tntbbp.myminecraft.manager.economy.CurrencyManager;
+import com.tntbbp.myminecraft.manager.item.EnhanceManager;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;

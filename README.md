@@ -36,19 +36,36 @@ Paper 서버용 유틸리티 플러그인입니다. (대상: Paper 1.21.x, Java 
 소스를 직접 읽어보려면 위의 `-sources.jar`를 받거나, 이 저장소의
 [`src/main/java`](src/main/java/com/tntbbp/myminecraft)를 보면 됩니다. 패키지 구성은 아래와 같습니다.
 
+먼저 **역할**로 나누고, 그 안을 다시 **분야**로 나눕니다.
+
 | 경로 | 역할 |
 |---|---|
 | `MyMinecraftPlugin.java` | 진입점. 매니저 생성과 명령어·리스너 등록이 전부 여기 모여 있습니다 |
-| `manager/` | 상태와 로직, YAML 저장 담당 (경제·홈·주식·강화·팀 등) |
+| `manager/` | 상태와 로직, YAML 저장 담당 |
 | `gui/` | GUI 화면과 각 GUI를 구분하는 전용 `InventoryHolder` |
-| `listener/` | 이벤트 처리. `GUIListener`가 모든 GUI 클릭을 분기합니다 |
-| `command/` | 명령어 실행부와 탭 자동완성 |
+| `listener/` | 이벤트 처리. `GUIListener`는 모든 분야의 GUI 클릭을 받으므로 `listener/` 바로 밑에 둡니다 |
+| `command/` | 명령어 실행부 |
 | `raid/` | 레이드 보스 공용 뼈대(`RaidBoss`)와 개별 보스 |
-| `model/`, `util/` | 데이터 객체와 공용 헬퍼 |
+| `model/`, `util/` | 데이터 객체와 공용 헬퍼 (파일이 적어 나누지 않았습니다) |
 
-특정 기능이 어디 있는지 찾을 때는 `manager/`에서 이름이 같은 파일을 먼저 보면 빠릅니다
-(예: 강화 → `EnhanceManager`, 주식 → `StockManager`). 커스텀 아이템은 모두
-`PersistentDataContainer` 태그로 식별하고 외형은 `CustomModelData`로 처리합니다.
+위 네 폴더(`manager` `gui` `listener` `command`) 안의 분야는 이름이 서로 같습니다.
+
+| 분야 | 들어가는 것 |
+|---|---|
+| `weapon/` | 신화 등급 무기 (레바테인·드라켄피어스·글레이프니르·사인참사검·발뭉·자하신검) |
+| `combat/` | PvP 전투 태그, 전투모드, 전투 음악, 무기들이 공용으로 쓰는 상태이상(저주·화상·감전) |
+| `item/` | 아이템 성장 — 강화, 스타포스, 등급, 초월의 제단 |
+| `economy/` | 포인트·동전·주식·뉴스·은행·암시장 |
+| `social/` | 홈, 팀, 텔레포트 요청, 디스코드 연동/알림 |
+| `world/` | 스폰·로비·랜덤이동과 팀 거점 '코어' 블록 |
+| `raid/` | 레이드 보스의 매니저·리스너·명령어 (보스 본체는 최상위 `raid/`) |
+| `admin/` | 관리자 메뉴, 특수 아이템 지급, 설정값 암호화 |
+| `menu/` | 메인 메뉴와 엔더상자 |
+
+특정 기능이 어디 있는지 찾을 때는 분야를 먼저 고르고 `manager/`에서 이름이 같은 파일을 보면
+빠릅니다 (예: 강화 → `manager/item/EnhanceManager`, 주식 → `manager/economy/StockManager`).
+커스텀 아이템은 모두 `PersistentDataContainer` 태그로 식별하고 외형은 `CustomModelData`로
+처리합니다.
 
 ## 기능
 
