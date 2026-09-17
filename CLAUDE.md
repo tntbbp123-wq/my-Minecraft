@@ -35,6 +35,10 @@ git fetch gitea --prune --tags
 - GN Git `main`에 직접 push하지 않는다. `main`은 병합 요청으로만 바꾼다. force push와 브랜치·태그 삭제도 하지 않는다.
 - `GITEA_TOKEN` 값을 출력하거나 파일, 커밋, 원격 주소(URL)에 넣지 않는다.
 
-## 4. 릴리스 (사용자가 요청할 때만)
+## 4. 버전 올리기 (사용자가 요청할 때만)
+
+버전은 `1.1.<업데이트 수>` 체계다. 사용자가 "버전 올려줘"라고 할 때마다 마지막 자리를 **1만** 올린다. 그 업데이트에 기능이 몇 개 들어갔는지는 세지 않는다.
+
+## 5. 릴리스 (사용자가 요청할 때만)
 
 병합이 끝난 `gitea/main` 커밋에 `pom.xml`의 `<version>`과 같은 `vX.Y.Z` 태그를 만들고 `git push gitea vX.Y.Z` 한다. 1분 안에 GitHub로 복사되고, GitHub Actions 릴리스(`.github/workflows/release.yml`)가 jar와 리소스팩을 첨부한다.
