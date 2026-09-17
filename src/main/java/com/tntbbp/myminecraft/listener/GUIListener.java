@@ -333,10 +333,7 @@ public class GUIListener implements Listener {
 
         String giveItemName = holder.getGiveItemName(slot);
         if (giveItemName != null) {
-            SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
-                    plugin.getEnhanceManager(), plugin.getLaevateinnManager(), plugin.getCurrencyManager(),
-                    plugin.getStarforceManager(), plugin.getBlackMarketManager(), plugin.getDrakenPierceManager(),
-                    plugin.getGleipnirManager(), giveItemName, 1);
+            SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(plugin, giveItemName, 1);
             if (resolved == null) {
                 return;
             }
@@ -406,10 +403,7 @@ public class GUIListener implements Listener {
             return;
         }
 
-        SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
-                plugin.getEnhanceManager(), plugin.getLaevateinnManager(), plugin.getCurrencyManager(),
-                plugin.getStarforceManager(), plugin.getBlackMarketManager(), plugin.getDrakenPierceManager(),
-                plugin.getGleipnirManager(), itemName, 1);
+        SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(plugin, itemName, 1);
         if (resolved == null) {
             economyManager.add(player.getUniqueId(), price);
             return;

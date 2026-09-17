@@ -1,12 +1,9 @@
 package com.tntbbp.myminecraft.util;
 
+import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.CurrencyManager;
-import com.tntbbp.myminecraft.manager.DrakenPierceManager;
 import com.tntbbp.myminecraft.manager.EnhanceManager;
-import com.tntbbp.myminecraft.manager.GleipnirManager;
-import com.tntbbp.myminecraft.manager.LaevateinnManager;
-import com.tntbbp.myminecraft.manager.StarforceManager;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -26,30 +23,34 @@ public final class SpecialItemCatalog {
     private SpecialItemCatalog() {
     }
 
-    public static Resolved resolve(EnhanceManager enhanceManager, LaevateinnManager laevateinnManager,
-                                    CurrencyManager currencyManager, StarforceManager starforceManager,
-                                    BlackMarketManager blackMarketManager, DrakenPierceManager drakenPierceManager,
-                                    GleipnirManager gleipnirManager, String itemName, int amount) {
+    public static Resolved resolve(MyMinecraftPlugin plugin, String itemName, int amount) {
+        EnhanceManager enhanceManager = plugin.getEnhanceManager();
+        CurrencyManager currencyManager = plugin.getCurrencyManager();
+        BlackMarketManager blackMarketManager = plugin.getBlackMarketManager();
+
         if (itemName.equals("강화석")) {
             return new Resolved(enhanceManager.createEnhanceStone(amount), "강화석");
         }
         if (itemName.equals("별가루")) {
-            return new Resolved(starforceManager.createStardust(amount), "별가루");
+            return new Resolved(plugin.getStarforceManager().createStardust(amount), "별가루");
         }
         if (itemName.equals("레바테인")) {
-            ItemStack item = laevateinnManager.createItem();
-            item.setAmount(amount);
-            return new Resolved(item, "레바테인");
+            return mythicWeapon(plugin.getLaevateinnManager().createItem(), "레바테인", amount);
         }
         if (itemName.equals("드라켄피어스")) {
-            ItemStack item = drakenPierceManager.createItem();
-            item.setAmount(amount);
-            return new Resolved(item, "드라켄피어스");
+            return mythicWeapon(plugin.getDrakenPierceManager().createItem(), "드라켄피어스", amount);
         }
         if (itemName.equals("글레이프니르")) {
-            ItemStack item = gleipnirManager.createItem();
-            item.setAmount(amount);
-            return new Resolved(item, "글레이프니르");
+            return mythicWeapon(plugin.getGleipnirManager().createItem(), "글레이프니르", amount);
+        }
+        if (itemName.equals("사인참사검")) {
+            return mythicWeapon(plugin.getSainchamsagumManager().createItem(), "사인참사검", amount);
+        }
+        if (itemName.equals("발뭉")) {
+            return mythicWeapon(plugin.getBalmungManager().createItem(), "발뭉", amount);
+        }
+        if (itemName.equals("자하신검")) {
+            return mythicWeapon(plugin.getJahaShingeomManager().createItem(), "자하신검", amount);
         }
         if (itemName.equals("일괄약탈주문서")) {
             return new Resolved(blackMarketManager.createLootAllScroll(amount), "일괄 약탈 주문서");
@@ -89,6 +90,11 @@ public final class SpecialItemCatalog {
         return null;
     }
 
+    private static Resolved mythicWeapon(ItemStack item, String displayName, int amount) {
+        item.setAmount(amount);
+        return new Resolved(item, displayName);
+    }
+
     public static EnhanceManager.ScrollGrade findScrollGrade(EnhanceManager enhanceManager, String itemName) {
         for (EnhanceManager.ScrollGrade grade : enhanceManager.scrollGrades()) {
             if (itemName.equalsIgnoreCase(grade.id()) || itemName.equals(scrollShortName(grade))) {
@@ -116,13 +122,18 @@ public final class SpecialItemCatalog {
     }
 
     /** 명령어/GUI에서 선택 가능한 아이템명 전체 목록. */
-    public static List<String> allItemNames(EnhanceManager enhanceManager, CurrencyManager currencyManager) {
+    public static List<String> allItemNames(MyMinecraftPlugin plugin) {
+        EnhanceManager enhanceManager = plugin.getEnhanceManager();
+        CurrencyManager currencyManager = plugin.getCurrencyManager();
         List<String> names = new ArrayList<>();
         names.add("강화석");
         names.add("별가루");
         names.add("레바테인");
         names.add("드라켄피어스");
         names.add("글레이프니르");
+        names.add("사인참사검");
+        names.add("발뭉");
+        names.add("자하신검");
         names.add("일괄약탈주문서");
         names.add("함정설치키트");
         names.add("화염병");

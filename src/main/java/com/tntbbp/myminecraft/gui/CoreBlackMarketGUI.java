@@ -1,14 +1,7 @@
 package com.tntbbp.myminecraft.gui;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
-import com.tntbbp.myminecraft.manager.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.CoreManager;
-import com.tntbbp.myminecraft.manager.CurrencyManager;
-import com.tntbbp.myminecraft.manager.DrakenPierceManager;
-import com.tntbbp.myminecraft.manager.EnhanceManager;
-import com.tntbbp.myminecraft.manager.GleipnirManager;
-import com.tntbbp.myminecraft.manager.LaevateinnManager;
-import com.tntbbp.myminecraft.manager.StarforceManager;
 import com.tntbbp.myminecraft.util.ItemBuilder;
 import com.tntbbp.myminecraft.util.SpecialItemCatalog;
 import org.bukkit.Bukkit;
@@ -57,19 +50,10 @@ public class CoreBlackMarketGUI {
 
         CoreManager coreManager = plugin.getCoreManager();
         String currencyName = plugin.getEconomyManager().currencyName();
-        EnhanceManager enhanceManager = plugin.getEnhanceManager();
-        CurrencyManager currencyManager = plugin.getCurrencyManager();
-        StarforceManager starforceManager = plugin.getStarforceManager();
-        BlackMarketManager blackMarketManager = plugin.getBlackMarketManager();
-        LaevateinnManager laevateinnManager = plugin.getLaevateinnManager();
-        DrakenPierceManager drakenPierceManager = plugin.getDrakenPierceManager();
-        GleipnirManager gleipnirManager = plugin.getGleipnirManager();
 
         for (int i = 0; i < ITEM_NAMES.size() && i < SLOTS.length; i++) {
             String itemName = ITEM_NAMES.get(i);
-            SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(
-                    enhanceManager, laevateinnManager, currencyManager, starforceManager, blackMarketManager,
-                    drakenPierceManager, gleipnirManager, itemName, 1);
+            SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(plugin, itemName, 1);
             if (resolved == null) {
                 continue;
             }

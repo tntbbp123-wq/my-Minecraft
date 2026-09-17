@@ -48,7 +48,7 @@ public class DrakenPierceListener implements Listener {
         player.sendMessage(ChatColor.AQUA + "드라켄 라이트닝을 발동했습니다!");
     }
 
-    /** Q키(기본 아이템 버리기 키)를 드라코닉 메타모포시스 발동 키로 사용한다. */
+    /** Q키(기본 아이템 버리기 키)를 드라코닉 팽 발동 키로 사용한다. */
     @EventHandler
     public void onDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
@@ -65,12 +65,12 @@ public class DrakenPierceListener implements Listener {
 
         long remaining = manager.remainingMetamorphosisCooldownSeconds(player.getUniqueId());
         if (remaining > 0) {
-            player.sendMessage(ChatColor.RED + "드라코닉 메타모포시스 재사용 대기 중입니다. (" + remaining + "초)");
+            player.sendMessage(ChatColor.RED + "드라코닉 팽 재사용 대기 중입니다. (" + remaining + "초)");
             return;
         }
 
         manager.useMetamorphosis(player);
-        player.sendMessage(ChatColor.LIGHT_PURPLE + "드라코닉 메타모포시스를 발동했습니다!");
+        player.sendMessage(ChatColor.LIGHT_PURPLE + "드라코닉 팽을 발동했습니다!");
     }
 
     /** 글레이프니르의 봉인에 걸려 있으면 스킬을 쓸 수 없다. */

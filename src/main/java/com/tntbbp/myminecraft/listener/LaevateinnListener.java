@@ -3,17 +3,21 @@ package com.tntbbp.myminecraft.listener;
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.InfernalBurnManager;
 import com.tntbbp.myminecraft.manager.LaevateinnManager;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 public class LaevateinnListener implements Listener {
@@ -24,7 +28,7 @@ public class LaevateinnListener implements Listener {
         this.plugin = plugin;
     }
 
-    /** F키(기본 손 바꾸기 키)를 레바테인의 액티브 스킬 발동 키로 사용한다. */
+    /** F키(기본 손 바꾸기 키) = 수르트의 불길. */
     @EventHandler
     public void onSwapHands(PlayerSwapHandItemsEvent event) {
         Player player = event.getPlayer();
@@ -35,20 +39,51 @@ public class LaevateinnListener implements Listener {
         }
 
         event.setCancelled(true);
-        if (plugin.getGleipnirManager().isSealed(player.getUniqueId())) {
-            player.sendMessage(ChatColor.GRAY + "봉인되어 스킬을 쓸 수 없습니다. ("
-                    + plugin.getGleipnirManager().remainingSealSeconds(player.getUniqueId()) + "초)");
+        if (plugin.getCurseManager().blockSkill(player)) {
             return;
         }
 
         long remaining = laevateinnManager.remainingCooldownSeconds(player.getUniqueId());
         if (remaining > 0) {
-            player.sendMessage(ChatColor.RED + "라그나로크의 숨결 재사용 대기 중입니다. (" + remaining + "초)");
+            player.sendMessage(ChatColor.RED + "수르트의 불길 재사용 대기 중입니다. (" + remaining + "초)");
             return;
         }
 
-        laevateinnManager.useBreathOfRagnarok(player);
-        player.sendMessage(ChatColor.GOLD + "라그나로크의 숨결을 발동했습니다!");
+        laevateinnManager.useSurtrFlame(player);
+        player.sendMessage(ChatColor.GOLD + "수르트의 불길을 발동했습니다!");
+    }
+
+    /** 웅크리기 + 우클릭 = 라그나로크. */
+    @EventHandler
+    public void onInteract(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+        if (event.getHand() != EquipmentSlot.HAND) {
+            return;
+        }
+        Player player = event.getPlayer();
+        if (!player.isSneaking()) {
+            return;
+        }
+        LaevateinnManager laevateinnManager = plugin.getLaevateinnManager();
+        if (!laevateinnManager.isLaevateinn(player.getInventory().getItemInMainHand())) {
+            return;
+        }
+
+        event.setCancelled(true);
+        if (plugin.getCurseManager().blockSkill(player)) {
+            return;
+        }
+
+        long remaining = laevateinnManager.remainingRagnarokCooldownSeconds(player.getUniqueId());
+        if (remaining > 0) {
+            player.sendMessage(ChatColor.RED + "라그나로크 재사용 대기 중입니다. (" + remaining + "초)");
+            return;
+        }
+
+        laevateinnManager.useRagnarok(player);
+        player.sendMessage(ChatColor.DARK_RED + "라그나로크! " + ChatColor.GRAY + "아홉 세계를 태우는 불길이 열립니다.");
     }
 
     @EventHandler
@@ -64,9 +99,13 @@ public class LaevateinnListener implements Listener {
             return;
         }
 
-        InfernalBurnManager burnManager = plugin.getInfernalBurnManager();
-        burnManager.applyBurn(target, player.getUniqueId(),
-                laevateinnManager.onHitBurnDurationSeconds(), laevateinnManager.onHitBurnDamagePerSecond());
+        int stacks = plugin.getInfernalBurnManager().applyKarmaStack(target, player.getUniqueId(),
+                laevateinnManager.karmaDurationSeconds(), laevateinnManager.karmaDamagePerSecondPerStack(),
+                laevateinnManager.karmaMaxStacks());
+        if (stacks > 0) {
+            player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(
+                    "§6업화 §f" + stacks + "§7/" + laevateinnManager.karmaMaxStacks() + " 중첩"));
+        }
     }
 
     /** 지옥의 화상 저주가 걸린 대상에게는 바닐라 화염 피해를 적용하지 않는다 (전용 매니저가 직접 처리). */
