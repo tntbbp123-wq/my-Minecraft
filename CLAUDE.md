@@ -19,7 +19,7 @@ git fetch gitea --prune --tags
 
 ## 2. 작업을 올릴 때
 
-1. 빌드를 확인한다: `mvn -B -q package` (Java 21). 빌드 도구가 없으면 설치를 시도하고, 그래도 안 되면 병합 요청 본문에 "빌드 확인 못 함"이라고 적는다. 빌드가 실패하면 올리지 말고 원인을 알린다.
+1. 빌드를 확인한다: `mvn -B -q package` (Java 21). `resourcepack/`을 고쳤다면 `scripts/pack-resourcepack.sh`도 돌려 zip과 README의 해시를 맞춘 뒤 함께 커밋한다. 빌드 도구가 없으면 설치를 시도하고, 그래도 안 되면 병합 요청 본문에 "빌드 확인 못 함"이라고 적는다. 빌드가 실패하면 올리지 말고 원인을 알린다.
 2. 커밋한 뒤 **작업 브랜치를 GN Git에 올린다**: `git push gitea HEAD:refs/heads/<지금 브랜치 이름>`
 3. 그 브랜치로 열린 병합 요청이 GN Git에 없으면 API로 만든다.
    - 확인: `GET https://gn.snrnsrk9901.com/api/v1/repos/GN/gn-plugin/pulls?state=open` 결과에서 `head.ref`가 지금 브랜치인 것

@@ -461,8 +461,30 @@ Minecraft 1.21.2 이후로는 아이템 텍스처 분기가 `assets/<ns>/models/
 resource-pack-prompt={"text":"이 서버는 필수 리소스팩이 있습니다. 다운로드 후 입장해주세요."}
 ```
 
-해시는 `sha1sum MyMinecraft-ResourcePack.zip` 로 확인할 수 있습니다. 서버를 재시작하면
-접속하는 플레이어에게 리소스팩 적용 여부를 묻는 창이 뜹니다.
+서버를 재시작하면 접속하는 플레이어에게 리소스팩 적용 여부를 묻는 창이 뜹니다.
+
+**해시를 어디서 가져오나**
+
+세 군데 중 편한 곳에서 그대로 복사하면 됩니다. 셋은 항상 같은 값입니다.
+
+| 어디 | 무엇 |
+|---|---|
+| 바로 위 코드블록 | 지금 `main`에 올라가 있는 팩의 해시 (팩이 바뀌면 같이 갱신됩니다) |
+| [릴리스](https://github.com/tntbbp123-wq/my-Minecraft/releases) 페이지 | "리소스팩" 항목에 `server.properties` 두 줄이 통째로 있습니다. 그 버전의 팩과 짝인 값이라 버전을 고정해 쓸 때 안전합니다 |
+| `scripts/pack-resourcepack.sh --print` | 손에 있는 zip에서 직접 뽑습니다 |
+
+**팩을 고쳤다면**
+
+`resourcepack/` 안을 고친 뒤 아래 한 줄이면 zip을 다시 묶고, 새 해시를 출력하고, 이 README의
+`resource-pack-sha1` 값까지 맞춰줍니다.
+
+```
+scripts/pack-resourcepack.sh
+```
+
+출력에 나온 두 줄을 `server.properties`에 붙이고, **zip과 README를 함께 커밋**하세요. 둘 중
+하나만 올리면 해시가 어긋나 클라이언트가 팩을 거부하는데, 릴리스 워크플로가
+`scripts/pack-resourcepack.sh --check`로 먼저 걸러서 그 상태로는 릴리스가 만들어지지 않습니다.
 
 ## 전투 음악 (선택 사항)
 
@@ -490,10 +512,9 @@ combat:
    ffmpeg -i 원본.mp3 -vn -c:a libvorbis -q:a 3 -ar 44100 combat.ogg
    ```
 2. `resourcepack/assets/myminecraft/sounds/music/combat.ogg`를 교체합니다.
-3. zip을 다시 만들고 해시를 갱신합니다.
+3. zip을 다시 만들고 해시를 갱신합니다. 아래 한 줄이면 README까지 같이 맞춰집니다.
    ```
-   cd resourcepack && zip -r ../MyMinecraft-ResourcePack.zip . -x '.*' && cd ..
-   sha1sum MyMinecraft-ResourcePack.zip
+   scripts/pack-resourcepack.sh
    ```
 4. `server.properties`의 `resource-pack-sha1`과 `config.yml`의 `track-length-seconds`
    (**실제 음원 길이(초)**)를 맞춰줍니다. 이 값이 틀리면 긴 전투에서 음악이 끊기거나 겹칩니다.

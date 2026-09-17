@@ -46,15 +46,53 @@ jobs:
       - name: 빌드
         run: mvn --batch-mode --no-transfer-progress clean package
 
+      # 팩을 고치고 zip을 다시 안 올렸거나 README 해시를 안 맞췄으면 여기서 잡는다.
+      # 해시가 틀린 팩은 클라이언트가 통째로 거부하므로 릴리스 전에 막는 편이 낫다.
+      - name: 리소스팩 SHA-1 확인
+        id: pack
+        run: |
+          scripts/pack-resourcepack.sh --check
+          SHA1=$(sha1sum MyMinecraft-ResourcePack.zip | cut -d' ' -f1)
+          echo "sha1=$SHA1" >> "$GITHUB_OUTPUT"
+          # 첨부용 파일 (서버 관리자가 받아서 바로 쓰거나 스크립트로 비교할 수 있게)
+          echo "$SHA1" > MyMinecraft-ResourcePack.zip.sha1
+          # Actions 실행 화면 맨 위에 복사 버튼과 함께 뜬다
+          {
+            echo "## 리소스팩 SHA-1"
+            echo
+            echo '```'
+            echo "$SHA1"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: 릴리스 생성 및 파일 첨부
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.version.outputs.tag }}
           VERSION: ${{ steps.version.outputs.version }}
+          SHA1: ${{ steps.pack.outputs.sha1 }}
         run: |
           gh release create "$TAG" \
             --title "MyMinecraft $TAG" \
             --generate-notes \
             "target/MyMinecraft-$VERSION.jar#플러그인 (plugins/ 폴더에 넣으세요)" \
             "target/MyMinecraft-$VERSION-sources.jar#소스 코드 (코드 확인용)" \
-            "MyMinecraft-ResourcePack.zip#리소스팩 (선택, 전용 아이템 텍스처)"
+            "MyMinecraft-ResourcePack.zip#리소스팩 (선택, 전용 아이템 텍스처)" \
+            "MyMinecraft-ResourcePack.zip.sha1#리소스팩 SHA-1 (server.properties용)"
+
+          # 자동 생성된 노트 뒤에 리소스팩 설정을 붙인다. 코드블록이라 릴리스 화면에서
+          # 복사 버튼 한 번으로 server.properties에 그대로 옮길 수 있다.
+          PACK_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/MyMinecraft-ResourcePack.zip"
+          {
+            gh release view "$TAG" --json body --jq .body
+            echo
+            echo "## 리소스팩"
+            echo
+            echo '`server.properties`에 아래 두 줄을 넣으세요. 이 해시는 위에 첨부된 이 버전의 팩과 짝입니다.'
+            echo
+            echo '```properties'
+            echo "resource-pack=$PACK_URL"
+            echo "resource-pack-sha1=$SHA1"
+            echo '```'
+          } > notes.md
+          gh release edit "$TAG" --notes-file notes.md
