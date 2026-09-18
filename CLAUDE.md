@@ -42,3 +42,12 @@ git fetch gitea --prune --tags
 ## 5. 릴리스 (사용자가 요청할 때만)
 
 병합이 끝난 `gitea/main` 커밋에 `pom.xml`의 `<version>`과 같은 `vX.Y.Z` 태그를 만들고 `git push gitea vX.Y.Z` 한다. 1분 안에 GitHub로 복사되고, GitHub Actions 릴리스(`.github/workflows/release.yml`)가 jar와 리소스팩을 첨부한다.
+
+## 6. 돈·아이템이 오가는 기능을 만들 때 (웹 관리자 거래 기록)
+
+웹 관리자(`/_admin`)의 거래 기록은 플러그인이 남기는 `plugins/MyMinecraft/logs/trade-날짜.jsonl`을 읽는다. 그래서 G·아이템·주식이 플레이어에게 들어가거나 나가는 기능(개인 거래, 거래소·경매, 상점, 보상 지급 등)을 새로 만들면 **반드시 거래 기록을 남긴다.**
+
+- 이미 있는 종류면 `plugin.getTradeLogger()`의 메서드를 쓴다(예: `coinBuy`, `shopCore`, `stockBuy`, `mailClaim`).
+- 새 종류면 `plugin.getTradeLogger().record("종류_이름", actor, data)`로 남긴다. `data`에는 기존 종류와 같은 필드 이름을 쓴다: 플레이어 `uuid`·`name`, 금액 `amount`(단가·합계는 `unit_price`·`total`), 아이템 `item_name`·`count`. 그리고 두 사람 사이 거래면 양쪽 uuid를 모두 넣는다. 새 종류 이름과 필드는 병합 요청 본문에 적는다(웹 화면 표시 이름을 맞추기 위해).
+- 기록은 돈·아이템이 **실제로 옮겨진 뒤**에 한 번만 남긴다(실패·취소는 남기지 않는다).
+- 플레이어에게 아이템·G를 보내는 보상은 직접 인벤토리에 넣지 말고 우편 `plugin.getMailManager().send(...)`를 쓰면 기록과 인벤토리 가득 참 처리가 같이 된다.
