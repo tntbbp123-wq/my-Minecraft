@@ -435,7 +435,7 @@ draken-pierce:
     chain-damage-multiplier: 0.6
     shock-duration-seconds: 5
     shock-damage-per-second: 2.5
-  # 드라코닉 메타모포시스 (Q키 발동) - 번개 폭발 후 쌍단검으로 일시 변형
+  # 드라코닉 메타모포시스 (웅크리기+F 발동) - 번개 폭발 후 쌍단검으로 일시 변형
   metamorphosis:
     cooldown-seconds: 25
     # 변형 지속시간(초). 이동속도/공격속도 상승도 이 시간 동안 유지됨

@@ -122,7 +122,7 @@ public class RaidBossListener implements Listener {
         }
     }
 
-    /** 우클릭 스킬, 레바테인/드라켄피어스의 F·Q 키 발동을 모두 막는다. */
+    /** 우클릭 스킬과 F·Q 키 발동(레바테인·드라켄피어스·글레이프니르 등)을 모두 막는다. */
     @EventHandler(ignoreCancelled = true)
     public void onMindBrokenInteract(PlayerInteractEvent event) {
         if (plugin.getRaidBossManager().isMindBroken(event.getPlayer().getUniqueId())) {

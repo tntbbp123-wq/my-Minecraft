@@ -11,7 +11,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -23,7 +22,10 @@ public class DrakenPierceListener implements Listener {
         this.plugin = plugin;
     }
 
-    /** F키(기본 손 바꾸기 키)를 드라켄 라이트닝 발동 키로 사용한다. */
+    /**
+     * F키(기본 손 바꾸기 키) 하나로 두 스킬을 모두 발동한다.
+     * 그냥 F는 드라켄 라이트닝, 웅크린 채로 F는 드라코닉 팽이다.
+     */
     @EventHandler
     public void onSwapHands(PlayerSwapHandItemsEvent event) {
         Player player = event.getPlayer();
@@ -38,6 +40,15 @@ public class DrakenPierceListener implements Listener {
             return;
         }
 
+        if (player.isSneaking()) {
+            useDraconicFang(player, manager);
+        } else {
+            useDrakenLightning(player, manager);
+        }
+    }
+
+    /** [F] 드라켄 라이트닝. */
+    private void useDrakenLightning(Player player, DrakenPierceManager manager) {
         long remaining = manager.remainingLightningCooldownSeconds(player.getUniqueId());
         if (remaining > 0) {
             player.sendMessage(ChatColor.RED + "드라켄 라이트닝 재사용 대기 중입니다. (" + remaining + "초)");
@@ -48,21 +59,8 @@ public class DrakenPierceListener implements Listener {
         player.sendMessage(ChatColor.AQUA + "드라켄 라이트닝을 발동했습니다!");
     }
 
-    /** Q키(기본 아이템 버리기 키)를 드라코닉 팽 발동 키로 사용한다. */
-    @EventHandler
-    public void onDrop(PlayerDropItemEvent event) {
-        Player player = event.getPlayer();
-        ItemStack mainHand = player.getInventory().getItemInMainHand();
-        DrakenPierceManager manager = plugin.getDrakenPierceManager();
-        if (!manager.isDrakenPierce(mainHand)) {
-            return;
-        }
-
-        event.setCancelled(true);
-        if (isSealed(player)) {
-            return;
-        }
-
+    /** [웅크리기+F] 드라코닉 팽. */
+    private void useDraconicFang(Player player, DrakenPierceManager manager) {
         long remaining = manager.remainingMetamorphosisCooldownSeconds(player.getUniqueId());
         if (remaining > 0) {
             player.sendMessage(ChatColor.RED + "드라코닉 팽 재사용 대기 중입니다. (" + remaining + "초)");
