@@ -3,6 +3,7 @@ package com.tntbbp.myminecraft.command.economy;
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.economy.StockManager;
 import com.tntbbp.myminecraft.model.Stock;
+import com.tntbbp.myminecraft.util.CommandActors;
 import com.tntbbp.myminecraft.util.TabCompletions;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -61,7 +62,7 @@ public class StockGiveCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        stockManager.giveHolding(target.getUniqueId(), stock.getId(), amount);
+        stockManager.giveHolding(target.getUniqueId(), stock.getId(), amount, CommandActors.actorOf(sender));
         sender.sendMessage(ChatColor.GREEN + target.getName() + "님에게 " + stock.getName() + " " + amount + "주를 지급했습니다.");
         target.sendMessage(ChatColor.GREEN + stock.getName() + " " + amount + "주를 받았습니다.");
         return true;

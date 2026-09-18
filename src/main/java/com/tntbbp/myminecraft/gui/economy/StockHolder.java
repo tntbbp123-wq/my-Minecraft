@@ -12,6 +12,7 @@ public class StockHolder implements InventoryHolder {
     private Inventory inventory;
     private final UUID owner;
     private final Map<Integer, String> slotToStockId = new HashMap<>();
+    private int page;
 
     public StockHolder(UUID owner) {
         this.owner = owner;
@@ -36,5 +37,14 @@ public class StockHolder implements InventoryHolder {
 
     public String getStockId(int slot) {
         return slotToStockId.get(slot);
+    }
+
+    /** 지금 보고 있는 페이지(0부터). */
+    public int getPage() {
+        return page;
+    }
+
+    void setPage(int page) {
+        this.page = page;
     }
 }

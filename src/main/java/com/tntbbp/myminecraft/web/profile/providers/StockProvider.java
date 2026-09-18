@@ -8,6 +8,7 @@ import com.tntbbp.myminecraft.model.Stock;
 import com.tntbbp.myminecraft.web.profile.PlayerDataProvider;
 import org.bukkit.OfflinePlayer;
 
+import java.util.Map;
 import java.util.UUID;
 
 /** {@code stocks} 섹션: 보유 수량이 1 이상인 종목과 현재가 기준 평가액. */
@@ -30,11 +31,12 @@ public class StockProvider implements PlayerDataProvider {
         UUID uuid = player.getUniqueId();
         JsonArray holdings = new JsonArray();
         double total = 0.0;
-        for (Stock stock : stockManager.getStocks()) {
-            int quantity = stockManager.getHolding(uuid, stock.getId());
-            if (quantity <= 0) {
+        for (Map.Entry<String, Integer> holding : stockManager.getHoldings(uuid).entrySet()) {
+            Stock stock = stockManager.getStock(holding.getKey());
+            if (stock == null) {
                 continue;
             }
+            int quantity = holding.getValue();
             double value = stock.getPrice() * quantity;
             JsonObject entry = new JsonObject();
             entry.addProperty("stock_id", stock.getId());

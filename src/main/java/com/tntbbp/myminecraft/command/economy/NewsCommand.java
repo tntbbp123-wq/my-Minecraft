@@ -5,6 +5,7 @@ import com.tntbbp.myminecraft.manager.economy.GeminiNewsClient;
 import com.tntbbp.myminecraft.manager.economy.NewsManager;
 import com.tntbbp.myminecraft.manager.economy.StockManager;
 import com.tntbbp.myminecraft.model.Stock;
+import com.tntbbp.myminecraft.util.CommandActors;
 import com.tntbbp.myminecraft.util.TabCompletions;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -48,6 +49,7 @@ public class NewsCommand implements CommandExecutor, TabCompleter {
         }
 
         boolean fake = label.equalsIgnoreCase("가짜뉴스작성");
+        String author = CommandActors.actorOf(sender);
 
         if (args.length < 2) {
             sendUsage(sender, label);
@@ -72,7 +74,7 @@ public class NewsCommand implements CommandExecutor, TabCompleter {
             geminiNewsClient.generateNewsWithImpact(finalStock, topic, fake)
                     .thenAccept(draft -> Bukkit.getScheduler().runTask(plugin, () -> {
                         String sanitized = NewsManager.sanitizeContent(draft.content());
-                        newsManager.submit(finalStock, draft.direction(), draft.magnitudePercent(), sanitized, fake);
+                        newsManager.submit(finalStock, draft.direction(), draft.magnitudePercent(), sanitized, fake, author);
                         sender.sendMessage(ChatColor.GREEN + (fake ? "가짜 뉴스" : "뉴스") + "를 예약했습니다: "
                                 + ChatColor.WHITE + sanitized);
                         sender.sendMessage(ChatColor.GRAY + "(AI 판단: " + (draft.direction() > 0 ? "상승" : "하락")
@@ -127,7 +129,7 @@ public class NewsCommand implements CommandExecutor, TabCompleter {
             geminiNewsClient.generateNewsArticle(topic, fake)
                     .thenAccept(generatedContent -> Bukkit.getScheduler().runTask(plugin, () -> {
                         String sanitized = NewsManager.sanitizeContent(generatedContent);
-                        newsManager.submit(finalStock, finalDirection, finalMagnitude, sanitized, fake);
+                        newsManager.submit(finalStock, finalDirection, finalMagnitude, sanitized, fake, author);
                         sender.sendMessage(ChatColor.GREEN + (fake ? "가짜 뉴스" : "뉴스") + "를 예약했습니다: "
                                 + ChatColor.WHITE + sanitized);
                     }))
@@ -139,7 +141,7 @@ public class NewsCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        newsManager.submit(stock, direction, magnitude, contentArg, fake);
+        newsManager.submit(stock, direction, magnitude, contentArg, fake, author);
         sender.sendMessage(ChatColor.GREEN + (fake ? "가짜 뉴스" : "뉴스") + "를 예약했습니다.");
         return true;
     }

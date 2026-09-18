@@ -2,6 +2,7 @@ package com.tntbbp.myminecraft.command.economy;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.economy.StockManager;
+import com.tntbbp.myminecraft.util.CommandActors;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -50,14 +51,16 @@ public class StockAddCommand implements CommandExecutor {
         }
         String businessType = businessBuilder.toString();
 
-        StockManager.AddResult result = stockManager.addCustomStock(name, minPrice, maxPrice, changeUnit, businessType);
-        switch (result) {
+        StockManager.AddOutcome outcome = stockManager.addCustomStock(name, minPrice, maxPrice, changeUnit,
+                businessType, null, CommandActors.actorOf(sender));
+        switch (outcome.result()) {
             case SUCCESS -> sender.sendMessage(ChatColor.GREEN + "'" + name + "' 종목을 추가했습니다. "
                     + "(시작가 " + minPrice + ", 최소 " + minPrice + " ~ 최대 " + maxPrice
                     + ", 변동단위 " + changeUnit + ", 업종: " + businessType + ")");
             case DUPLICATE_NAME -> sender.sendMessage(ChatColor.RED + "이미 존재하는 이름입니다.");
             case INVALID_RANGE -> sender.sendMessage(ChatColor.RED
                     + "최소값은 0 이상, 최대값은 최소값보다 커야 하며, 변동단위는 0보다 커야 합니다.");
+            case INVALID_NAME -> sender.sendMessage(ChatColor.RED + outcome.message());
         }
         return true;
     }
