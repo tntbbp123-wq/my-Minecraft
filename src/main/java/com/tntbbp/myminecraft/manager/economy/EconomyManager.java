@@ -1,6 +1,7 @@
 package com.tntbbp.myminecraft.manager.economy;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
+import com.tntbbp.myminecraft.util.AtomicYaml;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -42,6 +43,14 @@ public class EconomyManager {
         return data.getDouble(uuid.toString(), startingBalance);
     }
 
+    /**
+     * 잔액을 조회만 한다. {@link #getBalance}와 달리 계좌가 없어도 만들거나 저장하지 않고 시작 잔액 값을 돌려준다
+     * (웹 관리자 프로필 조회처럼 기록을 남기면 안 되는 곳에서 사용).
+     */
+    public double peekBalance(UUID uuid) {
+        return data.getDouble(uuid.toString(), startingBalance);
+    }
+
     public boolean has(UUID uuid, double amount) {
         return getBalance(uuid) >= amount;
     }
@@ -64,7 +73,7 @@ public class EconomyManager {
 
     public void save() {
         try {
-            data.save(file);
+            AtomicYaml.save(data, file);
         } catch (IOException e) {
             plugin.getLogger().severe("economy.yml 저장 실패: " + e.getMessage());
         }
