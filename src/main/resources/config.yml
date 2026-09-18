@@ -37,6 +37,18 @@ activity-log:
 home:
   max-homes: 5
 
+# 우편 (/우편함, 메뉴의 우편함 버튼, 웹 관리자 아이템 지급). 우편은 plugins/MyMinecraft/mail/<uuid>.yml 에 저장된다.
+mail:
+  # 일반(시스템·퀘스트) 우편 보관 기간(일)과 우편함 최대 개수 — 기획서 06 §4.6. 가득 차면 새 우편은 보류하고 알린다.
+  regular-retention-days: 7
+  regular-max-count: 50
+  # 관리자(웹) 우편 기본 보관 기간(일). 관리자 우편은 위 최대 개수에 포함되지 않는다.
+  admin-retention-days: 30
+  # 관리자 우편에도 안전상 절대 상한을 둘지(받지 않은 우편 전체 수 기준, 0=무제한). 기본 무제한(상한 제외).
+  admin-max-count: 0
+  # 퀘스트 보상 등 지연 발송 대기열의 발송 간격(틱, 20틱=1초). 웹 단건 발송에는 영향 없음(기획서 06: 3초).
+  send-batch-delay-ticks: 60
+
 tpa:
   request-timeout-seconds: 30
 

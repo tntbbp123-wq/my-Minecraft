@@ -26,6 +26,8 @@ public class MenuGUI {
     public static final int ENHANCE_SLOT = 38;
     public static final int TRANSCEND_SLOT = 40;
     public static final int STARFORCE_SLOT = 42;
+    // 맨 아래 줄: 우편함
+    public static final int MAIL_SLOT = 49;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -90,6 +92,18 @@ public class MenuGUI {
                         "§7스타포스 창을 엽니다."
                 ))
                 .build());
+
+        int unclaimedMail = plugin.getMailManager().unclaimedCount(player.getUniqueId());
+        ItemBuilder mail = new ItemBuilder(Material.PAPER)
+                .name("§6우편함" + (unclaimedMail > 0 ? " §e(" + unclaimedMail + ")" : ""))
+                .lore(List.of(
+                        unclaimedMail > 0 ? "§f받지 않은 우편: §e" + unclaimedMail + "통" : "§7받지 않은 우편이 없습니다.",
+                        "§7클릭하면 우편함을 엽니다."
+                ));
+        if (unclaimedMail > 0) {
+            mail.glow();
+        }
+        inventory.setItem(MAIL_SLOT, mail.build());
 
         player.openInventory(inventory);
     }

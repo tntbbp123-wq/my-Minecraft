@@ -15,6 +15,7 @@ import com.tntbbp.myminecraft.gui.item.StarforceGUI;
 import com.tntbbp.myminecraft.gui.item.StarforceHolder;
 import com.tntbbp.myminecraft.gui.item.TranscendAltarGUI;
 import com.tntbbp.myminecraft.gui.item.TranscendAltarHolder;
+import com.tntbbp.myminecraft.gui.mail.MailGUI;
 import com.tntbbp.myminecraft.gui.menu.MenuGUI;
 import com.tntbbp.myminecraft.gui.menu.MenuHolder;
 import com.tntbbp.myminecraft.gui.social.HomeGUI;
@@ -214,6 +215,7 @@ public class GUIListener implements Listener {
             case MenuGUI.ENHANCE_SLOT -> new EnhanceGUI(plugin, player).open();
             case MenuGUI.TRANSCEND_SLOT -> new TranscendAltarGUI(plugin, player).open();
             case MenuGUI.STARFORCE_SLOT -> new StarforceGUI(plugin, player).open();
+            case MenuGUI.MAIL_SLOT -> new MailGUI(plugin, player).open();
             default -> {
             }
         }

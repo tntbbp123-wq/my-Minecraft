@@ -8,6 +8,7 @@ import com.tntbbp.myminecraft.command.economy.NewsCommand;
 import com.tntbbp.myminecraft.command.economy.StockAddCommand;
 import com.tntbbp.myminecraft.command.economy.StockGiveCommand;
 import com.tntbbp.myminecraft.command.item.TranscendAltarPlaceCommand;
+import com.tntbbp.myminecraft.command.mail.MailCommand;
 import com.tntbbp.myminecraft.command.menu.EcCommand;
 import com.tntbbp.myminecraft.command.menu.MenuCommand;
 import com.tntbbp.myminecraft.command.raid.RaidBossCommand;
@@ -28,6 +29,8 @@ import com.tntbbp.myminecraft.listener.economy.BlackMarketListener;
 import com.tntbbp.myminecraft.listener.economy.ProtocolSilenceListener;
 import com.tntbbp.myminecraft.listener.item.StarforceListener;
 import com.tntbbp.myminecraft.listener.item.TranscendAltarBlockListener;
+import com.tntbbp.myminecraft.listener.mail.MailGUIListener;
+import com.tntbbp.myminecraft.listener.mail.MailJoinListener;
 import com.tntbbp.myminecraft.listener.raid.RaidBossListener;
 import com.tntbbp.myminecraft.listener.social.DiscordIntrusionListener;
 import com.tntbbp.myminecraft.listener.weapon.BalmungListener;
@@ -58,6 +61,7 @@ import com.tntbbp.myminecraft.manager.item.EnhanceManager;
 import com.tntbbp.myminecraft.manager.item.GradeManager;
 import com.tntbbp.myminecraft.manager.item.StarforceManager;
 import com.tntbbp.myminecraft.manager.item.TranscendAltarBlockManager;
+import com.tntbbp.myminecraft.manager.mail.MailManager;
 import com.tntbbp.myminecraft.manager.raid.RaidBossManager;
 import com.tntbbp.myminecraft.manager.social.DiscordLinkManager;
 import com.tntbbp.myminecraft.manager.social.DiscordManager;
@@ -120,6 +124,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private RaidBossManager raidBossManager;
     private SecretResolver secretResolver;
     private GleipnirManager gleipnirManager;
+    private MailManager mailManager;
     private EventLog eventLog;
     private TradeLogger tradeLogger;
     private AdminLog adminLog;
@@ -169,6 +174,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.coreManager = new CoreManager(this);
         this.gleipnirManager = new GleipnirManager(this);
         this.raidBossManager = new RaidBossManager(this);
+        this.mailManager = new MailManager(this);
 
         // 웹 관리자(gn-admin)용 기록기: 매니저가 만들어진 뒤, 태스크(주식 변동 등)가 돌기 전에 준비한다.
         this.eventLog = new EventLog(this);
@@ -195,6 +201,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         discordManager.start();
         raidBossManager.start();
         combatMusicManager.start();
+        mailManager.start();
 
         TpaCommand tpaCommand = new TpaCommand(this);
         getCommand("텔레포트요청").setExecutor(tpaCommand);
@@ -208,6 +215,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
         getCommand("엔더상자").setExecutor(new EcCommand());
         getCommand("은행").setExecutor(new BankCommand(this));
+        getCommand("우편함").setExecutor(new MailCommand(this));
         getCommand("메뉴").setExecutor(new MenuCommand(this));
         getCommand("로비").setExecutor(new LobbyCommand(this));
         getCommand("스폰").setExecutor(new SpawnCommand(this));
@@ -244,6 +252,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlackMarketListener(this), this);
         getServer().getPluginManager().registerEvents(new RaidBossListener(this), this);
         getServer().getPluginManager().registerEvents(new GleipnirListener(this), this);
+        getServer().getPluginManager().registerEvents(new MailGUIListener(this), this);
+        getServer().getPluginManager().registerEvents(new MailJoinListener(this), this);
 
         RaidBossCommand raidBossCommand = new RaidBossCommand(this);
         getCommand("레이드보스").setExecutor(raidBossCommand);
@@ -345,6 +355,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
         }
         if (PacketEvents.getAPI() != null && PacketEvents.getAPI().isInitialized()) {
             PacketEvents.getAPI().terminate();
+        }
+        // 지연 발송 대기 우편을 보내고, 아직 디스크에 쓰지 못한 우편 파일을 모두 저장한다.
+        if (mailManager != null) {
+            mailManager.shutdown();
         }
         getLogger().info("MyMinecraft 플러그인이 비활성화되었습니다.");
         // 활동 기록은 맨 마지막에 남은 것을 모두 파일에 쓰고 닫는다.
@@ -479,6 +493,11 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public GleipnirManager getGleipnirManager() {
         return gleipnirManager;
+    }
+
+    /** 우편 시스템. {@code send}/{@code enqueue}는 퀘스트 보상 등에서 쓰는 공개 API. */
+    public MailManager getMailManager() {
+        return mailManager;
     }
 
     public EventLog getEventLog() {
