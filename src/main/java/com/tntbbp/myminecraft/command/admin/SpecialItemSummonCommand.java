@@ -1,5 +1,6 @@
 package com.tntbbp.myminecraft.command.admin;
 
+import com.google.gson.JsonObject;
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.util.SpecialItemCatalog;
 import com.tntbbp.myminecraft.util.TabCompletions;
@@ -8,6 +9,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
@@ -65,10 +67,27 @@ public class SpecialItemSummonCommand implements CommandExecutor, TabCompleter {
 
         target.getInventory().addItem(resolved.item()).values()
                 .forEach(leftover -> target.getWorld().dropItem(target.getLocation(), leftover));
+        logGrant(sender, target, itemName, amount);
 
         sender.sendMessage(ChatColor.GREEN + target.getName() + "님에게 " + resolved.displayName() + " " + amount + "개를 지급했습니다.");
         target.sendMessage(ChatColor.GREEN + resolved.displayName() + " " + amount + "개를 받았습니다.");
         return true;
+    }
+
+    /**
+     * 관리자 아이템 지급 거래 기록 {@code admin_item_grant}
+     * ({@code {"actor","uuid","name","item_name","count"}}, api-bridge.md §5.4 P2 변경 메모).
+     */
+    private void logGrant(CommandSender sender, Player target, String itemName, int amount) {
+        String actor = sender instanceof Player player ? player.getName()
+                : sender instanceof ConsoleCommandSender ? "console" : sender.getName();
+        JsonObject data = new JsonObject();
+        data.addProperty("actor", actor);
+        data.addProperty("uuid", target.getUniqueId().toString());
+        data.addProperty("name", target.getName());
+        data.addProperty("item_name", itemName);
+        data.addProperty("count", amount);
+        plugin.getTradeLogger().record("admin_item_grant", actor, data);
     }
 
     @Override
