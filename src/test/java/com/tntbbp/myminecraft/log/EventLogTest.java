@@ -127,6 +127,41 @@ class EventLogTest {
     }
 
     @Test
+    void insertsNewlineBeforeAppendingToFileWithoutTrailingNewline() throws IOException {
+        // 비정상 종료로 마지막 줄이 개행 없이 끊긴 상황을 흉내낸다.
+        Path file = dir.resolve("activity-2026-09-18.jsonl");
+        Files.writeString(file, "{\"v\":1,\"ts\":1,\"seq\":1,\"type\":\"join\",\"actor\":\"a\",\"data\":{}}");
+        assertTrue(EventLog.fileEndsWithoutNewline(file.toFile()));
+
+        EventLog log = new EventLog(dir.toFile(), 100, 90, LOGGER, () -> NOW);
+        log.write(EventLog.Channel.ACTIVITY, "join", "b", new JsonObject());
+        log.flush();
+
+        List<String> lines = read("activity-2026-09-18.jsonl");
+        assertEquals(2, lines.size());
+        assertEquals("a", JsonParser.parseString(lines.get(0)).getAsJsonObject().get("actor").getAsString());
+        assertEquals("b", JsonParser.parseString(lines.get(1)).getAsJsonObject().get("actor").getAsString());
+    }
+
+    @Test
+    void doesNotInsertNewlineWhenFileAlreadyEndsWithOne() throws IOException {
+        Path file = dir.resolve("activity-2026-09-18.jsonl");
+        Files.writeString(file, "{\"v\":1,\"ts\":1,\"seq\":1,\"type\":\"join\",\"actor\":\"a\",\"data\":{}}\n");
+        assertFalse(EventLog.fileEndsWithoutNewline(file.toFile()));
+
+        EventLog log = new EventLog(dir.toFile(), 100, 90, LOGGER, () -> NOW);
+        log.write(EventLog.Channel.ACTIVITY, "join", "b", new JsonObject());
+        log.flush();
+
+        assertEquals(2, read("activity-2026-09-18.jsonl").size());
+    }
+
+    @Test
+    void fileEndsWithoutNewlineIsFalseForMissingOrEmptyFile() {
+        assertFalse(EventLog.fileEndsWithoutNewline(dir.resolve("no-such-file.jsonl").toFile()));
+    }
+
+    @Test
     void retentionOnlyMatchesLogFiles() {
         LocalDate today = LocalDate.of(2026, 9, 18);
         assertTrue(EventLog.isExpired("activity-2026-06-19.jsonl", today, 90));

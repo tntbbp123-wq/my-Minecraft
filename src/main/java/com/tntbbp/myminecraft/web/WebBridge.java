@@ -107,6 +107,16 @@ public class WebBridge {
 
         try {
             registerHandlers();
+            // JDK HttpServer는 헤더/응답 읽기·쓰기 시간 제한이 기본 없어, 느린 연결 2개만으로도 스레드
+            // 2개가 계속 묶일 수 있다. 이 값은 JDK가 HttpServer 클래스를 처음 쓸 때 읽으므로 반드시
+            // HttpServer.create(...) 호출 전에 두어야 하고, JVM 옵션으로 이미 설정돼 있으면 덮어쓰지 않는다.
+            // maxRspTime은 긴 명령 출력 응답을 끊지 않도록 넉넉히 60초로 둔다.
+            if (System.getProperty("sun.net.httpserver.maxReqTime") == null) {
+                System.setProperty("sun.net.httpserver.maxReqTime", "10");
+            }
+            if (System.getProperty("sun.net.httpserver.maxRspTime") == null) {
+                System.setProperty("sun.net.httpserver.maxRspTime", "60");
+            }
             server = HttpServer.create(new InetSocketAddress(bindAddress, port), 32);
             executor = Executors.newFixedThreadPool(threads, namedDaemonThreads());
             server.setExecutor(executor);

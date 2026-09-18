@@ -22,12 +22,27 @@ class CommandRunnerTest {
     }
 
     @Test
+    void blocksReloadBehindExecuteRun() {
+        assertTrue(CommandRunner.isBlocked("execute run reload confirm"));
+        assertTrue(CommandRunner.isBlocked("execute as @a run rl"));
+        assertTrue(CommandRunner.isBlocked("execute run bukkit:reload confirm"));
+        assertTrue(CommandRunner.isBlocked("execute run minecraft:reload"));
+        assertTrue(CommandRunner.isBlocked("minecraft:execute run reload"));
+        // 중첩된 execute도 모든 run 뒤를 보므로 막힌다
+        assertTrue(CommandRunner.isBlocked("execute run execute run reload confirm"));
+        assertTrue(CommandRunner.isBlocked("  /EXECUTE as @a at @s RUN reload confirm "));
+    }
+
+    @Test
     void allowsOtherCommands() {
         assertFalse(CommandRunner.isBlocked("time set day"));
         assertFalse(CommandRunner.isBlocked("reloadx"));
         assertFalse(CommandRunner.isBlocked("say reload"));
         assertFalse(CommandRunner.isBlocked("minecraft:give Gonk diamond"));
         assertFalse(CommandRunner.isBlocked(""));
+        assertFalse(CommandRunner.isBlocked("execute as @a run say hi"));
+        // execute로 시작하지 않으면 문자열 안의 run은 검사하지 않는다
+        assertFalse(CommandRunner.isBlocked("say run reload"));
     }
 
     @Test

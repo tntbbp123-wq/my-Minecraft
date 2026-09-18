@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -295,10 +296,33 @@ public class EventLog {
             throw new IOException("기록 폴더를 만들 수 없습니다: " + directory);
         }
         File file = new File(directory, fileName(channel, today));
+        // 서버가 비정상 종료되면 이 파일의 마지막 줄이 개행 없이 끊겨 있을 수 있다. 이어 쓰기 전에
+        // 확인해서, 그렇다면 개행을 하나 먼저 써 이전 조각과 새 이벤트가 한 줄로 붙지 않게 한다.
+        boolean needsLeadingNewline = fileEndsWithoutNewline(file);
         Writer writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(file, true), StandardCharsets.UTF_8));
+        if (needsLeadingNewline) {
+            writer.write('\n');
+        }
         openFiles.put(channel, new OpenFile(today, writer));
         return writer;
+    }
+
+    /** {@code file}이 존재하고 크기가 0보다 크면서 마지막 바이트가 개행({@code \n})이 아닌지. 순수 함수. */
+    static boolean fileEndsWithoutNewline(File file) {
+        if (!file.isFile()) {
+            return false;
+        }
+        long length = file.length();
+        if (length <= 0) {
+            return false;
+        }
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+            raf.seek(length - 1);
+            return raf.read() != '\n';
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private void flushWriters() {

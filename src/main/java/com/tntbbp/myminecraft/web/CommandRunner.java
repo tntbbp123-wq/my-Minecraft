@@ -217,10 +217,23 @@ public class CommandRunner {
         return value;
     }
 
-    /** 통로가 항상 막는 명령인지: 정규화 후 첫 토큰이 {@code reload}/{@code rl} (예: {@code reload confirm}, {@code bukkit:rl}). */
+    /**
+     * 통로가 항상 막는 명령인지: 정규화 후 첫 토큰이 {@code reload}/{@code rl} (예: {@code reload confirm},
+     * {@code bukkit:rl}). {@code execute ... run <명령> ...} 형태면 문자열 안의 모든 {@code run} 토큰 바로 다음
+     * 라벨도 같은 기준으로 검사한다(예: {@code execute run reload confirm}, {@code execute as @a run rl},
+     * 중첩된 {@code execute ... run execute ... run reload}도 모든 run 뒤를 보므로 막힌다).
+     */
     public static boolean isBlocked(String command) {
-        String label = LogRedaction.commandLabel(normalize(command));
-        return BLOCKED_LABELS.contains(label);
+        String normalized = normalize(command);
+        if (BLOCKED_LABELS.contains(LogRedaction.commandLabel(normalized))) {
+            return true;
+        }
+        for (int index : LogRedaction.runLabelIndexes(normalized)) {
+            if (BLOCKED_LABELS.contains(LogRedaction.commandLabel(normalized.substring(index)))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** 출력에 비밀값이 나올 수 있는 명령인지(토큰암호화). */

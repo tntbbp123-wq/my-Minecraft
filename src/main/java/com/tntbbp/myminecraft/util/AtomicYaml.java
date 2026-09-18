@@ -47,7 +47,7 @@ public final class AtomicYaml {
                 while (buffer.hasRemaining()) {
                     channel.write(buffer);
                 }
-                channel.force(true);
+                // fsync는 메인 스레드 지연 때문에 하지 않음(반쯤 쓰인 파일은 원자적 이동으로 방지).
             }
             copyPermissions(absolute, temp);
             try {
