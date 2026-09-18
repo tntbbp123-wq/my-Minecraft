@@ -5,9 +5,11 @@ import com.tntbbp.myminecraft.manager.economy.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.economy.CurrencyManager;
 import com.tntbbp.myminecraft.manager.item.EnhanceManager;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -16,6 +18,12 @@ import java.util.stream.Collectors;
  * 공통으로 사용한다.
  */
 public final class SpecialItemCatalog {
+
+    /** 웹 카탈로그 분류용: 신화 무기 / 암시장 아이템 이름. */
+    private static final Set<String> WEAPON_NAMES =
+            Set.of("레바테인", "드라켄피어스", "글레이프니르", "사인참사검", "발뭉", "자하신검");
+    private static final Set<String> BLACKMARKET_NAMES = Set.of("일괄약탈주문서", "함정설치키트", "화염병", "연막탄",
+            "밀도나침반", "발자국추적기", "혈흔나침반", "소음차단포션");
 
     public record Resolved(ItemStack item, String displayName) {
     }
@@ -119,6 +127,62 @@ public final class SpecialItemCatalog {
 
     public static String coinShortName(CurrencyManager.CoinDenomination coin) {
         return coin.value() + "G";
+    }
+
+    /**
+     * 웹 관리자(우편 첨부·지급 선택기)용 카탈로그 한 줄.
+     *
+     * @param name        /특수아이템소환·우편 첨부에 쓰는 정확한 아이템명 (예: 강화석, 일반두루마리, 1G)
+     * @param category    enhance | scroll | starforce | weapon | blackmarket | coin
+     * @param modelData   커스텀 모델 데이터 (없으면 0)
+     */
+    public record CatalogEntry(String name, String displayName, String material, int modelData, String category) {
+    }
+
+    /**
+     * {@link #allItemNames}의 각 아이템을 1개씩 실제로 만들어 이름·표시명·재질·모델 데이터·분류를 돌려준다.
+     * 아이템을 만들므로 메인 스레드에서 호출한다.
+     */
+    public static List<CatalogEntry> catalog(MyMinecraftPlugin plugin) {
+        EnhanceManager enhanceManager = plugin.getEnhanceManager();
+        CurrencyManager currencyManager = plugin.getCurrencyManager();
+        List<CatalogEntry> entries = new ArrayList<>();
+        for (String name : allItemNames(plugin)) {
+            Resolved resolved = resolve(plugin, name, 1);
+            if (resolved == null || resolved.item() == null) {
+                continue;
+            }
+            ItemStack item = resolved.item();
+            ItemMeta meta = item.getItemMeta();
+            int modelData = meta != null && meta.hasCustomModelData() ? meta.getCustomModelData() : 0;
+            String displayName = resolved.displayName() == null ? name
+                    : resolved.displayName().replaceAll("(?i)§[0-9A-FK-ORX]", "");
+            entries.add(new CatalogEntry(name, displayName, item.getType().name(), modelData,
+                    categoryOf(enhanceManager, currencyManager, name)));
+        }
+        return entries;
+    }
+
+    private static String categoryOf(EnhanceManager enhanceManager, CurrencyManager currencyManager, String name) {
+        if (name.equals("강화석")) {
+            return "enhance";
+        }
+        if (name.equals("별가루")) {
+            return "starforce";
+        }
+        if (WEAPON_NAMES.contains(name)) {
+            return "weapon";
+        }
+        if (BLACKMARKET_NAMES.contains(name)) {
+            return "blackmarket";
+        }
+        if (findScrollGrade(enhanceManager, name) != null) {
+            return "scroll";
+        }
+        if (findCoin(currencyManager, name) != null) {
+            return "coin";
+        }
+        return "enhance";
     }
 
     /** 명령어/GUI에서 선택 가능한 아이템명 전체 목록. */

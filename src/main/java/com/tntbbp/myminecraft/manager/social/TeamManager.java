@@ -2,6 +2,7 @@ package com.tntbbp.myminecraft.manager.social;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.model.Team;
+import com.tntbbp.myminecraft.util.AtomicYaml;
 import com.tntbbp.myminecraft.util.LocationUtil;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
@@ -160,7 +161,7 @@ public class TeamManager {
 
     private void save() {
         try {
-            data.save(file);
+            AtomicYaml.save(data, file);
         } catch (IOException e) {
             plugin.getLogger().severe("teams.yml 저장 실패: " + e.getMessage());
         }

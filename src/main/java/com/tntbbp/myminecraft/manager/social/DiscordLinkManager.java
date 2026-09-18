@@ -1,6 +1,7 @@
 package com.tntbbp.myminecraft.manager.social;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
+import com.tntbbp.myminecraft.util.AtomicYaml;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -91,7 +92,7 @@ public class DiscordLinkManager {
 
     private void save() {
         try {
-            data.save(file);
+            AtomicYaml.save(data, file);
         } catch (IOException e) {
             plugin.getLogger().severe("discord-links.yml 저장 실패: " + e.getMessage());
         }
