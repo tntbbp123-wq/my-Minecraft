@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *   <li><b>면역</b> — 궁극기 시전 중 위 세 가지와 나쁜 포션 효과를 전부 무시한다</li>
  * </ul>
  *
- * <p>실제 피해/치유 보정과 이동 차단은 {@link com.tntbbp.myminecraft.listener.CurseListener}가 맡는다.
+ * <p>실제 피해/치유 보정과 이동 차단은 {@link com.tntbbp.myminecraft.listener.combat.CurseListener}가 맡는다.
  */
 public class CurseManager {
 
@@ -215,7 +215,7 @@ public class CurseManager {
      * 방어력·저항·보호 마법을 전부 무시하는 고정 피해를 입힌다.
      *
      * <p>체력을 직접 깎지 않고 정상적인 피해 이벤트로 처리하기 때문에 넉백, 전투 태그, 사망 기여자
-     * 기록이 모두 그대로 남는다. 감면만 {@link com.tntbbp.myminecraft.listener.CurseListener}에서
+     * 기록이 모두 그대로 남는다. 감면만 {@link com.tntbbp.myminecraft.listener.combat.CurseListener}에서
      * 0으로 만든다.
      */
     public void dealTrueDamage(LivingEntity target, Player source, double amount) {
@@ -302,16 +302,21 @@ public class CurseManager {
         return (remainingMillis(map, uuid) + 999) / 1000;
     }
 
+    /**
+     * 남은 시간만 돌려주고 <b>아무것도 지우지 않는다.</b>
+     * <p>예전에는 만료된 항목을 여기서 바로 지웠는데, 제압에서 문제가 됐다. {@link #isStunned}가
+     * 만료를 먼저 읽으면 stunnedUntilMillis에서 항목이 사라지고, 그러면 {@link #tick()}이 그
+     * 항목을 보지 못해 {@link #clearStun}이 영영 돌지 않았다. 그 결과 몹의 AI가 꺼진 채로 남고
+     * (제압당한 몹이 영구히 얼어붙는다), stunAnchors에 남은 옛 좌표 때문에 다음 제압 때
+     * 엉뚱한 곳(다른 월드일 수도 있다)으로 되돌려졌다.
+     * <p>만료된 항목 정리는 0.5초마다 도는 {@link #tick()}에 맡긴다. 그 사이에 읽어도 0을
+     * 돌려주므로 만료 판정은 즉시 정확하다.
+     */
     private long remainingMillis(Map<UUID, Long> map, UUID uuid) {
         Long until = map.get(uuid);
         if (until == null) {
             return 0;
         }
-        long remaining = until - System.currentTimeMillis();
-        if (remaining <= 0) {
-            map.remove(uuid);
-            return 0;
-        }
-        return remaining;
+        return Math.max(0, until - System.currentTimeMillis());
     }
 }

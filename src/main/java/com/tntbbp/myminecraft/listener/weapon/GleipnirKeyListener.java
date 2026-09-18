@@ -54,8 +54,7 @@ public class GleipnirKeyListener extends PacketListenerAbstract {
                 player.sendMessage(ChatColor.GRAY + "절대봉인은 이 서버에서 비활성화되어 있습니다.");
                 return;
             }
-            if (manager.isSealed(player.getUniqueId())) {
-                player.sendMessage(ChatColor.GRAY + "봉인되어 스킬을 쓸 수 없습니다.");
+            if (plugin.getCurseManager().blockSkill(player)) {
                 return;
             }
 

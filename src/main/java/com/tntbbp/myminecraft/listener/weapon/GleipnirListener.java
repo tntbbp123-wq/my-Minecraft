@@ -34,8 +34,7 @@ public class GleipnirListener implements Listener {
         }
 
         event.setCancelled(true);
-        if (manager.isSealed(player.getUniqueId())) {
-            player.sendMessage(ChatColor.GRAY + "봉인되어 스킬을 쓸 수 없습니다.");
+        if (plugin.getCurseManager().blockSkill(player)) {
             return;
         }
 
@@ -64,8 +63,7 @@ public class GleipnirListener implements Listener {
         }
 
         event.setCancelled(true);
-        if (manager.isSealed(player.getUniqueId())) {
-            player.sendMessage(ChatColor.GRAY + "봉인되어 스킬을 쓸 수 없습니다.");
+        if (plugin.getCurseManager().blockSkill(player)) {
             return;
         }
 
