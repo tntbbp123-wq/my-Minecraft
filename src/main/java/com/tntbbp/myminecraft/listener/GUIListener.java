@@ -15,6 +15,7 @@ import com.tntbbp.myminecraft.gui.item.StarforceGUI;
 import com.tntbbp.myminecraft.gui.item.StarforceHolder;
 import com.tntbbp.myminecraft.gui.item.TranscendAltarGUI;
 import com.tntbbp.myminecraft.gui.item.TranscendAltarHolder;
+import com.tntbbp.myminecraft.gui.mail.MailGUI;
 import com.tntbbp.myminecraft.gui.menu.MenuGUI;
 import com.tntbbp.myminecraft.gui.menu.MenuHolder;
 import com.tntbbp.myminecraft.gui.social.HomeGUI;
@@ -214,6 +215,7 @@ public class GUIListener implements Listener {
             case MenuGUI.ENHANCE_SLOT -> new EnhanceGUI(plugin, player).open();
             case MenuGUI.TRANSCEND_SLOT -> new TranscendAltarGUI(plugin, player).open();
             case MenuGUI.STARFORCE_SLOT -> new StarforceGUI(plugin, player).open();
+            case MenuGUI.MAIL_SLOT -> new MailGUI(plugin, player).open();
             default -> {
             }
         }
@@ -395,7 +397,7 @@ public class GUIListener implements Listener {
         if (itemName == null) {
             return;
         }
-        purchaseCoreItem(player, itemName);
+        purchaseCoreItem(player, itemName, ShopSource.CORE);
     }
 
     private void handleCoreBlackMarketClick(Player player, CoreBlackMarketHolder holder, int slot) {
@@ -408,11 +410,16 @@ public class GUIListener implements Listener {
         if (itemName == null) {
             return;
         }
-        purchaseCoreItem(player, itemName);
+        purchaseCoreItem(player, itemName, ShopSource.BLACKMARKET);
+    }
+
+    /** 코어 구매가 어느 GUI에서 왔는지(거래 기록 유형 shop_core / shop_blackmarket 구분). */
+    private enum ShopSource {
+        CORE, BLACKMARKET
     }
 
     /** 코어(및 암시장) GUI 공용 구매 처리: 포인트를 차감하고 SpecialItemCatalog 기준 아이템을 지급한다. */
-    private void purchaseCoreItem(Player player, String itemName) {
+    private void purchaseCoreItem(Player player, String itemName, ShopSource source) {
         CoreManager coreManager = plugin.getCoreManager();
         EconomyManager economyManager = plugin.getEconomyManager();
         double price = coreManager.price(itemName);
@@ -430,6 +437,11 @@ public class GUIListener implements Listener {
 
         player.getInventory().addItem(resolved.item()).values()
                 .forEach(leftover -> player.getWorld().dropItem(player.getLocation(), leftover));
+        if (source == ShopSource.BLACKMARKET) {
+            plugin.getTradeLogger().shopBlackmarket(player.getUniqueId(), player.getName(), itemName, price);
+        } else {
+            plugin.getTradeLogger().shopCore(player.getUniqueId(), player.getName(), itemName, price);
+        }
         player.sendMessage(ChatColor.GREEN + resolved.displayName() + " 1개를 구매했습니다. (보유 "
                 + economyManager.currencyName() + ": "
                 + String.format("%,.1f", economyManager.getBalance(player.getUniqueId())) + ")");

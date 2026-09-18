@@ -94,6 +94,8 @@ public class CurrencyManager {
         ItemStack item = createCoin(coin, 1);
         player.getInventory().addItem(item).values()
                 .forEach(leftover -> player.getWorld().dropItem(player.getLocation(), leftover));
+        plugin.getTradeLogger().coinBuy(player.getUniqueId(), player.getName(), coin.id(), coin.value(), 1,
+                coin.value());
         return true;
     }
 
@@ -110,6 +112,8 @@ public class CurrencyManager {
                     stack.setAmount(stack.getAmount() - 1);
                 }
                 plugin.getEconomyManager().add(player.getUniqueId(), coin.value());
+                plugin.getTradeLogger().coinSell(player.getUniqueId(), player.getName(), coin.id(), coin.value(), 1,
+                        coin.value());
                 return true;
             }
         }
@@ -196,6 +200,7 @@ public class CurrencyManager {
         }
         if (total > 0) {
             plugin.getEconomyManager().add(player.getUniqueId(), total);
+            plugin.getTradeLogger().bankDepositAll(player.getUniqueId(), player.getName(), total);
         }
         return total;
     }
@@ -237,6 +242,7 @@ public class CurrencyManager {
 
         if (withdrawn > 0) {
             economyManager.subtract(player.getUniqueId(), withdrawn);
+            plugin.getTradeLogger().bankWithdrawAll(player.getUniqueId(), player.getName(), withdrawn);
         }
         return withdrawn;
     }
