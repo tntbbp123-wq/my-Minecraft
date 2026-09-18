@@ -4,6 +4,23 @@ economy:
   starting-balance: 1000.0
   currency-name: "G"
 
+# 웹 관리자(gn-admin) 연결 통로. 게임 서버 안에서 127.0.0.1 에만 열리고, 같은 서버의 웹 백엔드만 접속한다.
+web-bridge:
+  enabled: true
+  # 보안상 127.0.0.1 외의 주소를 적어도 127.0.0.1 에만 연다.
+  host: "127.0.0.1"
+  port: 25590
+  # 토큰은 env:GN_BRIDGE_TOKEN 권장 (root 전용 /etc/gn-test/bridge.env → EnvironmentFile)
+  # 토큰을 풀 수 없으면(환경변수 없음 등) 통로를 열지 않고 경고만 남긴다. 다른 기능은 그대로 동작한다.
+  token: "env:GN_BRIDGE_TOKEN"
+  threads: 2
+  max-body-bytes: 65536
+  # 메인 스레드가 이 시간(ms) 안에 요청 작업을 시작하지 못하면 504로 거절한다(실행되지 않음).
+  sync-timeout-ms: 5000
+  save-timeout-ms: 30000
+  # 같은 X-Request-Id 요청의 응답을 보관해 재시도 시 중복 실행을 막는 시간(초)
+  idempotency-ttl-seconds: 600
+
 # 활동/거래/관리 기록 (plugins/MyMinecraft/logs/<activity|trade|admin>-YYYY-MM-DD.jsonl, UTC 날짜)
 activity-log:
   # 접속/퇴장/채팅/명령어/사망 기록(activity) 여부. 거래(trade)·관리(admin) 기록은 이 값과 관계없이 남는다.

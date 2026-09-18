@@ -74,6 +74,14 @@ import com.tntbbp.myminecraft.manager.world.CoreManager;
 import com.tntbbp.myminecraft.manager.world.LocationsManager;
 import com.tntbbp.myminecraft.manager.world.RandomTeleportManager;
 import com.tntbbp.myminecraft.util.SecretResolver;
+import com.tntbbp.myminecraft.web.WebBridge;
+import com.tntbbp.myminecraft.web.profile.PlayerDataRegistry;
+import com.tntbbp.myminecraft.web.profile.providers.BasicProvider;
+import com.tntbbp.myminecraft.web.profile.providers.DiscordProvider;
+import com.tntbbp.myminecraft.web.profile.providers.EconomyProvider;
+import com.tntbbp.myminecraft.web.profile.providers.HomeProvider;
+import com.tntbbp.myminecraft.web.profile.providers.StockProvider;
+import com.tntbbp.myminecraft.web.profile.providers.TeamProvider;
 import com.github.retrooper.packetevents.PacketEvents;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -115,6 +123,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private EventLog eventLog;
     private TradeLogger tradeLogger;
     private AdminLog adminLog;
+    private PlayerDataRegistry playerDataRegistry;
+    private WebBridge webBridge;
 
     /** PacketEvents는 서버가 켜지기 전 단계에서 먼저 준비해야 패킷을 놓치지 않는다. */
     @Override
@@ -164,6 +174,13 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.eventLog = new EventLog(this);
         this.tradeLogger = new TradeLogger(eventLog);
         this.adminLog = new AdminLog(eventLog);
+        this.playerDataRegistry = new PlayerDataRegistry(getLogger());
+        playerDataRegistry.register(new BasicProvider());
+        playerDataRegistry.register(new EconomyProvider(this));
+        playerDataRegistry.register(new StockProvider(this));
+        playerDataRegistry.register(new HomeProvider(this));
+        playerDataRegistry.register(new TeamProvider(this));
+        playerDataRegistry.register(new DiscordProvider(this));
         if (getConfig().getBoolean("activity-log.enabled", true)) {
             getServer().getPluginManager().registerEvents(new ActivityListener(this, eventLog), this);
         }
@@ -269,10 +286,30 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getLogger().info("패킷 기능 활성화: 소음 차단 포션 은폐 / 웅크리기+L 전투모드 / 글레이프니르 절대봉인(L키)");
 
         getLogger().info("MyMinecraft 플러그인이 활성화되었습니다.");
+
+        // 웹 관리 통로는 맨 마지막에 연다. 열지 못해도(토큰 없음·포트 충돌 등) 다른 기능에는 영향이 없다.
+        startWebBridge();
+    }
+
+    private void startWebBridge() {
+        if (!getConfig().getBoolean("web-bridge.enabled", true)) {
+            getLogger().info("웹 관리 통로가 설정(web-bridge.enabled: false)으로 꺼져 있습니다.");
+            return;
+        }
+        try {
+            this.webBridge = new WebBridge(this, eventLog, playerDataRegistry);
+            webBridge.start();
+        } catch (Exception | LinkageError e) {
+            getLogger().severe("웹 관리 통로를 시작하지 못했습니다: " + e + " (다른 기능은 정상 동작합니다)");
+        }
     }
 
     @Override
     public void onDisable() {
+        // 웹 관리 통로를 가장 먼저 닫는다(이후 들어오는 요청은 503 server_stopping).
+        if (webBridge != null) {
+            webBridge.stop();
+        }
         if (stockManager != null) {
             stockManager.stopFluctuationTask();
         }
@@ -454,5 +491,14 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public AdminLog getAdminLog() {
         return adminLog;
+    }
+
+    /** 웹 관리 통로. 꺼져 있거나 시작하지 못했으면 null일 수 있다. */
+    public WebBridge getWebBridge() {
+        return webBridge;
+    }
+
+    public PlayerDataRegistry getPlayerDataRegistry() {
+        return playerDataRegistry;
     }
 }
