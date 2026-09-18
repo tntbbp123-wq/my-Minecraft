@@ -18,6 +18,7 @@ import com.tntbbp.myminecraft.command.social.TpaCommand;
 import com.tntbbp.myminecraft.command.world.LobbyCommand;
 import com.tntbbp.myminecraft.command.world.RtCommand;
 import com.tntbbp.myminecraft.command.world.SpawnCommand;
+import com.tntbbp.myminecraft.listener.ActivityListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.combat.CombatListener;
 import com.tntbbp.myminecraft.listener.combat.CombatStanceKeyListener;
@@ -38,6 +39,9 @@ import com.tntbbp.myminecraft.listener.weapon.LaevateinnListener;
 import com.tntbbp.myminecraft.listener.weapon.LaevateinnModelListener;
 import com.tntbbp.myminecraft.listener.weapon.SainchamsagumListener;
 import com.tntbbp.myminecraft.listener.world.CoreBlockListener;
+import com.tntbbp.myminecraft.log.AdminLog;
+import com.tntbbp.myminecraft.log.EventLog;
+import com.tntbbp.myminecraft.log.TradeLogger;
 import com.tntbbp.myminecraft.manager.combat.CombatManager;
 import com.tntbbp.myminecraft.manager.combat.CombatMusicManager;
 import com.tntbbp.myminecraft.manager.combat.CombatStanceManager;
@@ -108,6 +112,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private RaidBossManager raidBossManager;
     private SecretResolver secretResolver;
     private GleipnirManager gleipnirManager;
+    private EventLog eventLog;
+    private TradeLogger tradeLogger;
+    private AdminLog adminLog;
 
     /** PacketEvents는 서버가 켜지기 전 단계에서 먼저 준비해야 패킷을 놓치지 않는다. */
     @Override
@@ -152,6 +159,14 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.coreManager = new CoreManager(this);
         this.gleipnirManager = new GleipnirManager(this);
         this.raidBossManager = new RaidBossManager(this);
+
+        // 웹 관리자(gn-admin)용 기록기: 매니저가 만들어진 뒤, 태스크(주식 변동 등)가 돌기 전에 준비한다.
+        this.eventLog = new EventLog(this);
+        this.tradeLogger = new TradeLogger(eventLog);
+        this.adminLog = new AdminLog(eventLog);
+        if (getConfig().getBoolean("activity-log.enabled", true)) {
+            getServer().getPluginManager().registerEvents(new ActivityListener(this, eventLog), this);
+        }
 
         stockManager.startFluctuationTask();
         infernalBurnManager.start();
@@ -295,6 +310,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
             PacketEvents.getAPI().terminate();
         }
         getLogger().info("MyMinecraft 플러그인이 비활성화되었습니다.");
+        // 활동 기록은 맨 마지막에 남은 것을 모두 파일에 쓰고 닫는다.
+        if (eventLog != null) {
+            eventLog.flush();
+        }
     }
 
     public EconomyManager getEconomyManager() {
@@ -423,5 +442,17 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public GleipnirManager getGleipnirManager() {
         return gleipnirManager;
+    }
+
+    public EventLog getEventLog() {
+        return eventLog;
+    }
+
+    public TradeLogger getTradeLogger() {
+        return tradeLogger;
+    }
+
+    public AdminLog getAdminLog() {
+        return adminLog;
     }
 }

@@ -4,6 +4,19 @@ economy:
   starting-balance: 1000.0
   currency-name: "G"
 
+# 활동/거래/관리 기록 (plugins/MyMinecraft/logs/<activity|trade|admin>-YYYY-MM-DD.jsonl, UTC 날짜)
+activity-log:
+  # 접속/퇴장/채팅/명령어/사망 기록(activity) 여부. 거래(trade)·관리(admin) 기록은 이 값과 관계없이 남는다.
+  enabled: true
+  chat: true
+  commands: true
+  # 인자를 *** 로 가릴 명령 첫 토큰 목록
+  redact-commands: ["디스코드연동확인", "디스코드연동"]
+  # 기록 대기열 최대 개수. 넘치면 서버를 멈추지 않도록 버리고 개수만 admin 기록(log_dropped)에 남긴다.
+  queue-limit: 10000
+  # 이 기간(일)보다 오래된 기록 파일은 자동 삭제 (0 이하면 삭제 안 함)
+  retention-days: 90
+
 home:
   max-homes: 5
 
