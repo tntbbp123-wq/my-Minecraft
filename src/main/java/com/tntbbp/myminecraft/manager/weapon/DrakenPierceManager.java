@@ -35,7 +35,7 @@ import java.util.UUID;
 
 /**
  * 신화 등급 무기 '드라켄피어스'의 아이템 정의와 두 액티브 능력.
- * [F] 드라켄 라이트닝(연쇄 번개 찌르기) / [Q] 드라코닉 팽(쌍단검 변형).
+ * [F] 드라켄 라이트닝(연쇄 번개 찌르기) / [웅크리기+F] 드라코닉 팽(쌍단검 변형).
  */
 public class DrakenPierceManager {
 
@@ -71,7 +71,7 @@ public class DrakenPierceManager {
                                 + plugin.getConfig().getInt("draken-pierce.lightning.chain-count", 3) + "명까지 연쇄 타격",
                         "§7 적중한 모든 대상에게 §b감전§7(둔화+번개 도트) 부여",
                         "",
-                        "§6[Q] §f드라코닉 팽 §7(Draconic Fang · 재사용 " + metamorphosisCooldownSeconds() + "초)",
+                        "§6[웅크리기+F] §f드라코닉 팽 §7(Draconic Fang · 재사용 " + metamorphosisCooldownSeconds() + "초)",
                         "§7 전방에 번개 폭발을 일으킨 뒤 쌍단검으로 " + metamorphosisDurationSeconds() + "초간 변형",
                         "§7 변형 중 이동속도·공격속도가 대폭 상승",
                         "",
