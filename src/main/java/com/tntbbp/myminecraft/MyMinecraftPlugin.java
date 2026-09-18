@@ -29,6 +29,7 @@ import com.tntbbp.myminecraft.listener.economy.BlackMarketListener;
 import com.tntbbp.myminecraft.listener.economy.ProtocolSilenceListener;
 import com.tntbbp.myminecraft.listener.item.StarforceListener;
 import com.tntbbp.myminecraft.listener.item.TranscendAltarBlockListener;
+import com.tntbbp.myminecraft.gui.economy.StockGUIListener;
 import com.tntbbp.myminecraft.listener.mail.MailGUIListener;
 import com.tntbbp.myminecraft.listener.mail.MailJoinListener;
 import com.tntbbp.myminecraft.listener.raid.RaidBossListener;
@@ -254,6 +255,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GleipnirListener(this), this);
         getServer().getPluginManager().registerEvents(new MailGUIListener(this), this);
         getServer().getPluginManager().registerEvents(new MailJoinListener(this), this);
+        getServer().getPluginManager().registerEvents(new StockGUIListener(this), this);
 
         RaidBossCommand raidBossCommand = new RaidBossCommand(this);
         getCommand("레이드보스").setExecutor(raidBossCommand);

@@ -21,7 +21,7 @@ import java.util.List;
  * 거래 중지된 종목은 회색 이름과 «거래 중지» 표시가 붙고 매매 안내 대신 중지 안내가 나온다.
  *
  * <p>클릭 처리: 매수·매도·뒤로가기는 {@code GUIListener}가, 페이지 넘김과 중지 종목 안내는
- * {@link StockGUIListener}가 맡는다(처음 열 때 한 번 등록).
+ * {@link StockGUIListener}가 맡는다(플러그인 시작 때 등록).
  */
 public class StockGUI {
 
@@ -37,8 +37,6 @@ public class StockGUI {
     public static final int PREV_SLOT = 38;
     public static final int PAGE_SLOT = 40;
     public static final int NEXT_SLOT = 42;
-
-    private static boolean listenerRegistered;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -64,17 +62,7 @@ public class StockGUI {
         return 0;
     }
 
-    private static void ensureListener(MyMinecraftPlugin plugin) {
-        if (listenerRegistered) {
-            return;
-        }
-        plugin.getServer().getPluginManager().registerEvents(new StockGUIListener(plugin), plugin);
-        listenerRegistered = true;
-    }
-
     public void open() {
-        ensureListener(plugin);
-
         StockManager stockManager = plugin.getStockManager();
         EconomyManager economyManager = plugin.getEconomyManager();
         NewsManager newsManager = plugin.getNewsManager();
