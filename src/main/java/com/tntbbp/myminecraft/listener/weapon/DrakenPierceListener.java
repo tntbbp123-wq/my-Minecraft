@@ -36,7 +36,7 @@ public class DrakenPierceListener implements Listener {
         }
 
         event.setCancelled(true);
-        if (isSealed(player)) {
+        if (plugin.getCurseManager().blockSkill(player)) {
             return;
         }
 
@@ -69,16 +69,6 @@ public class DrakenPierceListener implements Listener {
 
         manager.useMetamorphosis(player);
         player.sendMessage(ChatColor.LIGHT_PURPLE + "드라코닉 팽을 발동했습니다!");
-    }
-
-    /** 글레이프니르의 봉인에 걸려 있으면 스킬을 쓸 수 없다. */
-    private boolean isSealed(Player player) {
-        if (!plugin.getGleipnirManager().isSealed(player.getUniqueId())) {
-            return false;
-        }
-        player.sendMessage(ChatColor.GRAY + "봉인되어 스킬을 쓸 수 없습니다. ("
-                + plugin.getGleipnirManager().remainingSealSeconds(player.getUniqueId()) + "초)");
-        return true;
     }
 
     /** 드라켄피어스의 고정 방어관통(%)을 근접 공격 피해에 적용한다. */
