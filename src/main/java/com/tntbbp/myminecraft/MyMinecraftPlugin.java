@@ -3,6 +3,7 @@ package com.tntbbp.myminecraft;
 import com.tntbbp.myminecraft.command.admin.AdminMenuCommand;
 import com.tntbbp.myminecraft.command.admin.SecretEncryptCommand;
 import com.tntbbp.myminecraft.command.admin.SpecialItemSummonCommand;
+import com.tntbbp.myminecraft.command.combat.BountyCommand;
 import com.tntbbp.myminecraft.command.economy.BankCommand;
 import com.tntbbp.myminecraft.command.economy.NewsCommand;
 import com.tntbbp.myminecraft.command.economy.StockAddCommand;
@@ -24,6 +25,7 @@ import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.combat.CombatListener;
 import com.tntbbp.myminecraft.listener.combat.CombatStanceKeyListener;
 import com.tntbbp.myminecraft.listener.combat.CombatStanceListener;
+import com.tntbbp.myminecraft.listener.combat.BountyListener;
 import com.tntbbp.myminecraft.listener.combat.CurseListener;
 import com.tntbbp.myminecraft.listener.economy.BlackMarketListener;
 import com.tntbbp.myminecraft.listener.economy.ProtocolSilenceListener;
@@ -41,6 +43,7 @@ import com.tntbbp.myminecraft.listener.weapon.GleipnirListener;
 import com.tntbbp.myminecraft.listener.weapon.JahaShingeomListener;
 import com.tntbbp.myminecraft.listener.weapon.LaevateinnListener;
 import com.tntbbp.myminecraft.listener.weapon.LaevateinnModelListener;
+import com.tntbbp.myminecraft.listener.weapon.MalyongdoListener;
 import com.tntbbp.myminecraft.listener.weapon.SainchamsagumListener;
 import com.tntbbp.myminecraft.listener.world.CoreBlockListener;
 import com.tntbbp.myminecraft.log.AdminLog;
@@ -49,6 +52,7 @@ import com.tntbbp.myminecraft.log.TradeLogger;
 import com.tntbbp.myminecraft.manager.combat.CombatManager;
 import com.tntbbp.myminecraft.manager.combat.CombatMusicManager;
 import com.tntbbp.myminecraft.manager.combat.CombatStanceManager;
+import com.tntbbp.myminecraft.manager.combat.BountyManager;
 import com.tntbbp.myminecraft.manager.combat.CurseManager;
 import com.tntbbp.myminecraft.manager.combat.InfernalBurnManager;
 import com.tntbbp.myminecraft.manager.combat.ShockManager;
@@ -74,6 +78,7 @@ import com.tntbbp.myminecraft.manager.weapon.DrakenPierceManager;
 import com.tntbbp.myminecraft.manager.weapon.GleipnirManager;
 import com.tntbbp.myminecraft.manager.weapon.JahaShingeomManager;
 import com.tntbbp.myminecraft.manager.weapon.LaevateinnManager;
+import com.tntbbp.myminecraft.manager.weapon.MalyongdoManager;
 import com.tntbbp.myminecraft.manager.weapon.SainchamsagumManager;
 import com.tntbbp.myminecraft.manager.world.CoreManager;
 import com.tntbbp.myminecraft.manager.world.LocationsManager;
@@ -110,6 +115,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private DrakenPierceManager drakenPierceManager;
     private CurseManager curseManager;
     private SainchamsagumManager sainchamsagumManager;
+    private MalyongdoManager malyongdoManager;
+    private BountyManager bountyManager;
     private BalmungManager balmungManager;
     private JahaShingeomManager jahaShingeomManager;
     private CurrencyManager currencyManager;
@@ -161,6 +168,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.drakenPierceManager = new DrakenPierceManager(this);
         this.curseManager = new CurseManager(this);
         this.sainchamsagumManager = new SainchamsagumManager(this);
+        this.malyongdoManager = new MalyongdoManager(this);
+        this.bountyManager = new BountyManager(this);
         this.balmungManager = new BalmungManager(this);
         this.jahaShingeomManager = new JahaShingeomManager(this);
         this.currencyManager = new CurrencyManager(this);
@@ -197,6 +206,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         shockManager.start();
         curseManager.start();
         sainchamsagumManager.start();
+        malyongdoManager.start();
         newsManager.startTask();
         blackMarketManager.start();
         discordManager.start();
@@ -205,6 +215,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
         mailManager.start();
 
         TpaCommand tpaCommand = new TpaCommand(this);
+        BountyCommand bountyCommand = new BountyCommand(this);
+        getCommand("현상금").setExecutor(bountyCommand);
+        getCommand("현상금").setTabCompleter(bountyCommand);
         getCommand("텔레포트요청").setExecutor(tpaCommand);
         getCommand("텔레포트수락").setExecutor(tpaCommand);
         getCommand("텔레포트거절").setExecutor(tpaCommand);
@@ -244,6 +257,8 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DrakenPierceListener(this), this);
         getServer().getPluginManager().registerEvents(new CurseListener(this), this);
         getServer().getPluginManager().registerEvents(new SainchamsagumListener(this), this);
+        getServer().getPluginManager().registerEvents(new MalyongdoListener(this), this);
+        getServer().getPluginManager().registerEvents(new BountyListener(this), this);
         getServer().getPluginManager().registerEvents(new BalmungListener(this), this);
         getServer().getPluginManager().registerEvents(new JahaShingeomListener(this), this);
         getServer().getPluginManager().registerEvents(new CombatListener(this), this);
@@ -336,6 +351,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
         }
         if (sainchamsagumManager != null) {
             sainchamsagumManager.stop();
+        }
+        if (malyongdoManager != null) {
+            malyongdoManager.stop();
         }
         if (newsManager != null) {
             newsManager.stopTask();
@@ -435,6 +453,14 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public SainchamsagumManager getSainchamsagumManager() {
         return sainchamsagumManager;
+    }
+
+    public MalyongdoManager getMalyongdoManager() {
+        return malyongdoManager;
+    }
+
+    public BountyManager getBountyManager() {
+        return bountyManager;
     }
 
     public BalmungManager getBalmungManager() {

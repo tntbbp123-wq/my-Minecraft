@@ -51,6 +51,9 @@ public final class SpecialItemCatalog {
         if (itemName.equals("글레이프니르")) {
             return mythicWeapon(plugin.getGleipnirManager().createItem(), "글레이프니르", amount);
         }
+        if (itemName.equals("말룡도")) {
+            return mythicWeapon(plugin.getMalyongdoManager().createItem(), "말룡도", amount);
+        }
         if (itemName.equals("사인참사검")) {
             return mythicWeapon(plugin.getSainchamsagumManager().createItem(), "사인참사검", amount);
         }
@@ -194,6 +197,7 @@ public final class SpecialItemCatalog {
         names.add("별가루");
         names.add("레바테인");
         names.add("드라켄피어스");
+        names.add("말룡도");
         names.add("글레이프니르");
         names.add("사인참사검");
         names.add("발뭉");
