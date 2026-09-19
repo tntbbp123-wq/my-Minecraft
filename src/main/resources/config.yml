@@ -451,6 +451,65 @@ jaha-shingeom:
     # 공격력 12 기준 한 번에 80 이상이 들어가 사실상 즉사기가 된다. 기본값은 0.6.
     extra-hit-multiplier: 0.6
 
+# 전설 등급 무기 '말룡도(末龍刀)' — 종말룡 엔더드래곤을 잡으면 확률로 떨어진다.
+# 단계별 연계 무기라 1초식 적중 -> 2초식 -> 3초식 순서로만 쓸 수 있다.
+malyongdo:
+  # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (0이면 붙이지 않음)
+  model-data: 0
+  attack-damage: 12.0
+  # 종말룡 처치 시 떨어질 확률(%). 마지막 일격을 넣은 사람에게 우편으로 간다.
+  drop-chance-percent: 10.0
+  # 앞 초식을 쓴 뒤 다음 초식이 열려 있는 시간(초). 지나면 1초식부터 다시 시작한다.
+  combo-window-seconds: 10
+  # '말' 자원
+  stack:
+    max: 100
+    # 때릴 때마다 오르는 양
+    per-hit: 1.0
+    # 들고 있기만 해도 초당 오르는 양
+    per-second: 0.5
+  # [F] 1초식 말 - 말을 조금 쓰고 전방을 내리벤다. 적중해야 2초식이 열린다.
+  first:
+    cooldown-seconds: 6
+    stack-cost: 20
+    damage: 12.0
+    range: 5.0
+    cone-angle-degrees: 80.0
+  # [웅크리기+F] 2초식 말룡 - 남은 말을 전부 쏟는다. 피해와 방어관통이 소모한 말에 비례한다.
+  second:
+    cooldown-seconds: 20
+    # 말 1개당 피해
+    damage-per-stack: 0.35
+    # 말을 가득(stack.max) 채웠을 때의 방어관통(%)
+    max-penetration-percent: 30.0
+    fire-ticks: 60
+    range: 9.0
+    cone-angle-degrees: 60.0
+  # [웅크리기+우클릭] 3초식 종말룡 - 화신 상태로 들어갔다가 끝날 때 쌓인 파괴력을 쏟아낸다.
+  third:
+    cooldown-seconds: 90
+    # 시전에 필요한 최소 말 (가진 말은 전부 소모된다)
+    min-stacks: 50
+    avatar-seconds: 5
+    # 소모한 말 1개당 시작 파괴력
+    power-per-stack: 0.4
+    # 화신 동안 입힌 피해가 파괴력으로 쌓이는 비율 (1.0 = 입힌 만큼 그대로)
+    power-ratio: 1.0
+    fire-ticks: 100
+    range: 12.0
+    cone-angle-degrees: 70.0
+
+# 현상금 표식 (Mark of Bounty) — 한 사람이 다른 한 사람에게만 찍을 수 있는 개인 표식.
+# 표식을 받은 쪽은 받는 피해와 주는 피해가 같이 늘어난다 (하이 리스크 하이 리턴).
+bounty:
+  enabled: true
+  # 표식 1개당 받는 피해 증가(%)
+  damage-taken-percent-per-mark: 0.4
+  # 표식 1개당 주는 피해 증가(%)
+  damage-dealt-percent-per-mark: 0.5
+  # 표식을 옮기고 나서 다시 옮길 수 있을 때까지의 시간(초). 0이면 제한 없음.
+  change-cooldown-seconds: 3600
+
 # 신화 등급 무기 '드라켄피어스' (/특수아이템소환 <유저> 드라켄피어스 <수량> 으로 지급)
 draken-pierce:
   # resourcepack/ 의 커스텀 텍스처와 연결되는 CustomModelData 값 (리소스팩 미적용 서버에서는 무시되고 삼지창 기본 아이콘으로 보임)
