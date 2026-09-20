@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "item/raw_iron"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 500102
+      },
+      "model": "item/rusted_iron_scrap"
+    }
+  ]
+}

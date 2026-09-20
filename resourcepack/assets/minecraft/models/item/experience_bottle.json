@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "item/experience_bottle"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 500107
+      },
+      "model": "item/imbued_mana_essence"
+    }
+  ]
+}

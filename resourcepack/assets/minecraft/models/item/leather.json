@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "item/leather"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 500103
+      },
+      "model": "item/tough_leather_strap"
+    }
+  ]
+}

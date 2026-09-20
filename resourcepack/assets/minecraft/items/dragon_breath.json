@@ -5,21 +5,14 @@
     "index": 0,
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:item/iron_ingot"
+      "model": "minecraft:item/dragon_breath"
     },
     "entries": [
       {
-        "threshold": 500051,
+        "threshold": 500114,
         "model": {
           "type": "minecraft:model",
-          "model": "minecraft:item/coin_10g"
-        }
-      },
-      {
-        "threshold": 500105,
-        "model": {
-          "type": "minecraft:model",
-          "model": "minecraft:item/refined_iron_ingot"
+          "model": "minecraft:item/condensed_titan_gravity_fluid"
         }
       }
     ]

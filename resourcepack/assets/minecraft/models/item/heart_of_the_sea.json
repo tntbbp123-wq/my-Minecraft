@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "item/heart_of_the_sea"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 500112
+      },
+      "model": "item/titans_pulsing_heartstone"
+    }
+  ]
+}

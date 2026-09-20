@@ -9,6 +9,12 @@
         "custom_model_data": 500052
       },
       "model": "item/coin_100g"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 500115
+      },
+      "model": "item/sunstone_of_the_ancient_kingdom"
     }
   ]
 }

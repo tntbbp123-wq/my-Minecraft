@@ -14,6 +14,13 @@
           "type": "minecraft:model",
           "model": "minecraft:item/coin_100g"
         }
+      },
+      {
+        "threshold": 500115,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/sunstone_of_the_ancient_kingdom"
+        }
       }
     ]
   }

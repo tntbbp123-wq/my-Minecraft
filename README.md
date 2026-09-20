@@ -454,7 +454,7 @@ Gemini 기준으로 구현했습니다. 필요하면 `GeminiNewsClient.java`를 
 ## 리소스팩 (전용 아이템 커스텀 텍스처)
 
 `resourcepack/` 폴더(및 루트의 `MyMinecraft-ResourcePack.zip`)는 강화석, 두루마리 4등급,
-레바테인, 화폐 동전 5종, 강화 GUI의 레벨별 진행 표시 화살표(10종)가 전용 아트워크로 보이도록
+레바테인, 화폐 동전 5종, 강화 GUI의 레벨별 진행 표시 화살표(10종), **제작 재료 18종**이 전용 아트워크로 보이도록
 만든 클라이언트 리소스팩입니다. **전투 브금도 이 팩 하나에 함께 들어 있습니다** (위 "전투 음악"
 항목 참고) — 팩은 하나뿐이므로 이 URL만 지정하면 텍스처와 브금이 모두 적용됩니다. `CustomModelData`로 동작하므로 리소스팩을 적용하지 않은
 플레이어에게는 원래 아이콘(강화석→자수정 조각, 두루마리→종이, 레바테인→네더라이트 검,
@@ -468,7 +468,7 @@ Gemini 기준으로 구현했습니다. 필요하면 `GeminiNewsClient.java`를 
 
 ```
 resource-pack=https://raw.githubusercontent.com/tntbbp123-wq/my-Minecraft/main/MyMinecraft-ResourcePack.zip
-resource-pack-sha1=3f3906bd8b0e4b6a332ec65f61ed251bd6538c66
+resource-pack-sha1=c260a64291f1a541249e8125cb14136a11d67792
 ```
 
 Minecraft 1.21.2 이후로는 아이템 텍스처 분기가 `assets/<ns>/models/item/*.json`의 `overrides`

@@ -5,21 +5,14 @@
     "index": 0,
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:item/iron_ingot"
+      "model": "minecraft:item/charcoal"
     },
     "entries": [
       {
-        "threshold": 500051,
+        "threshold": 500104,
         "model": {
           "type": "minecraft:model",
-          "model": "minecraft:item/coin_10g"
-        }
-      },
-      {
-        "threshold": 500105,
-        "model": {
-          "type": "minecraft:model",
-          "model": "minecraft:item/refined_iron_ingot"
+          "model": "minecraft:item/common_charcoal_powder"
         }
       }
     ]

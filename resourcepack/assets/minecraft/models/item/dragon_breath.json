@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "item/dragon_breath"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 500114
+      },
+      "model": "item/condensed_titan_gravity_fluid"
+    }
+  ]
+}

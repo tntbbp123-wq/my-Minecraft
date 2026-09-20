@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "item/flint"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 500100
+      },
+      "model": "item/hard_stone_fragment"
+    }
+  ]
+}
