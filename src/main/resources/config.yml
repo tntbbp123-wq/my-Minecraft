@@ -451,6 +451,159 @@ jaha-shingeom:
     # 공격력 12 기준 한 번에 80 이상이 들어가 사실상 즉사기가 된다. 기본값은 0.6.
     extra-hit-multiplier: 0.6
 
+# 무기 제작·강화 재료. 목록을 여기서 읽으므로 추가/삭제하면
+# /특수아이템소환·관리자메뉴·우편 첨부에 쓰는 이름도 따라서 늘어난다.
+#   grade        COMMON | RARE | UNIQUE | ANCIENT | LEGEND | MASTER (일반~신화)
+#   material     리소스팩이 없을 때 보이는 바닐라 재질
+#   model-data   커스텀 모델 데이터 (0이면 붙이지 않음)
+#   지급용 이름은 name에서 공백을 뺀 형태다 (예: 단단한 돌 조각 -> 단단한돌조각)
+materials:
+  list:
+    hard_stone_fragment:
+      name: "단단한 돌 조각"
+      grade: COMMON
+      material: STONE
+      model-data: 0
+      description:
+        - "흔하게 구할 수 있는 밀도 높은 회색 돌덩이."
+        - "가장 기초적인 장비의 뼈대를 잡는 데 쓰입니다."
+    rough_twig:
+      name: "거친 나뭇가지"
+      grade: COMMON
+      material: STICK
+      model-data: 0
+      description:
+        - "숲에서 쉽게 채집할 수 있는 질기고 단단한 나무 줄기."
+        - "도구와 자루의 손잡이 재료로 쓰입니다."
+    rusted_iron_scrap:
+      name: "녹슨 철광석 조각"
+      grade: COMMON
+      material: RAW_IRON
+      model-data: 0
+      description:
+        - "오랜 시간 방치되어 산화된 철 부스러기."
+        - "불순물이 많아 가공이 필요합니다."
+    tough_leather_strap:
+      name: "질긴 가죽 끈"
+      grade: COMMON
+      material: LEATHER
+      model-data: 0
+      description:
+        - "야생 동물의 가죽을 얇게 저며 엮어 만든 튼튼한 결합용 끈."
+    common_charcoal_powder:
+      name: "평범한 숯 가루"
+      grade: COMMON
+      material: CHARCOAL
+      model-data: 0
+      description:
+        - "화덕에서 흔히 얻어지는 탄소 가루."
+        - "기초적인 제련 및 코팅에 쓰입니다."
+    refined_iron_ingot:
+      name: "정제된 무쇠 주괴"
+      grade: RARE
+      material: IRON_INGOT
+      model-data: 0
+      description:
+        - "불순물을 말끔히 제거하고 단단하게 단조해 낸 고품질의 철 주괴."
+    beasts_sharp_claw:
+      name: "야수의 날카로운 발톱"
+      grade: RARE
+      material: PRISMARINE_SHARD
+      model-data: 0
+      description:
+        - "강력한 몬스터의 사냥에서 얻은 예리한 발톱."
+        - "날붙이의 절단력을 높여줍니다."
+    imbued_mana_essence:
+      name: "마력이 스민 정수"
+      grade: RARE
+      material: EXPERIENCE_BOTTLE
+      model-data: 0
+      description:
+        - "주변의 미세한 마력이 응축되어"
+        - "은은한 빛을 뿜어내는 액상 물질."
+    sturdy_oak_timber:
+      name: "단단한 오크 원목"
+      grade: RARE
+      material: OAK_LOG
+      model-data: 0
+      description:
+        - "오랜 세월 자라난 참나무의 심재."
+        - "쉽게 부러지지 않는 단단함을 자랑합니다."
+    mithril_alloy_ore:
+      name: "미스릴 합금 광석"
+      grade: UNIQUE
+      material: LAPIS_LAZULI
+      model-data: 0
+      description:
+        - "가볍고도 강철보다 단단한 성질을 지닌"
+        - "희귀한 푸른빛 광석."
+    void_leather:
+      name: "공허의 가죽"
+      grade: UNIQUE
+      material: PHANTOM_MEMBRANE
+      model-data: 0
+      description:
+        - "이계의 기운이 감도는 심연의 괴수로부터 벗겨낸"
+        - "질기고 기묘한 촉감의 가죽."
+    blazing_fire_crystal:
+      name: "타오르는 화염의 결정"
+      grade: UNIQUE
+      material: BLAZE_POWDER
+      model-data: 0
+      description:
+        - "내부에서 영원히 사그라들지 않는"
+        - "고열의 화염 에너지를 품고 있는 붉은 결정체."
+    titans_pulsing_heartstone:
+      name: "거신의 맥동하는 심장석"
+      grade: ANCIENT
+      material: HEART_OF_THE_SEA
+      model-data: 0
+      description:
+        - "타이탄 소울 모닝스타의 헤드 내부에서"
+        - "영원히 식지 않는 열과 중력을 내뿜는"
+        - "심장 모양의 광물 파편."
+    shattered_tectonic_shard:
+      name: "부서진 지각의 파편"
+      grade: ANCIENT
+      material: ECHO_SHARD
+      model-data: 0
+      description:
+        - "타이탄의 일격이 대지에 부딪칠 때 사방으로 튀어나온,"
+        - "형언할 수 없는 고밀도의 암석 결정체."
+    condensed_titan_gravity_fluid:
+      name: "타이탄의 응축된 중력수"
+      grade: ANCIENT
+      material: DRAGON_BREATH
+      model-data: 0
+      description:
+        - "거신의 거대한 질량에서 뿜어져 나오는 중력장을"
+        - "액화시켜 특수 유리병에 담아낸 무거운 액체."
+    sunstone_of_the_ancient_kingdom:
+      name: "성스러운 태양석"
+      grade: LEGEND
+      material: GOLD_INGOT
+      model-data: 0
+      description:
+        - "태양의 빛을 영구적으로 가둬 둔 황금빛 보석."
+        - "전설적인 신성 장비를 벼려낼 때 쓰는 핵심 촉매."
+    dragons_scale:
+      name: "드래곤의 비늘"
+      grade: LEGEND
+      material: NETHERITE_SCRAP
+      model-data: 0
+      description:
+        - "전설의 고대 드래곤의 심장부에서 떼어낸,"
+        - "어떠한 마법과 물리 공격도 튕겨내는 불멸의 비늘."
+    boundary_stone_of_cosmos:
+      name: "천공의 경계석"
+      grade: MASTER
+      material: NETHER_STAR
+      model-data: 0
+      description:
+        - "우주의 탄생과 소멸의 에너지가 응축되어"
+        - "차원의 균열 속에서만 발견되는"
+        - "절대적인 신화급 코어 재료."
+
 # 전설 등급 무기 '말룡도(末龍刀)' — 종말룡 엔더드래곤을 잡으면 확률로 떨어진다.
 # 단계별 연계 무기라 1초식 적중 -> 2초식 -> 3초식 순서로만 쓸 수 있다.
 malyongdo:

@@ -4,6 +4,7 @@ import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.economy.BlackMarketManager;
 import com.tntbbp.myminecraft.manager.economy.CurrencyManager;
 import com.tntbbp.myminecraft.manager.item.EnhanceManager;
+import com.tntbbp.myminecraft.manager.item.MaterialManager;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -50,6 +51,10 @@ public final class SpecialItemCatalog {
         }
         if (itemName.equals("글레이프니르")) {
             return mythicWeapon(plugin.getGleipnirManager().createItem(), "글레이프니르", amount);
+        }
+        MaterialManager.MaterialDef material = plugin.getMaterialManager().find(itemName);
+        if (material != null) {
+            return new Resolved(plugin.getMaterialManager().createItem(material, amount), material.displayName());
         }
         if (itemName.equals("말룡도")) {
             return mythicWeapon(plugin.getMalyongdoManager().createItem(), "말룡도", amount);
@@ -136,7 +141,7 @@ public final class SpecialItemCatalog {
      * 웹 관리자(우편 첨부·지급 선택기)용 카탈로그 한 줄.
      *
      * @param name        /특수아이템소환·우편 첨부에 쓰는 정확한 아이템명 (예: 강화석, 일반두루마리, 1G)
-     * @param category    enhance | scroll | starforce | weapon | blackmarket | coin
+     * @param category    enhance | scroll | starforce | weapon | blackmarket | coin | material
      * @param modelData   커스텀 모델 데이터 (없으면 0)
      */
     public record CatalogEntry(String name, String displayName, String material, int modelData, String category) {
@@ -161,12 +166,13 @@ public final class SpecialItemCatalog {
             String displayName = resolved.displayName() == null ? name
                     : resolved.displayName().replaceAll("(?i)§[0-9A-FK-ORX]", "");
             entries.add(new CatalogEntry(name, displayName, item.getType().name(), modelData,
-                    categoryOf(enhanceManager, currencyManager, name)));
+                    categoryOf(plugin, enhanceManager, currencyManager, name)));
         }
         return entries;
     }
 
-    private static String categoryOf(EnhanceManager enhanceManager, CurrencyManager currencyManager, String name) {
+    private static String categoryOf(MyMinecraftPlugin plugin, EnhanceManager enhanceManager,
+                                     CurrencyManager currencyManager, String name) {
         if (name.equals("강화석")) {
             return "enhance";
         }
@@ -185,6 +191,9 @@ public final class SpecialItemCatalog {
         if (findCoin(currencyManager, name) != null) {
             return "coin";
         }
+        if (plugin != null && plugin.getMaterialManager().find(name) != null) {
+            return "material";
+        }
         return "enhance";
     }
 
@@ -198,6 +207,9 @@ public final class SpecialItemCatalog {
         names.add("레바테인");
         names.add("드라켄피어스");
         names.add("말룡도");
+        names.addAll(plugin.getMaterialManager().materials().stream()
+                .map(MaterialManager.MaterialDef::shortName)
+                .collect(Collectors.toList()));
         names.add("글레이프니르");
         names.add("사인참사검");
         names.add("발뭉");
