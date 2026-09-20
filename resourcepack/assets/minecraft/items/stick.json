@@ -5,21 +5,21 @@
     "index": 0,
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:item/iron_ingot"
+      "model": "minecraft:item/stick"
     },
     "entries": [
       {
-        "threshold": 500051,
+        "threshold": 500101,
         "model": {
           "type": "minecraft:model",
-          "model": "minecraft:item/coin_10g"
+          "model": "minecraft:item/rough_twig"
         }
       },
       {
-        "threshold": 500105,
+        "threshold": 500108,
         "model": {
           "type": "minecraft:model",
-          "model": "minecraft:item/refined_iron_ingot"
+          "model": "minecraft:item/sturdy_oak_timber"
         }
       }
     ]

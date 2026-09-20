@@ -5,21 +5,14 @@
     "index": 0,
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:item/iron_ingot"
+      "model": "minecraft:item/nether_star"
     },
     "entries": [
       {
-        "threshold": 500051,
+        "threshold": 500117,
         "model": {
           "type": "minecraft:model",
-          "model": "minecraft:item/coin_10g"
-        }
-      },
-      {
-        "threshold": 500105,
-        "model": {
-          "type": "minecraft:model",
-          "model": "minecraft:item/refined_iron_ingot"
+          "model": "minecraft:item/boundary_stone_of_cosmos"
         }
       }
     ]

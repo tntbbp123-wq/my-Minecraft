@@ -64,6 +64,7 @@ import com.tntbbp.myminecraft.manager.economy.NewsManager;
 import com.tntbbp.myminecraft.manager.economy.StockManager;
 import com.tntbbp.myminecraft.manager.item.EnhanceManager;
 import com.tntbbp.myminecraft.manager.item.GradeManager;
+import com.tntbbp.myminecraft.manager.item.MaterialManager;
 import com.tntbbp.myminecraft.manager.item.StarforceManager;
 import com.tntbbp.myminecraft.manager.item.TranscendAltarBlockManager;
 import com.tntbbp.myminecraft.manager.mail.MailManager;
@@ -116,6 +117,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private CurseManager curseManager;
     private SainchamsagumManager sainchamsagumManager;
     private MalyongdoManager malyongdoManager;
+    private MaterialManager materialManager;
     private BountyManager bountyManager;
     private BalmungManager balmungManager;
     private JahaShingeomManager jahaShingeomManager;
@@ -169,6 +171,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.curseManager = new CurseManager(this);
         this.sainchamsagumManager = new SainchamsagumManager(this);
         this.malyongdoManager = new MalyongdoManager(this);
+        this.materialManager = new MaterialManager(this);
         this.bountyManager = new BountyManager(this);
         this.balmungManager = new BalmungManager(this);
         this.jahaShingeomManager = new JahaShingeomManager(this);
@@ -457,6 +460,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public MalyongdoManager getMalyongdoManager() {
         return malyongdoManager;
+    }
+
+    public MaterialManager getMaterialManager() {
+        return materialManager;
     }
 
     public BountyManager getBountyManager() {

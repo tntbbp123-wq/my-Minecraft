@@ -9,6 +9,12 @@
         "custom_model_data": 500051
       },
       "model": "item/coin_10g"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 500105
+      },
+      "model": "item/refined_iron_ingot"
     }
   ]
 }

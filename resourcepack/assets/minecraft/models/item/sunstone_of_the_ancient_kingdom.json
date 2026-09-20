@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "item/sunstone_of_the_ancient_kingdom"
+  }
+}
