@@ -188,7 +188,7 @@ public class ArtemisSetManager {
         int level = enchantLevel();
 
         List<String> lore = new ArrayList<>(List.of(
-                "§c§l전설 (Legendary) §8| §7아르테미스 세트 §8| §7방어력 §f" + num(armor),
+                "§e§l전설 (Legendary) §8| §7아르테미스 세트 §8| §7방어력 §f" + num(armor),
                 "§7달빛을 받아 스스로 벼려지는 은빛 갑주",
                 "",
                 "§b[패시브] §f월광 공명",
