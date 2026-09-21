@@ -82,17 +82,26 @@ jobs:
 
           # 자동 생성된 노트 뒤에 리소스팩 설정을 붙인다. 코드블록이라 릴리스 화면에서
           # 복사 버튼 한 번으로 server.properties에 그대로 옮길 수 있다.
-          PACK_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/MyMinecraft-ResourcePack.zip"
+          # 저장소가 공개라 GitHub가 main의 zip을 그대로 호스팅해준다. README·스크립트가
+          # 안내하는 주소와 같은 것을 쓴다(한 군데만 보면 되도록 통일).
+          PACK_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/MyMinecraft-ResourcePack.zip"
           {
             gh release view "$TAG" --json body --jq .body
             echo
             echo "## 리소스팩"
             echo
-            echo '`server.properties`에 아래 두 줄을 넣으세요. 이 해시는 위에 첨부된 이 버전의 팩과 짝입니다.'
+            echo '`server.properties`에 아래 두 줄을 넣으세요.'
             echo
             echo '```properties'
             echo "resource-pack=$PACK_URL"
             echo "resource-pack-sha1=$SHA1"
             echo '```'
+            echo
+            echo "이 주소는 **항상 \`main\`의 최신 팩**을 가리킵니다. 위 해시는 \`$TAG\` 시점의 값이라,"
+            echo "이 버전 이후에 팩이 바뀌면 해시도 달라집니다. 그때는 최신 릴리스 노트나 README의"
+            echo "\`resource-pack-sha1\` 값으로 갱신하세요 — **해시가 어긋나면 클라이언트가 팩을 거부합니다.**"
+            echo
+            echo "이 버전의 팩 그대로를 고정해서 쓰고 싶다면 위에 첨부된"
+            echo "\`MyMinecraft-ResourcePack.zip\`을 직접 호스팅하면 됩니다."
           } > notes.md
           gh release edit "$TAG" --notes-file notes.md

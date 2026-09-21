@@ -488,13 +488,15 @@ resource-pack-prompt={"text":"이 서버는 필수 리소스팩이 있습니다.
 
 **해시를 어디서 가져오나**
 
-세 군데 중 편한 곳에서 그대로 복사하면 됩니다. 셋은 항상 같은 값입니다.
+세 군데 중 편한 곳에서 그대로 복사하면 됩니다.
 
 | 어디 | 무엇 |
 |---|---|
-| 바로 위 코드블록 | 지금 `main`에 올라가 있는 팩의 해시 (팩이 바뀌면 같이 갱신됩니다) |
-| [릴리스](https://github.com/tntbbp123-wq/my-Minecraft/releases) 페이지 | "리소스팩" 항목에 `server.properties` 두 줄이 통째로 있습니다. 그 버전의 팩과 짝인 값이라 버전을 고정해 쓸 때 안전합니다 |
+| 바로 위 코드블록 | **지금 `main`에 올라가 있는 팩**의 해시 (팩이 바뀌면 같이 갱신됩니다) |
 | `scripts/pack-resourcepack.sh --print` | 손에 있는 zip에서 직접 뽑습니다 |
+| [릴리스](https://github.com/tntbbp123-wq/my-Minecraft/releases) 페이지 | "리소스팩" 항목에 `server.properties` 두 줄이 통째로 있습니다. 단 **그 릴리스 시점의 값**이라, 이후에 팩이 바뀌었다면 위 두 곳과 다릅니다 |
+
+위 URL은 항상 `main`의 최신 팩을 가리키므로, **팩이 바뀌면 `server.properties`의 해시도 같이 고쳐야 합니다.** 해시가 어긋나면 클라이언트가 팩을 통째로 거부합니다. 특정 버전의 팩을 고정해서 쓰고 싶다면 해당 릴리스에 첨부된 `MyMinecraft-ResourcePack.zip`을 받아 직접 호스팅하세요.
 
 **팩을 고쳤다면**
 
