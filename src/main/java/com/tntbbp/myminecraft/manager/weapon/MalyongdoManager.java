@@ -41,6 +41,10 @@ import java.util.concurrent.ConcurrentHashMap;
  *       끝날 때 그동안 쌓은 파괴력을 한 번에 쏟아낸다</li>
  * </ul>
  *
+ * <p>연계가 열려 있는 시간은 단계마다 다르다. 2초식이 말을 전부 먹고 가기 때문에 3초식은 더 길게
+ * 열어 두고, <b>2초식에 쏟아부은 말을 3초식이 그대로 이어받는다.</b> 이어받지 않으면 남은 시간 안에
+ * 3초식의 최소 말을 다시 모으는 것이 사실상 불가능하다.
+ *
  * <p><b>말 스택</b>은 들고 때리면 1, 들고 있기만 해도 초당 0.5씩 쌓인다. 스택과 지금 열린 연계 단계는
  * 무기를 들고 있는 동안 액션바에 계속 보여준다.
  */
@@ -59,8 +63,14 @@ public class MalyongdoManager {
         SECOND_USED
     }
 
-    /** 연계 진행 상황. 마지막으로 단계가 올라간 시각을 함께 들고 있다가 시간이 지나면 처음으로 되돌린다. */
-    private record Combo(Stage stage, long updatedAtMillis) {
+    /**
+     * 연계 진행 상황.
+     *
+     * @param stage           지금 밟은 단계
+     * @param updatedAtMillis 이 단계로 올라간 시각. 단계별 유지 시간이 지나면 처음으로 되돌린다
+     * @param carriedStacks   2초식에 쏟아부은 말. 3초식은 이 말을 이어받는다
+     */
+    private record Combo(Stage stage, long updatedAtMillis, int carriedStacks) {
     }
 
     private final MyMinecraftPlugin plugin;
@@ -99,9 +109,9 @@ public class MalyongdoManager {
         double attackDamage = attackDamage();
 
         ItemStack item = new ItemBuilder(Material.NETHERITE_SWORD)
-                .name("§c§l말룡도 §7(末龍刀)")
+                .name("§e§l말룡도 §7(末龍刀)")
                 .lore(List.of(
-                        "§c§l전설 (Legendary) §8| §7무기 §8| §7공격력 §c" + formatNumber(attackDamage)
+                        "§e§l전설 (Legendary) §8| §7무기 §8| §7공격력 §c" + formatNumber(attackDamage)
                                 + " §8| §7공격속도 §e1.6",
                         "§7종말룡의 턱뼈를 갈아 벼려낸 대도",
                         "",
@@ -109,8 +119,8 @@ public class MalyongdoManager {
                         "§7 때리면 §f1말§7, 들고 있으면 §f초당 0.5말",
                         "",
                         "§e[연계] §7앞 단계를 밟아야 다음 초식이 열린다",
-                        "§7 1초식 적중 §8→ §72초식 §8→ §73초식 §8(§7유지 "
-                                + comboWindowSeconds() + "초§8)",
+                        "§7 1초식 적중 §8→ §72초식 §8(§f" + comboWindowSeconds() + "초§8)"
+                                + " §8→ §73초식 §8(§f" + secondComboWindowSeconds() + "초§8)",
                         "",
                         "§6[F] §f1초식 말 §7(末 · 재사용 " + firstCooldownSeconds() + "초)",
                         "§7 말 §f" + firstCost() + "말 §7소모, 전방에 §c" + formatNumber(firstDamage()) + " §7참격",
@@ -123,7 +133,8 @@ public class MalyongdoManager {
                         "",
                         "§6[웅크리기+우클릭] §f3초식 종말룡 §7(終末龍 · 재사용 "
                                 + thirdCooldownSeconds() + "초)",
-                        "§8 └ §72초식을 쓴 뒤에만 · 말 §f" + thirdMinStacks() + "말 이상",
+                        "§8 └ §72초식을 쓴 뒤에만 · §f2초식에 쏟은 말 §7+ §f지금 가진 말 §7"
+                                + thirdMinStacks() + "말 이상",
                         "§7 " + avatarSeconds() + "초간 §5종말의 화신§7: 상태이상 면역,",
                         "§7 그동안 입힌 피해가 파괴력으로 쌓인다",
                         "§7 끝나는 순간 쌓인 파괴력을 암흑 용으로 쏟아낸다",
@@ -182,9 +193,14 @@ public class MalyongdoManager {
         return plugin.getConfig().getDouble("malyongdo.stack.per-second", 0.5);
     }
 
-    /** 앞 초식을 쓴 뒤 다음 초식이 열려 있는 시간. 지나면 1초식부터 다시 시작한다. */
+    /** 1초식이 적중한 뒤 2초식이 열려 있는 시간. 지나면 1초식부터 다시 시작한다. */
     public int comboWindowSeconds() {
-        return plugin.getConfig().getInt("malyongdo.combo-window-seconds", 10);
+        return plugin.getConfig().getInt("malyongdo.combo-window-seconds", 25);
+    }
+
+    /** 2초식을 쓴 뒤 3초식이 열려 있는 시간. 3초식은 말을 다시 모아야 해서 더 길게 잡는다. */
+    public int secondComboWindowSeconds() {
+        return plugin.getConfig().getInt("malyongdo.second-combo-window-seconds", 40);
     }
 
     public int firstCooldownSeconds() {
@@ -251,25 +267,61 @@ public class MalyongdoManager {
 
     // ----- 연계 단계 -----
 
-    /** 지금 열려 있는 단계. 연계 유지 시간이 지났으면 처음으로 되돌린다. */
-    public Stage stage(UUID uuid) {
+    /** 그 단계가 열려 있는 시간(초). */
+    private int windowSecondsFor(Stage stage) {
+        return switch (stage) {
+            case NONE -> 0;
+            case FIRST_HIT -> comboWindowSeconds();
+            case SECOND_USED -> secondComboWindowSeconds();
+        };
+    }
+
+    /** 아직 살아 있는 연계. 유지 시간이 지났으면 지우고 null을 준다. */
+    private Combo activeCombo(UUID uuid) {
         Combo combo = combos.get(uuid);
         if (combo == null) {
-            return Stage.NONE;
+            return null;
         }
-        if (System.currentTimeMillis() - combo.updatedAtMillis() > comboWindowSeconds() * 1000L) {
+        long elapsed = System.currentTimeMillis() - combo.updatedAtMillis();
+        if (elapsed > windowSecondsFor(combo.stage()) * 1000L) {
             combos.remove(uuid);
-            return Stage.NONE;
+            return null;
         }
-        return combo.stage();
+        return combo;
+    }
+
+    /** 지금 열려 있는 단계. 연계 유지 시간이 지났으면 처음으로 되돌린다. */
+    public Stage stage(UUID uuid) {
+        Combo combo = activeCombo(uuid);
+        return combo == null ? Stage.NONE : combo.stage();
+    }
+
+    /** 지금 열린 연계가 닫히기까지 남은 시간(초). 열린 연계가 없으면 0. */
+    public long remainingComboSeconds(UUID uuid) {
+        Combo combo = activeCombo(uuid);
+        if (combo == null) {
+            return 0;
+        }
+        long elapsed = System.currentTimeMillis() - combo.updatedAtMillis();
+        return Math.max(0, windowSecondsFor(combo.stage()) - elapsed / 1000);
+    }
+
+    /** 2초식에 쏟아부어 3초식으로 이어지는 말. 연계가 닫혔으면 0. */
+    private int carriedStacks(UUID uuid) {
+        Combo combo = activeCombo(uuid);
+        return combo == null ? 0 : combo.carriedStacks();
     }
 
     private void setStage(UUID uuid, Stage stage) {
+        setStage(uuid, stage, 0);
+    }
+
+    private void setStage(UUID uuid, Stage stage, int carriedStacks) {
         if (stage == Stage.NONE) {
             combos.remove(uuid);
             return;
         }
-        combos.put(uuid, new Combo(stage, System.currentTimeMillis()));
+        combos.put(uuid, new Combo(stage, System.currentTimeMillis(), carriedStacks));
     }
 
     // ----- [F] 1초식 말 -----
@@ -308,9 +360,20 @@ public class MalyongdoManager {
             hit = true;
         }
 
+        Stage before = stage(caster.getUniqueId());
         if (hit) {
-            setStage(caster.getUniqueId(), Stage.FIRST_HIT);
-            caster.sendMessage("§c1초식 말! §7— 2초식 말룡이 열렸습니다. (" + comboWindowSeconds() + "초)");
+            if (before == Stage.SECOND_USED) {
+                // 3초식이 열려 있는 동안 평소처럼 F를 눌렀다고 해서 연계를 뒤로 되돌리지는 않는다.
+                // 되돌리면 2초식에 쏟은 말이 통째로 날아가 버린다.
+                caster.sendMessage("§c1초식 말! §7— 3초식 종말룡이 그대로 열려 있습니다. ("
+                        + remainingComboSeconds(caster.getUniqueId()) + "초)");
+            } else {
+                setStage(caster.getUniqueId(), Stage.FIRST_HIT);
+                caster.sendMessage("§c1초식 말! §7— 2초식 말룡이 열렸습니다. ("
+                        + comboWindowSeconds() + "초)");
+            }
+        } else if (before == Stage.SECOND_USED) {
+            caster.sendMessage("§71초식 말이 빗나갔습니다. §73초식 종말룡은 그대로 열려 있습니다.");
         } else {
             // 빗나가면 연계가 열리지 않는다. 스펙상 "적중했거나 활성화된 상태"여야 다음 단계로 간다.
             setStage(caster.getUniqueId(), Stage.NONE);
@@ -336,7 +399,9 @@ public class MalyongdoManager {
         }
         int spent = stacks(uuid);
         if (spent <= 0) {
-            return "쏟아낼 말이 없습니다.";
+            // 1초식이 말을 먹고 가므로 여기서 0이 되기 쉽다. 연계가 얼마나 남았는지까지 알려준다.
+            return "쏟아낼 말이 없습니다. 말을 더 모으세요. (2초식 "
+                    + remainingComboSeconds(uuid) + "초 남음)";
         }
         secondCooldowns.put(uuid, System.currentTimeMillis());
         consumeStacks(uuid, spent);
@@ -367,10 +432,12 @@ public class MalyongdoManager {
                     plugin.getConfig().getInt("malyongdo.second.fire-ticks", 60)));
         }
 
-        setStage(uuid, Stage.SECOND_USED);
+        // 쏟아부은 말은 3초식으로 이어진다. 2초식이 말을 전부 먹기 때문에, 이어받지 않으면
+        // 남은 유지 시간 안에 3초식 최소 말을 다시 모으는 것이 사실상 불가능하다.
+        setStage(uuid, Stage.SECOND_USED, spent);
         caster.sendMessage("§42초식 말룡! §7— " + spent + "말 소모, 방어관통 "
                 + formatNumber(Math.round(penetration * 10) / 10.0) + "% §8· §73초식이 열렸습니다. ("
-                + comboWindowSeconds() + "초)");
+                + secondComboWindowSeconds() + "초, 쏟은 " + spent + "말이 이어집니다)");
         return null;
     }
 
@@ -402,16 +469,22 @@ public class MalyongdoManager {
         if (remainingThirdCooldown(uuid) > 0) {
             return "3초식 종말룡 재사용 대기 중입니다. (" + remainingThirdCooldown(uuid) + "초)";
         }
-        if (stacks(uuid) < thirdMinStacks()) {
-            return "말이 부족합니다. (" + stacks(uuid) + " / " + thirdMinStacks() + "말)";
+        // 2초식에 쏟은 말이 그대로 이어지고, 그 뒤에 다시 모은 말을 더해서 따진다.
+        int carried = carriedStacks(uuid);
+        int available = carried + stacks(uuid);
+        if (available < thirdMinStacks()) {
+            return "말이 부족합니다. (" + available + " / " + thirdMinStacks() + "말"
+                    + (carried > 0 ? ", 2초식에서 이어받은 " + carried + "말 포함" : "") + ")";
         }
         if (isAvatar(uuid)) {
             return "이미 종말의 화신 상태입니다.";
         }
         thirdCooldowns.put(uuid, System.currentTimeMillis());
 
-        int spent = stacks(uuid);
-        consumeStacks(uuid, spent);
+        int spent = available;
+        consumeStacks(uuid, stacks(uuid));
+        // 이어받은 말은 여기서 다 쓴다. 화신 처리가 도중에 끊겨도 두 번 세지 않도록 바로 비운다.
+        setStage(uuid, Stage.SECOND_USED, 0);
         int seconds = avatarSeconds();
 
         // 시작 파괴력은 쏟아부은 말에서 나온다. 여기에 화신 동안 입힌 피해가 더 쌓인다.
@@ -488,21 +561,35 @@ public class MalyongdoManager {
         }
     }
 
-    /** 스택과 지금 열린 연계 단계를 액션바로 보여준다. 로어는 실시간으로 못 바꾼다. */
+    /**
+     * 스택과 지금 열린 연계 단계를 액션바로 보여준다. 로어는 실시간으로 못 바꾼다.
+     *
+     * <p>초식 이름은 항상 <b>번호까지 통째로</b> 적는다. 예전에는 "1초식"을 §8(짙은 회색)로 칠하고
+     * 기술명만 밝게 칠해서, 어두운 배경에서는 "말"·"말룡"만 보여 무엇이 열렸는지 읽을 수 없었다.
+     * 이제 밟은 단계는 초록, 지금 쓸 수 있는 단계는 밝은 색, 아직 잠긴 단계만 회색으로 구분한다.
+     */
     private void showActionBar(Player player) {
         UUID uuid = player.getUniqueId();
         int current = stacks(uuid);
         Stage stage = stage(uuid);
+        long remaining = remainingComboSeconds(uuid);
 
         String combo = switch (stage) {
-            case NONE -> "§81초식 §f말 §8› §8말룡 §8› §8종말룡";
-            case FIRST_HIT -> "§71초식 §8› §c2초식 §f말룡 §8› §8종말룡";
-            case SECOND_USED -> "§71초식 §8› §72초식 §8› §53초식 §f종말룡";
+            case NONE -> "§e▶ 1초식 말 §8› §72초식 말룡 §8› §73초식 종말룡";
+            case FIRST_HIT -> "§a✔ 1초식 말 §8› §c▶ 2초식 말룡 §8› §73초식 종말룡 §8[§f"
+                    + remaining + "초§8]";
+            case SECOND_USED -> "§a✔ 1초식 말 §8› §a✔ 2초식 말룡 §8› §d▶ 3초식 종말룡 §8[§f"
+                    + remaining + "초§8]";
         };
+        // 3초식은 2초식에 쏟은 말을 이어받으므로, 그 몫까지 더해서 보여줘야 숫자가 맞는다.
+        int usable = current + (stage == Stage.SECOND_USED ? carriedStacks(uuid) : 0);
+        String stackText = usable == current
+                ? "§f" + current
+                : "§f" + current + "§7(+" + (usable - current) + ")";
         String avatar = isAvatar(uuid) ? " §8| §5종말의 화신" : "";
 
         player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(
-                "§c말 §f" + current + "§8/§7" + maxStacks() + " §8| " + combo + avatar));
+                "§6말(末) " + stackText + "§8/§7" + maxStacks() + " §8| " + combo + avatar));
     }
 
     // ----- 내부 -----

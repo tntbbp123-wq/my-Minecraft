@@ -22,7 +22,8 @@ public class GradeManager {
         RARE("레어", "9"),
         UNIQUE("유니크", "a"),
         ANCIENT("고대", "6"),
-        LEGEND("전설", "c"),
+        // 전설은 노란색(e)이다. 황금색(6)은 이미 고대가 쓰고 있어 겹치면 구분이 안 된다.
+        LEGEND("전설", "e"),
         MASTER("신화", "d");
 
         private final String displayName;

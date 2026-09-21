@@ -80,7 +80,7 @@ public class VoltSaberManager {
         ItemStack item = new ItemBuilder(Material.NETHERITE_SWORD)
                 .name("§b§l볼트 세이버 §7(Volt Saber)")
                 .lore(List.of(
-                        "§c§l전설 (Legendary) §8| §7세이버 §8| §7공격력 §c" + num(attackDamage())
+                        "§e§l전설 (Legendary) §8| §7세이버 §8| §7공격력 §c" + num(attackDamage())
                                 + " §8| §7공격속도 §e" + num(attackSpeed()),
                         "§7치명타 §c" + num(critDamage()) + " §8| §7날이 푸른 전자기파로 번쩍인다",
                         "",
