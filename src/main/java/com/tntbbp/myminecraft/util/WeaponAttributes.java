@@ -27,6 +27,16 @@ public final class WeaponAttributes {
      * @param attackDamageKey 이 무기 전용 공격력 수정자 키 (강화 시스템이 자기 수정자와 구분하는 기준)
      */
     public static void applyBase(ItemMeta meta, Material type, double attackDamage, NamespacedKey attackDamageKey) {
+        applyBase(meta, type, attackDamage, 0, attackDamageKey);
+    }
+
+    /**
+     * 공격속도까지 직접 정하는 판. 재질 기본값과 다른 속도를 쓰는 무기(모닝스타·장병기 등)에 쓴다.
+     *
+     * @param attackSpeed 0 이하면 재질의 기본 공격속도를 그대로 쓴다
+     */
+    public static void applyBase(ItemMeta meta, Material type, double attackDamage, double attackSpeed,
+                                 NamespacedKey attackDamageKey) {
         // 맨손 기본 공격력(1.0)을 더하면 툴팁상 공격력이 attackDamage가 된다.
         meta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier(
                 attackDamageKey,
@@ -34,6 +44,15 @@ public final class WeaponAttributes {
                 AttributeModifier.Operation.ADD_NUMBER,
                 EquipmentSlotGroup.MAINHAND));
 
+        if (attackSpeed > 0) {
+            // 맨손 기본 공격속도(4.0)를 빼야 툴팁에 적힌 값이 그대로 나온다.
+            meta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(
+                    new NamespacedKey(attackDamageKey.getNamespace(), attackDamageKey.getKey() + "_speed"),
+                    attackSpeed - 4.0,
+                    AttributeModifier.Operation.ADD_NUMBER,
+                    EquipmentSlotGroup.MAINHAND));
+            return;
+        }
         for (AttributeModifier modifier : type.getDefaultAttributeModifiers(EquipmentSlot.HAND)
                 .get(Attribute.GENERIC_ATTACK_SPEED)) {
             meta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, modifier);

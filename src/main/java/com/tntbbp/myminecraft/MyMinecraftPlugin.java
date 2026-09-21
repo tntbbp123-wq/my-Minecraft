@@ -43,7 +43,11 @@ import com.tntbbp.myminecraft.listener.weapon.GleipnirListener;
 import com.tntbbp.myminecraft.listener.weapon.JahaShingeomListener;
 import com.tntbbp.myminecraft.listener.weapon.LaevateinnListener;
 import com.tntbbp.myminecraft.listener.weapon.LaevateinnModelListener;
+import com.tntbbp.myminecraft.listener.item.ArtemisSetListener;
+import com.tntbbp.myminecraft.listener.weapon.FangtianJiListener;
 import com.tntbbp.myminecraft.listener.weapon.MalyongdoListener;
+import com.tntbbp.myminecraft.listener.weapon.TitanListener;
+import com.tntbbp.myminecraft.listener.weapon.VoltSaberListener;
 import com.tntbbp.myminecraft.listener.weapon.SainchamsagumListener;
 import com.tntbbp.myminecraft.listener.world.CoreBlockListener;
 import com.tntbbp.myminecraft.log.AdminLog;
@@ -64,6 +68,7 @@ import com.tntbbp.myminecraft.manager.economy.NewsManager;
 import com.tntbbp.myminecraft.manager.economy.StockManager;
 import com.tntbbp.myminecraft.manager.item.EnhanceManager;
 import com.tntbbp.myminecraft.manager.item.GradeManager;
+import com.tntbbp.myminecraft.manager.item.ArtemisSetManager;
 import com.tntbbp.myminecraft.manager.item.MaterialManager;
 import com.tntbbp.myminecraft.manager.item.StarforceManager;
 import com.tntbbp.myminecraft.manager.item.TranscendAltarBlockManager;
@@ -79,7 +84,10 @@ import com.tntbbp.myminecraft.manager.weapon.DrakenPierceManager;
 import com.tntbbp.myminecraft.manager.weapon.GleipnirManager;
 import com.tntbbp.myminecraft.manager.weapon.JahaShingeomManager;
 import com.tntbbp.myminecraft.manager.weapon.LaevateinnManager;
+import com.tntbbp.myminecraft.manager.weapon.FangtianJiManager;
 import com.tntbbp.myminecraft.manager.weapon.MalyongdoManager;
+import com.tntbbp.myminecraft.manager.weapon.TitanManager;
+import com.tntbbp.myminecraft.manager.weapon.VoltSaberManager;
 import com.tntbbp.myminecraft.manager.weapon.SainchamsagumManager;
 import com.tntbbp.myminecraft.manager.world.CoreManager;
 import com.tntbbp.myminecraft.manager.world.LocationsManager;
@@ -118,6 +126,11 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private SainchamsagumManager sainchamsagumManager;
     private MalyongdoManager malyongdoManager;
     private MaterialManager materialManager;
+    private TitanManager titanManager;
+    private FangtianJiManager fangtianJiManager;
+    private VoltSaberManager voltSaberManager;
+    private ArtemisSetManager artemisSetManager;
+    private ArtemisSetListener artemisSetListener;
     private BountyManager bountyManager;
     private BalmungManager balmungManager;
     private JahaShingeomManager jahaShingeomManager;
@@ -172,6 +185,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.sainchamsagumManager = new SainchamsagumManager(this);
         this.malyongdoManager = new MalyongdoManager(this);
         this.materialManager = new MaterialManager(this);
+        this.titanManager = new TitanManager(this);
+        this.fangtianJiManager = new FangtianJiManager(this);
+        this.voltSaberManager = new VoltSaberManager(this);
+        this.artemisSetManager = new ArtemisSetManager(this);
         this.bountyManager = new BountyManager(this);
         this.balmungManager = new BalmungManager(this);
         this.jahaShingeomManager = new JahaShingeomManager(this);
@@ -210,6 +227,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         curseManager.start();
         sainchamsagumManager.start();
         malyongdoManager.start();
+        voltSaberManager.start();
         newsManager.startTask();
         blackMarketManager.start();
         discordManager.start();
@@ -261,6 +279,13 @@ public class MyMinecraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CurseListener(this), this);
         getServer().getPluginManager().registerEvents(new SainchamsagumListener(this), this);
         getServer().getPluginManager().registerEvents(new MalyongdoListener(this), this);
+        getServer().getPluginManager().registerEvents(new TitanListener(this), this);
+        getServer().getPluginManager().registerEvents(new FangtianJiListener(this), this);
+        getServer().getPluginManager().registerEvents(new VoltSaberListener(this), this);
+        this.artemisSetListener = new ArtemisSetListener(this);
+        getServer().getPluginManager().registerEvents(artemisSetListener, this);
+        artemisSetListener.start();
+        getServer().addRecipe(ArtemisSetListener.recipe(this));
         getServer().getPluginManager().registerEvents(new BountyListener(this), this);
         getServer().getPluginManager().registerEvents(new BalmungListener(this), this);
         getServer().getPluginManager().registerEvents(new JahaShingeomListener(this), this);
@@ -357,6 +382,12 @@ public class MyMinecraftPlugin extends JavaPlugin {
         }
         if (malyongdoManager != null) {
             malyongdoManager.stop();
+        }
+        if (voltSaberManager != null) {
+            voltSaberManager.stop();
+        }
+        if (artemisSetListener != null) {
+            artemisSetListener.stop();
         }
         if (newsManager != null) {
             newsManager.stopTask();
@@ -464,6 +495,22 @@ public class MyMinecraftPlugin extends JavaPlugin {
 
     public MaterialManager getMaterialManager() {
         return materialManager;
+    }
+
+    public TitanManager getTitanManager() {
+        return titanManager;
+    }
+
+    public FangtianJiManager getFangtianJiManager() {
+        return fangtianJiManager;
+    }
+
+    public VoltSaberManager getVoltSaberManager() {
+        return voltSaberManager;
+    }
+
+    public ArtemisSetManager getArtemisSetManager() {
+        return artemisSetManager;
     }
 
     public BountyManager getBountyManager() {
