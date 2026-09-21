@@ -500,7 +500,9 @@ resource-pack-prompt={"text":"이 서버는 필수 리소스팩이 있습니다.
 | `scripts/pack-resourcepack.sh --print` | 손에 있는 zip에서 직접 뽑습니다 |
 | [릴리스](https://github.com/tntbbp123-wq/my-Minecraft/releases) 페이지 | "리소스팩" 항목에 `server.properties` 두 줄이 통째로 있습니다. 단 **그 릴리스 시점의 값**이라, 이후에 팩이 바뀌었다면 위 두 곳과 다릅니다 |
 
-위 URL은 항상 `main`의 최신 팩을 가리키므로, **팩이 바뀌면 `server.properties`의 해시도 같이 고쳐야 합니다.** 해시가 어긋나면 클라이언트가 팩을 통째로 거부합니다. 특정 버전의 팩을 고정해서 쓰고 싶다면 그 버전 태그의 zip(`https://raw.githubusercontent.com/tntbbp123-wq/my-Minecraft/<태그>/MyMinecraft-ResourcePack.zip`)을 받아 직접 호스팅하세요.
+이 **URL은 한 번 넣으면 바꿀 일이 없습니다.** 버전이 올라가도 주소는 그대로입니다.
+
+팩이 바뀌면 **`resource-pack-sha1` 값만** 새로 넣으면 됩니다. 새 값은 바로 위 코드블록이나 그 버전 릴리스 노트의 "리소스팩" 항목에 있습니다. 해시가 어긋나면 클라이언트가 팩을 통째로 거부하므로, 팩이 갱신된 버전으로 올릴 때는 이 한 줄만 챙기세요.
 
 **팩을 고쳤다면**
 
