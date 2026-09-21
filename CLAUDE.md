@@ -41,7 +41,7 @@ git fetch gitea --prune --tags
 
 ## 5. 릴리스 (사용자가 요청할 때만)
 
-병합이 끝난 `gitea/main` 커밋에 `pom.xml`의 `<version>`과 같은 `vX.Y.Z` 태그를 만들고 `git push gitea vX.Y.Z` 한다. 1분 안에 GitHub로 복사되고, GitHub Actions 릴리스(`.github/workflows/release.yml`)가 jar와 리소스팩을 첨부한다.
+병합이 끝난 `gitea/main` 커밋에 `pom.xml`의 `<version>`과 같은 `vX.Y.Z` 태그를 만들고 `git push gitea vX.Y.Z` 한다. 1분 안에 GitHub로 복사되고, GitHub Actions 릴리스(`.github/workflows/release.yml`)가 플러그인 jar와 리소스팩 해시(`.sha1`)를 첨부하고, 릴리스 노트에 `resource-pack-sha1` 값을 적는다.
 
 ## 6. 돈·아이템이 오가는 기능을 만들 때 (웹 관리자 거래 기록)
 

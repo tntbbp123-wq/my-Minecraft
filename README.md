@@ -5,13 +5,16 @@ Paper 서버용 유틸리티 플러그인입니다. (대상: Paper 1.21.x, Java 
 ## 다운로드 / 설치
 
 빌드할 필요 없이 [**Releases**](https://github.com/tntbbp123-wq/my-Minecraft/releases/latest) 페이지에서
-바로 받을 수 있습니다. 릴리스마다 파일 3개가 첨부됩니다.
+바로 받을 수 있습니다. 릴리스마다 파일 2개가 첨부됩니다.
 
 | 파일 | 용도 |
 |---|---|
 | `MyMinecraft-<버전>.jar` | **플러그인 본체.** 서버의 `plugins/` 폴더에 넣으세요 |
-| `MyMinecraft-<버전>-sources.jar` | **소스 코드.** 코드를 확인하거나 IDE에 소스를 연결할 때 씁니다 |
-| `MyMinecraft-ResourcePack.zip` | 리소스팩 (선택). **전용 아이템 텍스처 + 전투 브금** — 아래 "리소스팩" 항목 참고 |
+| `MyMinecraft-ResourcePack.zip.sha1` | 그 버전 시점의 리소스팩 해시. `server.properties`에 넣을 값이며 릴리스 노트에도 같은 값이 적혀 있습니다 |
+
+리소스팩 zip 자체는 릴리스에 붙이지 않습니다. 아래 "리소스팩" 항목의 주소가 **항상 `main`의
+최신 팩**을 가리키므로 서버가 그곳에서 직접 받아갑니다. 소스 코드는 저장소를 그대로 보거나
+`mvn package`로 `-sources.jar`를 만들면 됩니다.
 
 **설치 순서**
 
@@ -33,7 +36,7 @@ Paper 서버용 유틸리티 플러그인입니다. (대상: Paper 1.21.x, Java 
 
 ## 코드 확인
 
-소스를 직접 읽어보려면 위의 `-sources.jar`를 받거나, 이 저장소의
+소스를 직접 읽어보려면 `mvn package`로 만들어지는 `-sources.jar`를 쓰거나, 이 저장소의
 [`src/main/java`](src/main/java/com/tntbbp/myminecraft)를 보면 됩니다. 패키지 구성은 아래와 같습니다.
 
 먼저 **역할**로 나누고, 그 안을 다시 **분야**로 나눕니다.
@@ -386,8 +389,9 @@ mvn clean package
 ### 릴리스 만들기
 
 `pom.xml`의 `<version>`을 올려 커밋한 뒤 그 버전의 태그를 올리면, GitHub Actions
-(`.github/workflows/release.yml`)가 자동으로 빌드해 릴리스를 만들고 jar / 소스 jar /
-리소스팩을 첨부합니다.
+(`.github/workflows/release.yml`)가 자동으로 빌드해 릴리스를 만들고, 플러그인 jar와
+리소스팩 해시(`.sha1`) 두 개를 첨부합니다. 릴리스 노트에는 그 버전 시점의
+`resource-pack-sha1` 값이 함께 적힙니다.
 
 ```
 git tag v1.1.21
@@ -488,13 +492,17 @@ resource-pack-prompt={"text":"이 서버는 필수 리소스팩이 있습니다.
 
 **해시를 어디서 가져오나**
 
-세 군데 중 편한 곳에서 그대로 복사하면 됩니다. 셋은 항상 같은 값입니다.
+세 군데 중 편한 곳에서 그대로 복사하면 됩니다.
 
 | 어디 | 무엇 |
 |---|---|
-| 바로 위 코드블록 | 지금 `main`에 올라가 있는 팩의 해시 (팩이 바뀌면 같이 갱신됩니다) |
-| [릴리스](https://github.com/tntbbp123-wq/my-Minecraft/releases) 페이지 | "리소스팩" 항목에 `server.properties` 두 줄이 통째로 있습니다. 그 버전의 팩과 짝인 값이라 버전을 고정해 쓸 때 안전합니다 |
+| 바로 위 코드블록 | **지금 `main`에 올라가 있는 팩**의 해시 (팩이 바뀌면 같이 갱신됩니다) |
 | `scripts/pack-resourcepack.sh --print` | 손에 있는 zip에서 직접 뽑습니다 |
+| [릴리스](https://github.com/tntbbp123-wq/my-Minecraft/releases) 페이지 | "리소스팩" 항목에 `server.properties` 두 줄이 통째로 있습니다. 단 **그 릴리스 시점의 값**이라, 이후에 팩이 바뀌었다면 위 두 곳과 다릅니다 |
+
+이 **URL은 한 번 넣으면 바꿀 일이 없습니다.** 버전이 올라가도 주소는 그대로입니다.
+
+팩이 바뀌면 **`resource-pack-sha1` 값만** 새로 넣으면 됩니다. 새 값은 바로 위 코드블록이나 그 버전 릴리스 노트의 "리소스팩" 항목에 있습니다. 해시가 어긋나면 클라이언트가 팩을 통째로 거부하므로, 팩이 갱신된 버전으로 올릴 때는 이 한 줄만 챙기세요.
 
 **팩을 고쳤다면**
 

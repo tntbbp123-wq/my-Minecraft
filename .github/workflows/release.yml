@@ -1,7 +1,8 @@
 name: Release
 
-# v로 시작하는 태그(예: v1.1.21)를 올리면 플러그인을 빌드해 릴리스를 만들고,
-# 서버 관리자가 바로 받을 수 있도록 jar / 소스 jar / 리소스팩을 첨부한다.
+# v로 시작하는 태그(예: v1.1.21)를 올리면 플러그인을 빌드해 릴리스를 만든다.
+# 첨부는 서버에 올릴 플러그인 jar와 리소스팩 SHA-1 두 개뿐이다.
+# 리소스팩 zip 자체는 main에서 그대로 받아가므로(README의 주소) 중복으로 붙이지 않는다.
 on:
   push:
     tags:
@@ -76,23 +77,24 @@ jobs:
             --title "MyMinecraft $TAG" \
             --generate-notes \
             "target/MyMinecraft-$VERSION.jar#플러그인 (plugins/ 폴더에 넣으세요)" \
-            "target/MyMinecraft-$VERSION-sources.jar#소스 코드 (코드 확인용)" \
-            "MyMinecraft-ResourcePack.zip#리소스팩 (선택, 전용 아이템 텍스처)" \
             "MyMinecraft-ResourcePack.zip.sha1#리소스팩 SHA-1 (server.properties용)"
 
           # 자동 생성된 노트 뒤에 리소스팩 설정을 붙인다. 코드블록이라 릴리스 화면에서
           # 복사 버튼 한 번으로 server.properties에 그대로 옮길 수 있다.
-          PACK_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/MyMinecraft-ResourcePack.zip"
+          # 자동 생성된 노트 뒤에 리소스팩 해시만 붙인다. 주소는 버전이 바뀌어도 그대로라
+          # (README의 리소스팩 항목) 매번 반복하지 않는다. 버전마다 달라지는 건 해시뿐이다.
           {
             gh release view "$TAG" --json body --jq .body
             echo
             echo "## 리소스팩"
             echo
-            echo '`server.properties`에 아래 두 줄을 넣으세요. 이 해시는 위에 첨부된 이 버전의 팩과 짝입니다.'
+            echo "\`server.properties\`의 해시를 아래 값으로 바꾸세요. 주소는 그대로 두면 됩니다."
             echo
             echo '```properties'
-            echo "resource-pack=$PACK_URL"
             echo "resource-pack-sha1=$SHA1"
             echo '```'
+            echo
+            echo "해시가 어긋나면 클라이언트가 팩을 거부합니다. 주소를 처음 넣는 거라면"
+            echo "[README의 리소스팩 항목](https://github.com/$GITHUB_REPOSITORY#리소스팩-전용-아이템-커스텀-텍스처)을 보세요."
           } > notes.md
           gh release edit "$TAG" --notes-file notes.md
