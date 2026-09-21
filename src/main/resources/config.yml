@@ -451,6 +451,105 @@ jaha-shingeom:
     # 공격력 12 기준 한 번에 80 이상이 들어가 사실상 즉사기가 된다. 기본값은 0.6.
     extra-hit-multiplier: 0.6
 
+# 고대 등급 모닝스타 '타이탄' (/특수아이템소환 <유저> 타이탄 <수량>)
+titan:
+  model-data: 0
+  attack-damage: 17.5
+  attack-speed: 0.7
+  # 치명타로 들어갈 때의 최종 피해. 바닐라 1.5배 대신 이 값으로 고정한다.
+  crit-damage: 25.0
+  passive:
+    # 방어력과 방패 가드를 이만큼 무시한다(%)
+    armor-ignore-percent: 29.0
+    slow-seconds: 3
+    slow-percent: 40.0
+  # [F] 지진타
+  quake:
+    cooldown-seconds: 16
+    radius: 5.0
+    damage: 12.0
+  # [웅크리기+F] 타이탄 크래시
+  crash:
+    cooldown-seconds: 20
+    radius: 7.0
+    damage: 20.0
+
+# 유니크 등급 장병기 '방천화극' (/특수아이템소환 <유저> 방천화극 <수량>)
+fangtian-ji:
+  model-data: 0
+  attack-damage: 18.0
+  attack-speed: 0.8
+  crit-damage: 26.0
+  # 패시브 투신의 분노
+  rage:
+    # 체력이 이 비율 이하로 떨어지면 발동(%)
+    health-percent: 50.0
+    attack-speed-percent: 20.0
+    # 평타가 함께 베는 반경. 분노 상태에서는 두 배가 된다.
+    sweep-radius: 2.0
+    # 함께 베인 적이 받는 피해 비율(원래 피해 대비 %)
+    sweep-damage-percent: 40.0
+  # [F] 패왕의 일격
+  strike:
+    cooldown-seconds: 20
+    range: 7.0
+    cone-angle-degrees: 100.0
+    damage: 16.0
+
+# 전설 등급 세이버 '볼트 세이버' (/특수아이템소환 <유저> 볼트세이버 <수량>)
+volt-saber:
+  model-data: 0
+  attack-damage: 16.5
+  attack-speed: 1.6
+  crit-damage: 24.0
+  # 패시브 일렉트릭 필드
+  field:
+    # 전하가 가득 차는 데 필요한 이동 거리(블록)
+    charge-distance: 12.0
+    # 가득 찬 상태에서 평타에 얹히는 방어무시 번개 피해
+    bolt-damage: 2.0
+  # [F] 소닉 랜스
+  lance:
+    cooldown-seconds: 12
+    distance: 8.0
+    width: 2.0
+    damage: 14.0
+    stun-seconds: 0.5
+  # [웅크리기+F] 라이트닝 오라 (두른 상태에서 다시 누르면 방출)
+  aura:
+    cooldown-seconds: 30
+    duration-seconds: 10
+    damage-percent: 40.0
+    discharge-strikes: 30
+    discharge-radius: 7.0
+    discharge-damage-per-strike: 3.0
+
+# 전설 등급 궁수 방어구 '아르테미스 세트' (제작법: 사방에 인챈트 방어구, 중앙 네더의 별,
+# 네 모서리 네더라이트 블록. 어느 부위가 나올지는 북(위 가운데)에 넣은 방어구의 부위로 정해진다.)
+artemis:
+  enabled: true
+  # 네 부위에 붙는 보호 계열 인챈트 레벨
+  enchant-level: 5
+  # 제작 재료로 인정할 최소 인챈트 레벨
+  recipe-enchant-level: 4
+  # 네더라이트 기본 방어력의 몇 배로 고정할지
+  armor-multiplier: 1.5
+  model-data:
+    helmet: 0
+    chestplate: 0
+    leggings: 0
+    boots: 0
+  # 세트 4부위 효과
+  set:
+    evade-base-percent: 20.0
+    # 보름달일 때의 회피 확률. 위상이 멀어질수록 base 쪽으로 내려온다.
+    evade-full-moon-percent: 35.0
+    evade-swiftness-seconds: 2
+  # 월광 공명 (밤에만, 보름달에 가까울수록 강해짐)
+  moon:
+    speed-percent: 25.0
+    bow-damage-multiplier: 1.5
+
 # 무기 제작·강화 재료. 목록을 여기서 읽으므로 추가/삭제하면
 # /특수아이템소환·관리자메뉴·우편 첨부에 쓰는 이름도 따라서 늘어난다.
 #   grade        COMMON | RARE | UNIQUE | ANCIENT | LEGEND | MASTER (일반~신화)

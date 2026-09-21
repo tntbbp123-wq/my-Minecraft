@@ -22,7 +22,8 @@ public final class SpecialItemCatalog {
 
     /** 웹 카탈로그 분류용: 신화 무기 / 암시장 아이템 이름. */
     private static final Set<String> WEAPON_NAMES =
-            Set.of("레바테인", "드라켄피어스", "글레이프니르", "사인참사검", "발뭉", "자하신검");
+            Set.of("레바테인", "드라켄피어스", "글레이프니르", "사인참사검", "발뭉", "자하신검",
+                    "말룡도", "타이탄", "방천화극", "볼트세이버");
     private static final Set<String> BLACKMARKET_NAMES = Set.of("일괄약탈주문서", "함정설치키트", "화염병", "연막탄",
             "밀도나침반", "발자국추적기", "혈흔나침반", "소음차단포션");
 
@@ -55,6 +56,22 @@ public final class SpecialItemCatalog {
         MaterialManager.MaterialDef material = plugin.getMaterialManager().find(itemName);
         if (material != null) {
             return new Resolved(plugin.getMaterialManager().createItem(material, amount), material.displayName());
+        }
+        if (itemName.equals("타이탄")) {
+            return mythicWeapon(plugin.getTitanManager().createItem(), "타이탄", amount);
+        }
+        if (itemName.equals("방천화극")) {
+            return mythicWeapon(plugin.getFangtianJiManager().createItem(), "방천화극", amount);
+        }
+        if (itemName.equals("볼트세이버")) {
+            return mythicWeapon(plugin.getVoltSaberManager().createItem(), "볼트세이버", amount);
+        }
+        for (com.tntbbp.myminecraft.manager.item.ArtemisSetManager.Piece piece
+                : com.tntbbp.myminecraft.manager.item.ArtemisSetManager.Piece.values()) {
+            if (itemName.equals("아르테미스" + piece.displayName())) {
+                return mythicWeapon(plugin.getArtemisSetManager().createPiece(piece),
+                        "아르테미스의 " + piece.displayName(), amount);
+            }
         }
         if (itemName.equals("말룡도")) {
             return mythicWeapon(plugin.getMalyongdoManager().createItem(), "말룡도", amount);
@@ -141,7 +158,7 @@ public final class SpecialItemCatalog {
      * 웹 관리자(우편 첨부·지급 선택기)용 카탈로그 한 줄.
      *
      * @param name        /특수아이템소환·우편 첨부에 쓰는 정확한 아이템명 (예: 강화석, 일반두루마리, 1G)
-     * @param category    enhance | scroll | starforce | weapon | blackmarket | coin | material
+     * @param category    enhance | scroll | starforce | weapon | armor | blackmarket | coin | material
      * @param modelData   커스텀 모델 데이터 (없으면 0)
      */
     public record CatalogEntry(String name, String displayName, String material, int modelData, String category) {
@@ -182,6 +199,9 @@ public final class SpecialItemCatalog {
         if (WEAPON_NAMES.contains(name)) {
             return "weapon";
         }
+        if (name.startsWith("아르테미스")) {
+            return "armor";
+        }
         if (BLACKMARKET_NAMES.contains(name)) {
             return "blackmarket";
         }
@@ -207,6 +227,13 @@ public final class SpecialItemCatalog {
         names.add("레바테인");
         names.add("드라켄피어스");
         names.add("말룡도");
+        names.add("타이탄");
+        names.add("방천화극");
+        names.add("볼트세이버");
+        for (com.tntbbp.myminecraft.manager.item.ArtemisSetManager.Piece piece
+                : com.tntbbp.myminecraft.manager.item.ArtemisSetManager.Piece.values()) {
+            names.add("아르테미스" + piece.displayName());
+        }
         names.addAll(plugin.getMaterialManager().materials().stream()
                 .map(MaterialManager.MaterialDef::shortName)
                 .collect(Collectors.toList()));
