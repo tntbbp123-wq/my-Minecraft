@@ -107,6 +107,41 @@ public class TradeLogger {
         log.write(EventLog.Channel.TRADE, "admin_stock_grant", actor, data);
     }
 
+    /**
+     * 대장간 강화 비용. 성공·실패와 관계없이 동전(G)과 강화석이 나간다.
+     *
+     * @param amount    나간 G (동전으로 낸 값에서 거스름돈을 뺀 순액)
+     * @param stones    소모한 강화석 수
+     * @param fromLevel 강화 전 레벨
+     */
+    public void enhanceCost(UUID uuid, String name, String itemName, int fromLevel, double amount, int stones,
+                            boolean usedScroll, boolean success) {
+        JsonObject data = player(uuid, name);
+        data.addProperty("item_name", itemName);
+        data.addProperty("from_level", fromLevel);
+        data.addProperty("amount", amount);
+        data.addProperty("stones", stones);
+        data.addProperty("used_scroll", usedScroll);
+        data.addProperty("success", success);
+        log.write(EventLog.Channel.TRADE, "enhance_cost", actorOf(uuid, name), data);
+    }
+
+    /** 일괄 약탈 주문서로 상자 안의 아이템을 통째로 가져감. */
+    public void blackmarketLootAll(UUID uuid, String name, String world, int x, int y, int z, List<ItemCount> taken) {
+        JsonObject data = player(uuid, name);
+        data.addProperty("world", world);
+        data.addProperty("x", x);
+        data.addProperty("y", y);
+        data.addProperty("z", z);
+        data.add("items", items(taken));
+        int total = 0;
+        for (ItemCount item : taken) {
+            total += item.count();
+        }
+        data.addProperty("count", total);
+        log.write(EventLog.Channel.TRADE, "blackmarket_loot_all", actorOf(uuid, name), data);
+    }
+
     /** 위에 없는 거래 유형(예약 유형 등)을 그대로 남긴다. {@code data}는 넘긴 뒤 수정하지 않는다. */
     public void record(String type, String actor, JsonObject data) {
         log.write(EventLog.Channel.TRADE, type, actor, data);

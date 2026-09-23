@@ -73,6 +73,9 @@ public class VoltSaberListener implements Listener {
         if (multiplier != 1.0) {
             event.setDamage(event.getDamage() * multiplier);
         }
-        manager.consumeCharge(attacker, target);
+        // 번개 전하는 평타 전용이다. 소닉 랜스·전기 방출에 맞은 피해로는 소모하지 않는다.
+        if (!manager.isDealingSkill(attacker.getUniqueId())) {
+            manager.consumeCharge(attacker, target);
+        }
     }
 }

@@ -34,6 +34,7 @@ import com.tntbbp.myminecraft.manager.social.HomeManager;
 import com.tntbbp.myminecraft.manager.world.CoreManager;
 import com.tntbbp.myminecraft.manager.world.LocationsManager;
 import com.tntbbp.myminecraft.manager.world.RandomTeleportManager;
+import com.tntbbp.myminecraft.util.ItemLabels;
 import com.tntbbp.myminecraft.util.SpecialItemCatalog;
 import com.google.gson.JsonObject;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -552,6 +553,10 @@ public class GUIListener implements Listener {
         }
 
         boolean success = enhanceManager.rollSuccess(currentLevel, scrollBonus);
+        // 동전(G)과 강화석은 성공·실패와 관계없이 이미 나갔다. 서버에서 G가 가장 많이 빠지는 곳이라
+        // 거래 기록에 없으면 웹 관리자에서 돈 흐름이 맞지 않는다.
+        plugin.getTradeLogger().enhanceCost(player.getUniqueId(), player.getName(), ItemLabels.of(targetItem),
+                currentLevel, cost, requiredStones, useScroll, success);
         if (success) {
             int newLevel = currentLevel + 1;
             enhanceManager.applyEnhance(targetItem, newLevel);

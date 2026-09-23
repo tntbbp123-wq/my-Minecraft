@@ -26,6 +26,7 @@ import org.bukkit.util.Vector;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,6 +50,12 @@ public class VoltSaberManager {
 
     /** 이동으로 모인 전하. 설정한 양을 채우면 다음 평타에 번개가 실린다. */
     private final Map<UUID, Double> charge = new ConcurrentHashMap<>();
+    /**
+     * 기술(소닉 랜스·전기 방출) 피해를 입히고 있는 사람. {@code target.damage(x, caster)}는 평타와 똑같은
+     * 피해 이벤트를 일으키므로, 표시하지 않으면 기술에 맞은 적이 평타로 취급돼 <b>평타 전용 번개 전하가
+     * 기술에 소모</b>됐다 (움직여 전하를 채운 뒤 랜스로 돌진하면 다음 평타의 번개가 사라짐).
+     */
+    private final Set<UUID> dealingSkill = ConcurrentHashMap.newKeySet();
     private final Map<UUID, Location> lastLocations = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lanceCooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, Long> auraCooldowns = new ConcurrentHashMap<>();
@@ -202,6 +209,23 @@ public class VoltSaberManager {
     }
 
     /** 쌓인 전하를 써서 번개 피해를 얹는다. 전하가 모자라면 아무 일도 없다. */
+    /** 지금 들어오는 피해 이벤트가 평타가 아니라 기술에서 나온 것인지. */
+    public boolean isDealingSkill(UUID attacker) {
+        return dealingSkill.contains(attacker);
+    }
+
+    /** 기술 피해를 입힌다. 이 피해로는 평타 전용 번개 전하가 소모되지 않는다. */
+    private void dealSkill(Player caster, LivingEntity target, double amount) {
+        boolean outermost = dealingSkill.add(caster.getUniqueId());
+        try {
+            target.damage(amount, caster);
+        } finally {
+            if (outermost) {
+                dealingSkill.remove(caster.getUniqueId());
+            }
+        }
+    }
+
     public boolean consumeCharge(Player attacker, LivingEntity target) {
         if (!isCharged(attacker.getUniqueId())) {
             return false;
@@ -236,7 +260,7 @@ public class VoltSaberManager {
 
         int stunTicks = (int) Math.round(lanceStunSeconds() * 20);
         for (LivingEntity target : SkillTargets.inLine(world, eye, direction, lanceDistance(), lanceWidth(), caster)) {
-            target.damage(lanceDamage(), caster);
+            dealSkill(caster, target, lanceDamage());
             if (!OpImmunity.isImmune(target) && stunTicks > 0) {
                 // 아주 짧은 기절이라 제압 상태를 쓰기보다 그 자리에서 묶는 편이 자연스럽다.
                 plugin.getCurseManager().applyStun(target, Math.max(1, stunTicks / 20));
@@ -305,7 +329,7 @@ public class VoltSaberManager {
                 world.strikeLightningEffect(spot);
                 for (LivingEntity target : SkillTargets.inCone(world, spot, spot.getDirection(),
                         2.5, 360.0, caster)) {
-                    target.damage(dischargeDamage(), caster);
+                    dealSkill(caster, target, dischargeDamage());
                 }
             }
         }.runTaskTimer(plugin, 0L, 2L);
