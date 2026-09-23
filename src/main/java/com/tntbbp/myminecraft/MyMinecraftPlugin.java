@@ -47,6 +47,7 @@ import com.tntbbp.myminecraft.listener.weapon.JahaShingeomListener;
 import com.tntbbp.myminecraft.listener.weapon.LaevateinnListener;
 import com.tntbbp.myminecraft.listener.weapon.LaevateinnModelListener;
 import com.tntbbp.myminecraft.listener.item.ArtemisSetListener;
+import com.tntbbp.myminecraft.listener.item.GradeListener;
 import com.tntbbp.myminecraft.listener.weapon.FangtianJiListener;
 import com.tntbbp.myminecraft.listener.weapon.MalyongdoListener;
 import com.tntbbp.myminecraft.listener.weapon.TitanListener;
@@ -137,6 +138,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
     private VoltSaberManager voltSaberManager;
     private ArtemisSetManager artemisSetManager;
     private ArtemisSetListener artemisSetListener;
+    private GradeListener gradeListener;
     private BountyManager bountyManager;
     private BalmungManager balmungManager;
     private JahaShingeomManager jahaShingeomManager;
@@ -294,6 +296,10 @@ public class MyMinecraftPlugin extends JavaPlugin {
         this.artemisSetListener = new ArtemisSetListener(this);
         getServer().getPluginManager().registerEvents(artemisSetListener, this);
         artemisSetListener.start();
+        // 바닐라 장비에 기본 등급(일반)을 붙인다.
+        this.gradeListener = new GradeListener(this);
+        getServer().getPluginManager().registerEvents(gradeListener, this);
+        gradeListener.start();
         getServer().addRecipe(ArtemisSetListener.recipe(this));
         getServer().getPluginManager().registerEvents(new BountyListener(this), this);
         getServer().getPluginManager().registerEvents(new BalmungListener(this), this);
@@ -398,6 +404,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
         }
         if (artemisSetListener != null) {
             artemisSetListener.stop();
+        }
+        if (gradeListener != null) {
+            gradeListener.stop();
         }
         if (newsManager != null) {
             newsManager.stopTask();

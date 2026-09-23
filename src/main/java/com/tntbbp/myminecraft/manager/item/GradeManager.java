@@ -77,6 +77,35 @@ public class GradeManager {
         return Grade.COMMON;
     }
 
+    /** 등급이 기록돼 있는지 (한 번이라도 {@link #applyGrade}를 거쳤는지). */
+    public boolean hasGrade(ItemStack item) {
+        return item != null && item.hasItemMeta()
+                && item.getItemMeta().getPersistentDataContainer().has(gradeKey, PersistentDataType.STRING);
+    }
+
+    /**
+     * 기본 등급(일반)을 자동으로 붙이는 대상인지. <b>내구도가 있는 장비</b>(무기·방어구·도구·방패·겉날개 등)만이다.
+     *
+     * <p>흙·조약돌처럼 쌓이는 아이템에 등급 줄을 쓰면, 새로 캔 아이템(줄 없음)과 등급이 붙은 아이템이 서로
+     * 겹쳐지지 않아 인벤토리가 난장판이 된다. 내구도가 있는 장비는 원래 한 칸에 하나라 그런 문제가 없다.
+     */
+    public boolean isGradable(ItemStack item) {
+        return item != null && !item.getType().isAir() && item.getType().getMaxDurability() > 0;
+    }
+
+    /**
+     * 등급이 없는 장비에 기본 등급(일반)을 붙인다. 이미 등급이 있으면(커스텀 무기 등) 건드리지 않는다.
+     *
+     * @return 붙였으면 true
+     */
+    public boolean ensureDefaultGrade(ItemStack item) {
+        if (!isGradable(item) || hasGrade(item)) {
+            return false;
+        }
+        applyGrade(item, defaultGradeFor(item.getType()));
+        return true;
+    }
+
     /** 아이템에 등급을 부여/갱신하고 등급 표시 lore 줄을 새로 쓴다. */
     public void applyGrade(ItemStack item, Grade grade) {
         ItemMeta meta = item.getItemMeta();
