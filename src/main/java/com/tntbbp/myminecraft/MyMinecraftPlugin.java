@@ -92,6 +92,7 @@ import com.tntbbp.myminecraft.manager.weapon.SainchamsagumManager;
 import com.tntbbp.myminecraft.manager.world.CoreManager;
 import com.tntbbp.myminecraft.manager.world.LocationsManager;
 import com.tntbbp.myminecraft.manager.world.RandomTeleportManager;
+import com.tntbbp.myminecraft.util.ConfigUpdater;
 import com.tntbbp.myminecraft.util.SecretResolver;
 import com.tntbbp.myminecraft.web.WebBridge;
 import com.tntbbp.myminecraft.web.profile.PlayerDataRegistry;
@@ -164,6 +165,9 @@ public class MyMinecraftPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        // 기존 서버의 config.yml에 새로 생긴 항목을 채워 넣는다. saveDefaultConfig()는 파일이
+        // 없을 때만 복사하므로, 이것이 없으면 새 설정이 영원히 서버 파일에 생기지 않는다.
+        ConfigUpdater.run(this);
 
         this.secretResolver = new SecretResolver(this);
         this.economyManager = new EconomyManager(this);
