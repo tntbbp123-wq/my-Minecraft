@@ -5,6 +5,7 @@ import com.tntbbp.myminecraft.manager.combat.CurseManager;
 import com.tntbbp.myminecraft.manager.item.GradeManager;
 import com.tntbbp.myminecraft.util.ItemBuilder;
 import com.tntbbp.myminecraft.util.OpImmunity;
+import com.tntbbp.myminecraft.util.Particles;
 import com.tntbbp.myminecraft.util.SkillTargets;
 import com.tntbbp.myminecraft.util.WeaponAttributes;
 import org.bukkit.Color;
@@ -330,7 +331,7 @@ public class SainchamsagumManager {
             world.spawnParticle(Particle.END_ROD, point, finalStrike ? 4 : 2, 0.15, 0.05, 0.15, 0.0);
         }
         if (finalStrike) {
-            world.spawnParticle(Particle.FLASH, impact, 1);
+            Particles.flash(world, impact, 1);
             world.spawnParticle(Particle.SONIC_BOOM, impact, 1);
         }
     }

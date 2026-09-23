@@ -3,6 +3,7 @@ package com.tntbbp.myminecraft.manager.weapon;
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.item.GradeManager;
 import com.tntbbp.myminecraft.util.ItemBuilder;
+import com.tntbbp.myminecraft.util.Particles;
 import com.tntbbp.myminecraft.util.SkillTargets;
 import com.tntbbp.myminecraft.util.WeaponAttributes;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -650,7 +651,7 @@ public class MalyongdoManager {
                         new Particle.DustOptions(Color.fromRGB(80, 0, 110), 1.8f));
             }
         }
-        world.spawnParticle(Particle.FLASH, impact, 2);
+        Particles.flash(world, impact, 2);
         world.spawnParticle(Particle.SONIC_BOOM, impact, 1);
     }
 
