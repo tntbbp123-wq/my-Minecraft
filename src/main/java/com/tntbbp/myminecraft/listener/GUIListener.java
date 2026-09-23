@@ -195,6 +195,9 @@ public class GUIListener implements Listener {
         switch (slot) {
             case MenuGUI.SPAWN_SLOT -> {
                 player.closeInventory();
+                if (plugin.getCombatManager().blockTeleportIfTagged(player)) {
+                    return;
+                }
                 Location spawn = locationsManager.getSpawn();
                 player.teleport(spawn != null ? spawn : player.getWorld().getSpawnLocation());
                 player.sendMessage(ChatColor.GREEN + "스폰으로 이동했습니다.");
@@ -207,6 +210,9 @@ public class GUIListener implements Listener {
             case MenuGUI.BANK_SLOT -> new BankGUI(plugin, player).open();
             case MenuGUI.RANDOM_TP_SLOT -> {
                 player.closeInventory();
+                if (plugin.getCombatManager().blockTeleportIfTagged(player)) {
+                    return;
+                }
                 RandomTeleportManager randomTeleportManager = plugin.getRandomTeleportManager();
                 RandomTeleportManager.Result result = randomTeleportManager.teleport(player);
                 switch (result) {
@@ -239,6 +245,9 @@ public class GUIListener implements Listener {
             Location location = homeManager.getHome(player.getUniqueId(), homeName);
             if (location != null) {
                 player.closeInventory();
+                if (plugin.getCombatManager().blockTeleportIfTagged(player)) {
+                    return;
+                }
                 player.teleport(location);
                 player.sendMessage(ChatColor.GREEN + "'" + homeName + "' 홈으로 이동했습니다.");
             }
@@ -333,10 +342,19 @@ public class GUIListener implements Listener {
             CurrencyManager currencyManager = plugin.getCurrencyManager();
             EconomyManager economyManager = plugin.getEconomyManager();
             double withdrawn = currencyManager.withdrawAll(player);
+            // 인벤토리에 들어가는 만큼만 출금된다. 남은 잔액이 동전 한 닢 이상인데 빈칸이 없으면 알려준다.
+            boolean stoppedByFullInventory = player.getInventory().firstEmpty() == -1
+                    && economyManager.getBalance(player.getUniqueId()) >= 1;
             if (withdrawn > 0) {
                 player.sendMessage(ChatColor.GREEN + String.format("%,.0f", withdrawn) + economyManager.currencyName()
                         + " 출금 완료 (보유 " + economyManager.currencyName() + ": "
                         + String.format("%,.1f", economyManager.getBalance(player.getUniqueId())) + ")");
+                if (stoppedByFullInventory) {
+                    player.sendMessage(ChatColor.YELLOW + "인벤토리가 가득 차서 들어가는 만큼만 출금했습니다. "
+                            + "나머지는 계좌에 그대로 있습니다.");
+                }
+            } else if (stoppedByFullInventory) {
+                player.sendMessage(ChatColor.RED + "인벤토리에 빈칸이 없어 출금하지 못했습니다.");
             } else {
                 player.sendMessage(ChatColor.RED + "출금할 수 있는 금액이 부족합니다.");
             }

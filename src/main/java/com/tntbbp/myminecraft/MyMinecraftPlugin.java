@@ -20,6 +20,9 @@ import com.tntbbp.myminecraft.command.social.TpaCommand;
 import com.tntbbp.myminecraft.command.world.LobbyCommand;
 import com.tntbbp.myminecraft.command.world.RtCommand;
 import com.tntbbp.myminecraft.command.world.SpawnCommand;
+import com.tntbbp.myminecraft.gui.item.EnhanceHolder;
+import com.tntbbp.myminecraft.gui.item.StarforceHolder;
+import com.tntbbp.myminecraft.gui.item.TranscendAltarHolder;
 import com.tntbbp.myminecraft.listener.ActivityListener;
 import com.tntbbp.myminecraft.listener.GUIListener;
 import com.tntbbp.myminecraft.listener.combat.CombatListener;
@@ -104,6 +107,8 @@ import com.tntbbp.myminecraft.web.profile.providers.StockProvider;
 import com.tntbbp.myminecraft.web.profile.providers.TeamProvider;
 import com.github.retrooper.packetevents.PacketEvents;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MyMinecraftPlugin extends JavaPlugin {
@@ -369,6 +374,7 @@ public class MyMinecraftPlugin extends JavaPlugin {
         if (webBridge != null) {
             webBridge.stop();
         }
+        returnItemsFromOpenGuis();
         if (stockManager != null) {
             stockManager.stopFluctuationTask();
         }
@@ -424,6 +430,25 @@ public class MyMinecraftPlugin extends JavaPlugin {
             eventLog.flush();
         }
     }
+
+    /**
+     * 재료를 넣어 두는 GUI(대장간 강화·초월의 제단·스타포스)를 열어 둔 사람이 있으면 닫아서 아이템을 돌려준다.
+     *
+     * <p>서버를 끌 때 Paper는 <b>플러그인을 먼저 끄고 그다음에 플레이어를 내보낸다.</b> 플레이어를 내보낼 때
+     * 창이 닫히긴 하지만 그때는 이 플러그인의 리스너가 이미 빠져 있어서, 칸에 올려 둔 무기·재료가 돌아오지
+     * 않고 그대로 사라졌다. {@code onDisable()} 안에서는 리스너가 아직 살아 있으므로 여기서 닫으면
+     * {@code GUIListener}가 평소처럼 인벤토리로 돌려준다(그 뒤 플레이어 저장에 함께 저장된다).
+     */
+    private void returnItemsFromOpenGuis() {
+        for (Player player : getServer().getOnlinePlayers()) {
+            InventoryHolder holder = player.getOpenInventory().getTopInventory().getHolder();
+            if (holder instanceof EnhanceHolder || holder instanceof TranscendAltarHolder
+                    || holder instanceof StarforceHolder) {
+                player.closeInventory();
+            }
+        }
+    }
+
 
     public EconomyManager getEconomyManager() {
         return economyManager;

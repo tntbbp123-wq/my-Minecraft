@@ -91,6 +91,11 @@ public class TpaCommand implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "요청을 보낸 플레이어가 오프라인입니다.");
             return;
         }
+        // 이동하는 쪽은 요청자다. 전투 전에 팀원에게 tpa를 보내 두고 전투 중에 수락받아 빠져나가지 못하게 한다.
+        if (plugin.getCombatManager().blockTeleportIfTagged(requester)) {
+            player.sendMessage(ChatColor.RED + requester.getName() + "님이 전투 중이라 이동시킬 수 없습니다.");
+            return;
+        }
         requester.teleport(player.getLocation());
         requester.sendMessage(ChatColor.GREEN + player.getName() + "님이 요청을 수락했습니다.");
         player.sendMessage(ChatColor.GREEN + requester.getName() + "님을 이동시켰습니다.");

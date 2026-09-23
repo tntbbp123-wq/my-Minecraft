@@ -33,6 +33,11 @@ class NewsHandlerHelpersTest {
         assertEquals(422, assertThrows(BridgeException.class, () -> NewsHandler.parseMagnitude(0.0, true)).status());
         assertEquals(422, assertThrows(BridgeException.class, () -> NewsHandler.parseMagnitude(-1.0, true)).status());
         assertEquals(422, assertThrows(BridgeException.class, () -> NewsHandler.parseMagnitude(null, true)).status());
+        // NaN은 "<= 0" 비교를 그냥 통과하므로 따로 막아야 한다 (들어가면 주가가 0이 된다)
+        assertEquals(422, assertThrows(BridgeException.class,
+                () -> NewsHandler.parseMagnitude(Double.NaN, true)).status());
+        assertEquals(422, assertThrows(BridgeException.class,
+                () -> NewsHandler.parseMagnitude(Double.POSITIVE_INFINITY, true)).status());
     }
 
     @Test

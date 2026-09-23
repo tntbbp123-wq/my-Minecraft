@@ -24,6 +24,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -43,6 +44,12 @@ public class RaidBossListener implements Listener {
      * 보스가 받는 피해를 가로챈다. 무적 페이즈면 전부 무효화하고, 이번 피해로 체력이 0 이하가
      * 되면 보스에게 "진짜 죽을지"를 물어본다 (불사 기믹이 false를 반환하면 피해가 취소된다).
      */
+    /** 청크가 올라와 엔티티가 로드될 때, 추적하지 않는 보스 잔재를 치운다. */
+    @EventHandler
+    public void onEntitiesLoad(EntitiesLoadEvent event) {
+        plugin.getRaidBossManager().removeOrphans(event.getEntities());
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBossDamage(EntityDamageEvent event) {
         RaidBossManager manager = plugin.getRaidBossManager();

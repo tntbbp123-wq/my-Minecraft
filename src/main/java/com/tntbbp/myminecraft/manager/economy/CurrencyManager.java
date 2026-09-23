@@ -220,24 +220,31 @@ public class CurrencyManager {
         List<CoinDenomination> byValueDesc = new ArrayList<>(denominations);
         byValueDesc.sort(Comparator.comparingInt(CoinDenomination::value).reversed());
 
+        // 인벤토리에 들어가는 만큼만 동전으로 바꾸고, 나머지는 계좌에 그대로 둔다.
+        // 예전에는 넘치는 동전을 바닥에 떨어뜨렸는데, 떨어진 동전은 5분 뒤 사라지고(= G 증발) 옆 사람이
+        // 주울 수도 있었다. 잔액이 크면 수만 뭉치가 한꺼번에 떨어져 서버가 멈췄고, 개수를 int로 세서
+        // 21억 개를 넘으면 넘침도 났다.
         double remaining = balance;
         double withdrawn = 0;
+        boolean inventoryFull = false;
         for (CoinDenomination coin : byValueDesc) {
-            int count = (int) (remaining / coin.value());
-            if (count <= 0) {
-                continue;
+            long count = (long) Math.floor(remaining / coin.value());
+            while (count > 0 && !inventoryFull) {
+                int batch = (int) Math.min(count, 64);
+                int notGiven = 0;
+                for (ItemStack leftover : player.getInventory().addItem(createCoin(coin, batch)).values()) {
+                    notGiven += leftover.getAmount();
+                }
+                int given = batch - notGiven;
+                double value = (double) given * coin.value();
+                remaining -= value;
+                withdrawn += value;
+                count -= given;
+                inventoryFull = notGiven > 0;
             }
-            int remainingCount = count;
-            while (remainingCount > 0) {
-                int batch = Math.min(remainingCount, 64);
-                ItemStack item = createCoin(coin, batch);
-                player.getInventory().addItem(item).values()
-                        .forEach(leftover -> player.getWorld().dropItem(player.getLocation(), leftover));
-                remainingCount -= batch;
+            if (inventoryFull) {
+                break;
             }
-            double value = (double) count * coin.value();
-            remaining -= value;
-            withdrawn += value;
         }
 
         if (withdrawn > 0) {
