@@ -202,9 +202,10 @@ public class ApocalypseDragon extends RaidBoss {
                     return;
                 }
                 Location point = eye.clone().add(direction.clone().multiply(step));
+                // 진행 칸을 연출보다 먼저 올린다. 연출에서 예외가 나도 끝에 닿아 멈추게.
+                step += 2;
                 Particles.spawn(point.getWorld(), Particle.DRAGON_BREATH, point, 12, 0.6, 0.6, 0.6, 0.02);
                 point.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, point, 4, 0.4, 0.4, 0.4, 0.01);
-                step += 2;
             }
         }.runTaskTimer(plugin, 0L, 1L);
 

@@ -512,8 +512,9 @@ public class MalyongdoManager {
                         new Particle.DustOptions(Color.fromRGB(60, 0, 80), 1.6f));
 
                 if (elapsedTicks >= seconds * 20) {
-                    releaseAvatar(caster);
+                    // 먼저 멈춘다. 방출 도중 예외가 나도 화신 연출이 무한히 반복되지 않게.
                     cancel();
+                    releaseAvatar(caster);
                 }
             }
         }.runTaskTimer(plugin, 5L, 5L);

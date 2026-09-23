@@ -215,8 +215,9 @@ public class TitanManager {
                 }
                 // 땅에 닿았거나, 물·사다리 등으로 끝내 안 닿으면 제한 시간에 그 자리에서 터뜨린다.
                 if ((slammed && caster.isOnGround()) || ticks >= QUAKE_MAX_TICKS) {
-                    quakeImpact(caster);
+                    // 먼저 멈춘다. 터뜨리는 도중 예외가 나도 이 작업이 다시 돌지 않게.
                     cancel();
+                    quakeImpact(caster);
                 }
             }
         }.runTaskTimer(plugin, 1L, 1L);
@@ -275,8 +276,11 @@ public class TitanManager {
                 // 정점을 찍고 내려와 땅에 닿거나, 너무 오래 걸리면 강제로 터뜨린다.
                 boolean landed = ticks > 12 && caster.isOnGround();
                 if (landed || ticks > 60) {
-                    crashImpact(caster);
+                    // 먼저 멈춘다. 예전에는 crashImpact()가 예외로 끝나 cancel()에 닿지 못했고,
+                    // 반복 작업은 예외가 나도 계속 돌기 때문에 마법진·폭발음·치명타 입자가 무한히 반복됐다
+                    // (그동안 시전자는 낙하 피해도 받지 않았다).
                     cancel();
+                    crashImpact(caster);
                 }
             }
         }.runTaskTimer(plugin, 2L, 2L);
@@ -314,6 +318,7 @@ public class TitanManager {
                 if (step < 8) {
                     return;
                 }
+                cancel();
                 for (LivingEntity target : targets) {
                     if (target.isDead() || OpImmunity.isImmune(target)) {
                         continue;
@@ -321,7 +326,6 @@ public class TitanManager {
                     target.setVelocity(new Vector(0, -2.0, 0));
                 }
                 world.playSound(impact, Sound.ENTITY_IRON_GOLEM_DAMAGE, 1.8f, 0.5f);
-                cancel();
             }
         }.runTaskTimer(plugin, 2L, 2L);
     }
