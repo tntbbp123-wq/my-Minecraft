@@ -271,10 +271,10 @@ public class JahaShingeomManager {
                     cancel();
                     return;
                 }
+                elapsed += 4;
                 caster.getWorld().spawnParticle(Particle.DUST, caster.getLocation().add(0, 1.0, 0),
                         10, 0.5, 0.8, 0.5, 0,
                         new Particle.DustOptions(Color.fromRGB(190, 70, 160), 1.2f));
-                elapsed += 4;
             }
         }.runTaskTimer(plugin, 0L, 4L);
     }

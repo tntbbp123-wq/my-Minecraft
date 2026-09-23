@@ -315,12 +315,12 @@ public class LaevateinnManager {
                     cancel();
                     return;
                 }
+                elapsed += 5;
                 for (int d = 1; d <= (int) range; d++) {
                     Location point = eye.clone().add(forward.clone().multiply(d));
                     world.spawnParticle(Particle.SOUL_FIRE_FLAME, point, 4, 0.3, 0.2, 0.3, 0.01);
                     world.spawnParticle(Particle.LAVA, point, 1, 0.2, 0.1, 0.2, 0);
                 }
-                elapsed += 5;
             }
         }.runTaskTimer(plugin, 0L, 5L);
     }

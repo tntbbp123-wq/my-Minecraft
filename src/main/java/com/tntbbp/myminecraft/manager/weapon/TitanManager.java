@@ -4,6 +4,7 @@ import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.manager.item.GradeManager;
 import com.tntbbp.myminecraft.util.ItemBuilder;
 import com.tntbbp.myminecraft.util.OpImmunity;
+import com.tntbbp.myminecraft.util.Particles;
 import com.tntbbp.myminecraft.util.SkillTargets;
 import com.tntbbp.myminecraft.util.WeaponAttributes;
 import org.bukkit.Color;
@@ -40,6 +41,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * </ul>
  */
 public class TitanManager {
+
+    /** 지진타: 뛰어오른 뒤 이 틱에 내리꽂는다. 위로 0.45로 뛰면 5~6틱 무렵이 정점이다. */
+    private static final int QUAKE_SLAM_TICK = 5;
+    /** 지진타: 땅에 끝내 안 닿을 때 강제로 터뜨리는 시한. */
+    private static final int QUAKE_MAX_TICKS = 20;
 
     private final MyMinecraftPlugin plugin;
     private final NamespacedKey itemKey;
@@ -185,33 +191,55 @@ public class TitanManager {
 
         World world = caster.getWorld();
         Location center = caster.getLocation();
-        // 먼저 살짝 띄웠다가 내리꽂는 모양새. 실제 판정은 착지 연출과 함께 바로 낸다.
+        // 살짝 뛰어올랐다가 정점에서 내리꽂고, 발이 땅에 닿는 순간 터뜨린다.
+        // 예전에는 뛰어오른 뒤 8틱에 바로 터뜨렸는데, 그때 시전자는 아직 지면 위 약 1.25블록 공중에 있어서
+        // 충격파 고리와 착지 소리가 허공에서 났다.
         caster.setVelocity(new Vector(0, 0.45, 0));
         world.playSound(center, Sound.ENTITY_IRON_GOLEM_ATTACK, 1.6f, 0.6f);
 
         new BukkitRunnable() {
+            int ticks = 0;
+            boolean slammed = false;
+
             @Override
             public void run() {
+                ticks++;
                 if (!caster.isOnline()) {
+                    cancel();
                     return;
                 }
-                Location impact = caster.getLocation();
-                World w = caster.getWorld();
-                w.playSound(impact, Sound.ENTITY_GENERIC_EXPLODE, 1.6f, 0.7f);
-                w.playSound(impact, Sound.BLOCK_ANVIL_LAND, 1.2f, 0.6f);
-                shockRing(w, impact, quakeRadius());
-
-                for (LivingEntity target : SkillTargets.inCone(w, impact, impact.getDirection(),
-                        quakeRadius(), 360.0, caster)) {
-                    target.damage(quakeDamage(), caster);
-                    if (!OpImmunity.isImmune(target)) {
-                        target.setVelocity(target.getVelocity().setY(0.9));
-                    }
-                    applyCrushSlow(target);
+                caster.setFallDistance(0);
+                if (!slammed && ticks >= QUAKE_SLAM_TICK) {
+                    caster.setVelocity(new Vector(0, -1.2, 0));
+                    slammed = true;
+                }
+                // 땅에 닿았거나, 물·사다리 등으로 끝내 안 닿으면 제한 시간에 그 자리에서 터뜨린다.
+                if ((slammed && caster.isOnGround()) || ticks >= QUAKE_MAX_TICKS) {
+                    // 먼저 멈춘다. 터뜨리는 도중 예외가 나도 이 작업이 다시 돌지 않게.
+                    cancel();
+                    quakeImpact(caster);
                 }
             }
-        }.runTaskLater(plugin, 8L);
+        }.runTaskTimer(plugin, 1L, 1L);
         return true;
+    }
+
+    /** 지진타가 땅을 때리는 순간. */
+    private void quakeImpact(Player caster) {
+        Location impact = caster.getLocation();
+        World world = caster.getWorld();
+        world.playSound(impact, Sound.ENTITY_GENERIC_EXPLODE, 1.6f, 0.7f);
+        world.playSound(impact, Sound.BLOCK_ANVIL_LAND, 1.2f, 0.6f);
+        shockRing(world, impact, quakeRadius());
+
+        for (LivingEntity target : SkillTargets.inCone(world, impact, impact.getDirection(),
+                quakeRadius(), 360.0, caster)) {
+            target.damage(quakeDamage(), caster);
+            if (!OpImmunity.isImmune(target)) {
+                target.setVelocity(target.getVelocity().setY(0.9));
+            }
+            applyCrushSlow(target);
+        }
     }
 
     // ----- [웅크리기+F] 타이탄 크래시 -----
@@ -248,8 +276,11 @@ public class TitanManager {
                 // 정점을 찍고 내려와 땅에 닿거나, 너무 오래 걸리면 강제로 터뜨린다.
                 boolean landed = ticks > 12 && caster.isOnGround();
                 if (landed || ticks > 60) {
-                    crashImpact(caster);
+                    // 먼저 멈춘다. 예전에는 crashImpact()가 예외로 끝나 cancel()에 닿지 못했고,
+                    // 반복 작업은 예외가 나도 계속 돌기 때문에 마법진·폭발음·치명타 입자가 무한히 반복됐다
+                    // (그동안 시전자는 낙하 피해도 받지 않았다).
                     cancel();
+                    crashImpact(caster);
                 }
             }
         }.runTaskTimer(plugin, 2L, 2L);
@@ -264,7 +295,7 @@ public class TitanManager {
         world.playSound(impact, Sound.ENTITY_GENERIC_EXPLODE, 2.0f, 0.5f);
         world.playSound(impact, Sound.BLOCK_DEEPSLATE_BREAK, 1.8f, 0.5f);
         magicCircle(world, impact, radius);
-        world.spawnParticle(Particle.FLASH, impact, 3);
+        Particles.flash(world, impact, 3);
 
         List<LivingEntity> targets = SkillTargets.inCone(world, impact, impact.getDirection(),
                 radius, 360.0, caster);
@@ -287,6 +318,7 @@ public class TitanManager {
                 if (step < 8) {
                     return;
                 }
+                cancel();
                 for (LivingEntity target : targets) {
                     if (target.isDead() || OpImmunity.isImmune(target)) {
                         continue;
@@ -294,7 +326,6 @@ public class TitanManager {
                     target.setVelocity(new Vector(0, -2.0, 0));
                 }
                 world.playSound(impact, Sound.ENTITY_IRON_GOLEM_DAMAGE, 1.8f, 0.5f);
-                cancel();
             }
         }.runTaskTimer(plugin, 2L, 2L);
     }

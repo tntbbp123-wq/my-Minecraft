@@ -2,6 +2,7 @@ package com.tntbbp.myminecraft.raid;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
 import com.tntbbp.myminecraft.util.OpImmunity;
+import com.tntbbp.myminecraft.util.Particles;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -201,9 +202,10 @@ public class ApocalypseDragon extends RaidBoss {
                     return;
                 }
                 Location point = eye.clone().add(direction.clone().multiply(step));
-                point.getWorld().spawnParticle(Particle.DRAGON_BREATH, point, 12, 0.6, 0.6, 0.6, 0.02);
-                point.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, point, 4, 0.4, 0.4, 0.4, 0.01);
+                // 진행 칸을 연출보다 먼저 올린다. 연출에서 예외가 나도 끝에 닿아 멈추게.
                 step += 2;
+                Particles.spawn(point.getWorld(), Particle.DRAGON_BREATH, point, 12, 0.6, 0.6, 0.6, 0.02);
+                point.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, point, 4, 0.4, 0.4, 0.4, 0.01);
             }
         }.runTaskTimer(plugin, 0L, 1L);
 
@@ -284,7 +286,7 @@ public class ApocalypseDragon extends RaidBoss {
                     return;
                 }
                 elapsed += 4;
-                landing.getWorld().spawnParticle(Particle.DRAGON_BREATH, landing.clone().add(0, 0.2, 0),
+                Particles.spawn(landing.getWorld(), Particle.DRAGON_BREATH, landing.clone().add(0, 0.2, 0),
                         40, radius / 2, 0.1, radius / 2, 0.0);
             }
         }.runTaskTimer(plugin, 0L, 4L);
