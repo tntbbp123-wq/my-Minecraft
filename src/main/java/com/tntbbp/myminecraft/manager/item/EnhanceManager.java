@@ -234,11 +234,6 @@ public class EnhanceManager {
         return Math.min(100.0, chance + scrollBonus);
     }
 
-    public double cost(int currentLevel) {
-        double base = plugin.getConfig().getDouble("enhance.base-cost", 100.0);
-        double perLevel = plugin.getConfig().getDouble("enhance.cost-per-level", 50.0);
-        return base + perLevel * currentLevel;
-    }
 
     /** 강화 성공 여부를 판정한다. 재료/자금 차감은 호출부에서 이미 끝났다고 가정한다. */
     public boolean rollSuccess(int currentLevel, double scrollBonus) {

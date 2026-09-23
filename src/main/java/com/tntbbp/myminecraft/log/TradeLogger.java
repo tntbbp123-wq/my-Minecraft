@@ -108,18 +108,17 @@ public class TradeLogger {
     }
 
     /**
-     * 대장간 강화 비용. 성공·실패와 관계없이 동전(G)과 강화석이 나간다.
+     * 대장간 강화 비용. 성공·실패와 관계없이 강화석(과 두루마리를 넣었다면 두루마리 1장)이 나간다.
+     * 강화에는 G가 들지 않는다.
      *
-     * @param amount    나간 G (동전으로 낸 값에서 거스름돈을 뺀 순액)
      * @param stones    소모한 강화석 수
      * @param fromLevel 강화 전 레벨
      */
-    public void enhanceCost(UUID uuid, String name, String itemName, int fromLevel, double amount, int stones,
+    public void enhanceCost(UUID uuid, String name, String itemName, int fromLevel, int stones,
                             boolean usedScroll, boolean success) {
         JsonObject data = player(uuid, name);
         data.addProperty("item_name", itemName);
         data.addProperty("from_level", fromLevel);
-        data.addProperty("amount", amount);
         data.addProperty("stones", stones);
         data.addProperty("used_scroll", usedScroll);
         data.addProperty("success", success);
