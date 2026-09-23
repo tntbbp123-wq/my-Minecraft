@@ -531,7 +531,6 @@ public class GUIListener implements Listener {
 
     private void runEnhance(Player player, InventoryClickEvent event) {
         EnhanceManager enhanceManager = plugin.getEnhanceManager();
-        CurrencyManager currencyManager = plugin.getCurrencyManager();
 
         ItemStack targetItem = event.getInventory().getItem(EnhanceGUI.INPUT_SLOT);
         ItemStack material = event.getInventory().getItem(EnhanceGUI.MATERIAL_SLOT);
@@ -555,13 +554,6 @@ public class GUIListener implements Listener {
             return;
         }
 
-        double cost = enhanceManager.cost(currentLevel);
-        if (!currencyManager.chargeCoins(player, cost)) {
-            player.sendMessage(ChatColor.RED + "동전이 부족합니다. (필요: "
-                    + String.format("%,.0f", cost) + "상당)");
-            return;
-        }
-
         material.setAmount(material.getAmount() - requiredStones);
         event.getInventory().setItem(EnhanceGUI.MATERIAL_SLOT, material.getAmount() <= 0 ? null : material);
 
@@ -571,17 +563,16 @@ public class GUIListener implements Listener {
         }
 
         boolean success = enhanceManager.rollSuccess(currentLevel, scrollBonus);
-        // 동전(G)과 강화석은 성공·실패와 관계없이 이미 나갔다. 서버에서 G가 가장 많이 빠지는 곳이라
-        // 거래 기록에 없으면 웹 관리자에서 돈 흐름이 맞지 않는다.
+        // 강화석(과 두루마리)은 성공·실패와 관계없이 이미 나갔다. 강화에는 G가 들지 않는다.
         plugin.getTradeLogger().enhanceCost(player.getUniqueId(), player.getName(), ItemLabels.of(targetItem),
-                currentLevel, cost, requiredStones, useScroll, success);
+                currentLevel, requiredStones, useScroll, success);
         if (success) {
             int newLevel = currentLevel + 1;
             enhanceManager.applyEnhance(targetItem, newLevel);
             event.getInventory().setItem(EnhanceGUI.INPUT_SLOT, targetItem);
             player.sendMessage(ChatColor.GREEN + "강화 성공! 현재 강화 레벨: +" + newLevel);
         } else {
-            player.sendMessage(ChatColor.RED + "강화 실패... 재료와 동전이 소모되었습니다.");
+            player.sendMessage(ChatColor.RED + "강화 실패... 강화석이 소모되었습니다.");
         }
         EnhanceGUI.refreshProgress(plugin, event.getInventory());
     }

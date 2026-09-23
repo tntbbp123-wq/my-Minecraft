@@ -42,7 +42,7 @@ class TradeLoggerTest {
     @Test
     void 강화_비용() throws IOException {
         JsonObject event = writeOne(logger -> logger.enhanceCost(
-                PLAYER, "철수", "레바테인", 12, 3500.0, 4, true, false));
+                PLAYER, "철수", "레바테인", 12, 4, true, false));
 
         assertEquals("enhance_cost", event.get("type").getAsString());
         assertEquals("철수", event.get("actor").getAsString());
@@ -51,7 +51,7 @@ class TradeLoggerTest {
         assertEquals("철수", data.get("name").getAsString());
         assertEquals("레바테인", data.get("item_name").getAsString());
         assertEquals(12, data.get("from_level").getAsInt());
-        assertEquals(3500.0, data.get("amount").getAsDouble());
+        assertEquals(false, data.has("amount"), "강화에는 G가 들지 않으므로 금액 필드가 없다");
         assertEquals(4, data.get("stones").getAsInt());
         assertTrue(data.get("used_scroll").getAsBoolean());
         assertEquals(false, data.get("success").getAsBoolean());
