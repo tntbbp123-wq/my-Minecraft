@@ -1,6 +1,8 @@
 package com.tntbbp.myminecraft.listener;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
+import com.tntbbp.myminecraft.gui.admin.AdminItemCategory;
+import com.tntbbp.myminecraft.gui.admin.AdminItemCategoryGUI;
 import com.tntbbp.myminecraft.gui.admin.AdminMenuGUI;
 import com.tntbbp.myminecraft.gui.admin.AdminMenuHolder;
 import com.tntbbp.myminecraft.gui.economy.BankGUI;
@@ -33,6 +35,7 @@ import com.tntbbp.myminecraft.manager.world.CoreManager;
 import com.tntbbp.myminecraft.manager.world.LocationsManager;
 import com.tntbbp.myminecraft.manager.world.RandomTeleportManager;
 import com.tntbbp.myminecraft.util.SpecialItemCatalog;
+import com.google.gson.JsonObject;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -347,8 +350,28 @@ public class GUIListener implements Listener {
     }
 
     private void handleAdminMenuClick(Player player, AdminMenuHolder holder, int slot, ClickType clickType) {
-        if (slot == AdminMenuGUI.CLOSE_SLOT) {
+        // 메뉴를 연 뒤 관리자 권한이 빠졌을 수 있다. 여기서 아이템과 G(화폐)가 나가므로 누를 때마다 다시 본다.
+        if (!player.hasPermission("myminecraft.admin")) {
             player.closeInventory();
+            return;
+        }
+
+        AdminMenuHolder.Nav nav = holder.getNav(slot);
+        if (nav != null) {
+            switch (nav) {
+                case CLOSE -> player.closeInventory();
+                case BACK -> new AdminMenuGUI(plugin, player).open();
+                case PREV_PAGE -> new AdminItemCategoryGUI(plugin, player, holder.getCategory(),
+                        holder.getPage() - 1).open();
+                case NEXT_PAGE -> new AdminItemCategoryGUI(plugin, player, holder.getCategory(),
+                        holder.getPage() + 1).open();
+            }
+            return;
+        }
+
+        AdminItemCategory category = holder.getCategoryButton(slot);
+        if (category != null) {
+            new AdminItemCategoryGUI(plugin, player, category, 0).open();
             return;
         }
 
@@ -363,6 +386,7 @@ public class GUIListener implements Listener {
             item.setAmount(amount);
             player.getInventory().addItem(item).values()
                     .forEach(leftover -> player.getWorld().dropItem(player.getLocation(), leftover));
+            logAdminMenuTake(player, giveItemName, amount);
             player.sendMessage(ChatColor.GREEN + resolved.displayName() + " " + amount + "개를 받았습니다.");
             return;
         }
@@ -377,6 +401,21 @@ public class GUIListener implements Listener {
                 + ChatColor.WHITE + suggestedCommand);
         message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, suggestedCommand));
         player.spigot().sendMessage(message);
+    }
+
+    /**
+     * 관리자 메뉴에서 꺼낸 아이템을 거래 기록에 남긴다. {@code /특수아이템소환}과 같은 종류
+     * {@code admin_item_grant}와 같은 필드를 쓴다 (받는 사람이 꺼낸 관리자 자신).
+     * 화폐 동전은 곧 G라서, 메뉴로 꺼낸 것도 빠짐없이 남아야 웹 관리자의 거래 기록과 맞는다.
+     */
+    private void logAdminMenuTake(Player player, String itemName, int amount) {
+        JsonObject data = new JsonObject();
+        data.addProperty("actor", player.getName());
+        data.addProperty("uuid", player.getUniqueId().toString());
+        data.addProperty("name", player.getName());
+        data.addProperty("item_name", itemName);
+        data.addProperty("count", amount);
+        plugin.getTradeLogger().record("admin_item_grant", player.getName(), data);
     }
 
     private void handleCoreClick(Player player, CoreHolder holder, int slot) {

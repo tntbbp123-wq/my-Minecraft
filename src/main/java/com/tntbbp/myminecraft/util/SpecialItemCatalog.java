@@ -27,6 +27,13 @@ public final class SpecialItemCatalog {
     private static final Set<String> BLACKMARKET_NAMES = Set.of("일괄약탈주문서", "함정설치키트", "화염병", "연막탄",
             "밀도나침반", "발자국추적기", "혈흔나침반", "소음차단포션");
 
+    /**
+     * {@link #categoryOf}가 돌려줄 수 있는 분류 전부. 웹 카탈로그와 관리자 메뉴가 같은 값을 쓴다.
+     * 새 분류를 만들면 여기에 넣어야 관리자 메뉴 분류 시험이 빠진 칸을 잡아낸다.
+     */
+    public static final List<String> CATEGORY_IDS = List.of(
+            "weapon", "armor", "material", "enhance", "starforce", "scroll", "blackmarket", "coin");
+
     public record Resolved(ItemStack item, String displayName) {
     }
 
@@ -186,6 +193,11 @@ public final class SpecialItemCatalog {
                     categoryOf(plugin, enhanceManager, currencyManager, name)));
         }
         return entries;
+    }
+
+    /** 아이템명의 분류. {@link #CATEGORY_IDS} 중 하나를 돌려준다. */
+    public static String categoryOf(MyMinecraftPlugin plugin, String name) {
+        return categoryOf(plugin, plugin.getEnhanceManager(), plugin.getCurrencyManager(), name);
     }
 
     private static String categoryOf(MyMinecraftPlugin plugin, EnhanceManager enhanceManager,
