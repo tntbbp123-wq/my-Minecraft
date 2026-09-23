@@ -5,7 +5,6 @@ import com.tntbbp.myminecraft.manager.economy.NewsManager;
 import com.tntbbp.myminecraft.manager.economy.StockManager;
 import com.tntbbp.myminecraft.model.Stock;
 import com.tntbbp.myminecraft.util.ItemBuilder;
-import com.tntbbp.myminecraft.util.SpecialItemCatalog;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -14,8 +13,16 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-/** 관리자 전용 안내/현황 GUI. 명령어 안내 항목은 클릭 시 채팅창에 명령어를 입력해주고, 특수 아이템 항목은 클릭 시 직접 지급된다. */
+/**
+ * 관리자 전용 안내/현황 GUI. 명령어 안내 항목은 클릭 시 채팅창에 명령어를 입력해준다.
+ *
+ * <p>특수 아이템은 <b>분류별 칸</b>(무기·방어구·재료·강화 아이템·암시장 아이템·화폐)으로 나눠 두고,
+ * 칸을 누르면 {@link AdminItemCategoryGUI}에서 그 분류의 아이템을 꺼낼 수 있다. 예전에는 모든 아이템을
+ * 한 화면 27칸에 순서대로 넣어서, 아이템이 27개를 넘자 뒤쪽(신화 무기 일부·암시장·두루마리·화폐)이
+ * 메뉴에서 아예 사라졌다.
+ */
 public class AdminMenuGUI {
 
     public static final String TITLE = "§4관리자 메뉴";
@@ -27,12 +34,12 @@ public class AdminMenuGUI {
     public static final int NEWS_SLOT = 12;
     public static final int FAKE_NEWS_SLOT = 14;
     public static final int SPECIAL_ITEM_SLOT = 16;
-    public static final int[] TAKE_ITEM_SLOTS = {
-            18, 19, 20, 21, 22, 23, 24, 25, 26,
-            27, 28, 29, 30, 31, 32, 33, 34, 35,
-            36, 37, 38, 39, 40, 41, 42, 43, 44
-    };
+    /** 분류 칸 자리. {@link AdminItemCategory} 순서대로 채운다 (3칸씩 두 줄). */
+    static final int[] CATEGORY_SLOTS = {20, 22, 24, 29, 31, 33};
     public static final int STOCK_STATUS_SLOT = 49;
+
+    /** 분류 칸 설명에 미리 보여줄 아이템 이름 수. 넘으면 "외 n개"로 줄인다. */
+    private static final int PREVIEW_NAMES = 8;
 
     private final MyMinecraftPlugin plugin;
     private final Player player;
@@ -104,27 +111,17 @@ public class AdminMenuGUI {
                         "§7/특수아이템소환 <유저> <아이템명> <수량>",
                         "§7강화석/두루마리/레바테인/화폐 동전 모두 지급 가능합니다.",
                         "§7클릭하면 채팅창에 명령어가 입력됩니다.",
-                        "§7내 인벤토리로 바로 꺼내려면 아래 칸을 클릭하세요."
+                        "§7내 인벤토리로 바로 꺼내려면 아래 분류 칸을 누르세요."
                 ))
                 .build());
         holder.mapCommand(SPECIAL_ITEM_SLOT, "/특수아이템소환 ");
-        List<String> itemNames = SpecialItemCatalog.allItemNames(plugin);
-        for (int i = 0; i < itemNames.size() && i < TAKE_ITEM_SLOTS.length; i++) {
-            String itemName = itemNames.get(i);
-            SpecialItemCatalog.Resolved resolved = SpecialItemCatalog.resolve(plugin, itemName, 1);
-            if (resolved == null) {
-                continue;
-            }
-            int slot = TAKE_ITEM_SLOTS[i];
-            ItemStack icon = resolved.item();
-            List<String> lore = new ArrayList<>(icon.hasItemMeta() && icon.getItemMeta().hasLore()
-                    ? icon.getItemMeta().getLore() : List.of());
-            lore.add("");
-            lore.add("§a좌클릭 §7- 1개 꺼내기");
-            lore.add("§a쉬프트+좌클릭 §7- 최대 스택 꺼내기");
-            icon = new ItemBuilder(icon).lore(lore).build();
-            inventory.setItem(slot, icon);
-            holder.mapGiveItem(slot, itemName);
+
+        Map<AdminItemCategory, List<String>> grouped = AdminItemCategory.group(plugin);
+        AdminItemCategory[] categories = AdminItemCategory.values();
+        for (int i = 0; i < categories.length && i < CATEGORY_SLOTS.length; i++) {
+            AdminItemCategory category = categories[i];
+            inventory.setItem(CATEGORY_SLOTS[i], categoryButton(category, grouped.get(category)));
+            holder.mapCategory(CATEGORY_SLOTS[i], category);
         }
 
         StockManager stockManager = plugin.getStockManager();
@@ -144,7 +141,27 @@ public class AdminMenuGUI {
         inventory.setItem(CLOSE_SLOT, new ItemBuilder(Material.BARRIER)
                 .name("§c닫기")
                 .build());
+        holder.mapNav(CLOSE_SLOT, AdminMenuHolder.Nav.CLOSE);
 
         player.openInventory(inventory);
+    }
+
+    /** 분류 칸. 몇 개가 들어 있는지와 앞쪽 아이템 이름을 미리 보여준다. */
+    private ItemStack categoryButton(AdminItemCategory category, List<String> names) {
+        List<String> lore = new ArrayList<>();
+        lore.add("§7아이템 §f" + names.size() + "개");
+        lore.add("");
+        for (int i = 0; i < names.size() && i < PREVIEW_NAMES; i++) {
+            lore.add("§8· §7" + names.get(i));
+        }
+        if (names.size() > PREVIEW_NAMES) {
+            lore.add("§8  외 " + (names.size() - PREVIEW_NAMES) + "개");
+        }
+        lore.add("");
+        lore.add("§a클릭 §7- 열어서 꺼내기");
+        return new ItemBuilder(category.icon())
+                .name(category.color() + "§l" + category.displayName())
+                .lore(lore)
+                .build();
     }
 }
