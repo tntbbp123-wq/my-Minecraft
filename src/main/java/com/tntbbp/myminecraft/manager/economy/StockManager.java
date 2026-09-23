@@ -633,6 +633,11 @@ public class StockManager {
             return TradeResult.HALTED;
         }
         double unitPrice = stock.getPrice();
+        // 최소가를 0으로 둔 종목은 주가가 0까지 떨어질 수 있다. 그때 사면 공짜로 무한히 살 수 있고,
+        // 가격이 조금만 올라도 전부 팔아 G를 찍어낼 수 있으므로 0원 매수는 거래 정지로 막는다.
+        if (!(unitPrice > 0)) {
+            return TradeResult.HALTED;
+        }
         double cost = unitPrice * amount;
         if (!economyManager.subtract(uuid, cost)) {
             return TradeResult.NOT_ENOUGH_BALANCE;

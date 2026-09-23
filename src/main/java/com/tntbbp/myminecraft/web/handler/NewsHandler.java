@@ -355,8 +355,9 @@ public class NewsHandler {
             }
             return 0.0;
         }
-        if (magnitude <= 0) {
-            throw BridgeException.invalidField("magnitude_percent 는 0보다 커야 합니다.");
+        // Gson은 기본적으로 NaN·Infinity 글자도 받아들인다. NaN은 "<= 0"을 통과하므로 따로 막는다.
+        if (!Double.isFinite(magnitude) || magnitude <= 0) {
+            throw BridgeException.invalidField("magnitude_percent 는 0보다 큰 숫자여야 합니다.");
         }
         return magnitude;
     }

@@ -110,8 +110,10 @@ public class NewsCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(ChatColor.RED + "변동폭은 숫자(%)로 입력해주세요.");
             return true;
         }
-        if (magnitude <= 0) {
-            sender.sendMessage(ChatColor.RED + "변동폭은 0보다 커야 합니다.");
+        // NaN은 "<= 0" 검사를 그냥 통과한다(NaN과의 비교는 전부 거짓). 들어가면 2시간 뒤 주가가 0이 되고,
+        // Infinity면 상한 없는 종목의 주가가 천문학적으로 뛴다.
+        if (!Double.isFinite(magnitude) || magnitude <= 0) {
+            sender.sendMessage(ChatColor.RED + "변동폭은 0보다 큰 숫자여야 합니다.");
             return true;
         }
 

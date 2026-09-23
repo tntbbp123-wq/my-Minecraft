@@ -13,6 +13,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -99,10 +100,40 @@ public class CombatStanceManager {
         return savedHotbars.remove(uuid);
     }
 
+    /** 저장해 둔 원래 아이템을 핫바로 되돌린다. 사망 시 keepInventory 처리에서도 쓴다. */
+    public void restoreSaved(Player player, ItemStack[] saved) {
+        restoreHotbar(player, saved);
+    }
+
+    /**
+     * 핫바 1~4번에 원래 아이템을 되돌린다.
+     *
+     * <p>그 칸에 스킬 아이템이 아닌 게 들어와 있으면 <b>덮어쓰지 않고 인벤토리로 옮긴다.</b> 예전에는 그냥
+     * 덮어써서, 숫자키 바꾸기나 F(손 바꾸기)로 칸에 들어온 검·방패가 전투모드를 끄는 순간 사라졌다.
+     * 입구는 막았지만, 다른 경로로 들어와도 아이템이 없어지지 않게 여기서도 지킨다.
+     */
     private void restoreHotbar(Player player, ItemStack[] saved) {
         PlayerInventory inventory = player.getInventory();
+        List<ItemStack> displaced = new ArrayList<>();
         for (int slot = 0; slot < SKILL_SLOT_COUNT; slot++) {
+            ItemStack current = inventory.getItem(slot);
+            if (current != null && !current.getType().isAir() && !isSkillItem(current)) {
+                displaced.add(current);
+            }
             inventory.setItem(slot, saved[slot]);
+        }
+        // 스킬 아이템이 다른 칸으로 옮겨져 있었다면 함께 치운다.
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            if (isSkillItem(inventory.getItem(slot))) {
+                inventory.setItem(slot, null);
+            }
+        }
+        if (isSkillItem(inventory.getItemInOffHand())) {
+            inventory.setItemInOffHand(null);
+        }
+        for (ItemStack item : displaced) {
+            inventory.addItem(item).values()
+                    .forEach(leftover -> player.getWorld().dropItem(player.getLocation(), leftover));
         }
     }
 

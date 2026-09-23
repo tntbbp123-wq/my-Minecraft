@@ -44,6 +44,9 @@ import java.util.UUID;
  */
 public class EternalKnight extends RaidBoss {
 
+    /** 영혼의 파편(보조 엔티티)에 붙이는 표시. 남은 파편을 치울 때 {@code RaidBossManager}도 쓴다. */
+    public static final String FRAGMENT_KEY = "eternal_knight_fragment";
+
     public static final String ID = "eternal-knight";
 
     private final NamespacedKey fragmentKey;
@@ -60,7 +63,7 @@ public class EternalKnight extends RaidBoss {
 
     public EternalKnight(MyMinecraftPlugin plugin) {
         super(plugin);
-        this.fragmentKey = new NamespacedKey(plugin, "eternal_knight_fragment");
+        this.fragmentKey = new NamespacedKey(plugin, FRAGMENT_KEY);
     }
 
     @Override

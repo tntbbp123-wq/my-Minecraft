@@ -7,10 +7,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
 
 /** 전투모드 스킬 슬롯의 발동(우클릭)과 보호(드롭·이동 금지, 접속 종료/사망 시 정리)를 처리한다. */
@@ -58,6 +60,24 @@ public class CombatStanceListener implements Listener {
         }
         if (manager.isSkillItem(event.getCurrentItem()) || manager.isSkillItem(event.getCursor())) {
             event.setCancelled(true);
+            return;
+        }
+        // 숫자키로 핫바와 바꾸는 경우엔 옮겨지는 스킬 아이템이 "누른 칸"도 "커서"도 아니라 위 검사를 빠져나간다.
+        if (event.getClick() == ClickType.NUMBER_KEY && event.getHotbarButton() >= 0
+                && manager.isSkillItem(player.getInventory().getItem(event.getHotbarButton()))) {
+            event.setCancelled(true);
+        }
+    }
+
+    /** 스킬 아이템을 든 채 F(손 바꾸기)를 누르면 보조손 아이템이 스킬 칸으로 들어온다. 막는다. */
+    @EventHandler
+    public void onSwapHands(PlayerSwapHandItemsEvent event) {
+        CombatStanceManager manager = plugin.getCombatStanceManager();
+        if (!manager.isInStance(event.getPlayer().getUniqueId())) {
+            return;
+        }
+        if (manager.isSkillItem(event.getMainHandItem()) || manager.isSkillItem(event.getOffHandItem())) {
+            event.setCancelled(true);
         }
     }
 
@@ -81,6 +101,14 @@ public class CombatStanceListener implements Listener {
 
         ItemStack[] saved = manager.clearStanceAndGetSaved(player.getUniqueId());
         event.getDrops().removeIf(manager::isSkillItem);
+        if (event.getKeepInventory()) {
+            // 인벤토리를 지키는 설정이면 아이템이 떨어지지 않고 그대로 남는다. 원래 아이템을 바닥에 흘리지 말고
+            // 핫바에 되돌려야 한다(예전에는 스킬 아이템이 핫바에 남고 원래 아이템은 바닥에 떨어졌다).
+            if (saved != null) {
+                manager.restoreSaved(player, saved);
+            }
+            return;
+        }
         if (saved != null) {
             for (ItemStack item : saved) {
                 if (item != null) {

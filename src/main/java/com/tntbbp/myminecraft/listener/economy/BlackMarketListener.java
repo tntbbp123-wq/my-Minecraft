@@ -1,7 +1,9 @@
 package com.tntbbp.myminecraft.listener.economy;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
+import com.tntbbp.myminecraft.log.TradeLogger;
 import com.tntbbp.myminecraft.manager.economy.BlackMarketManager;
+import com.tntbbp.myminecraft.util.ItemLabels;
 import com.tntbbp.myminecraft.util.OpImmunity;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -17,7 +19,9 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.AreaEffectCloudApplyEvent;
@@ -34,6 +38,8 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /** 암시장 아이템(일괄 약탈 주문서, 함정 설치 키트, 화염병, 연막탄) 동작 처리. */
@@ -45,7 +51,7 @@ public class BlackMarketListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK && event.getAction() != Action.RIGHT_CLICK_AIR) {
             return;
@@ -61,6 +67,15 @@ public class BlackMarketListener implements Listener {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {
             Block clicked = event.getClickedBlock();
             if (isContainer(clicked.getType())) {
+                // 보호 구역 플러그인이 이 상자를 막았으면 암시장 도구로도 건드릴 수 없다. 예전에는 이 판단을 보지
+                // 않아서, 직접 열 수도 없는 보호된 상자(스폰의 관리자 상자 등)를 통째로 털거나 함정을 걸 수 있었다.
+                boolean blackMarketTool = blackMarketManager.isTrapKit(hand)
+                        || (blackMarketManager.isLootAllScroll(hand) && player.isSneaking());
+                if (blackMarketTool && event.useInteractedBlock() == Event.Result.DENY) {
+                    event.setCancelled(true);
+                    player.sendMessage(ChatColor.RED + "보호된 상자에는 쓸 수 없습니다.");
+                    return;
+                }
                 if (blackMarketManager.isTrapKit(hand)) {
                     event.setCancelled(true);
                     handleTrapKit(player, clicked, hand);
@@ -151,17 +166,25 @@ public class BlackMarketListener implements Listener {
             return;
         }
         Inventory blockInventory = container.getInventory();
+        List<TradeLogger.ItemCount> taken = new ArrayList<>();
         for (int slot = 0; slot < blockInventory.getSize(); slot++) {
             ItemStack stack = blockInventory.getItem(slot);
             if (stack == null || stack.getType().isAir()) {
                 continue;
             }
+            // addItem이 넘긴 스택을 건드릴 수 있어 이름·개수는 옮기기 전에 적어 둔다.
+            taken.add(new TradeLogger.ItemCount(ItemLabels.of(stack), stack.getAmount()));
             player.getInventory().addItem(stack).values()
                     .forEach(leftover -> player.getWorld().dropItem(player.getLocation(), leftover));
             blockInventory.setItem(slot, null);
         }
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.7f);
         consumeOne(player, scroll);
+        // 남의 상자에서 아이템(동전 = G 포함)을 통째로 가져가는 기능이라 거래 기록에 남긴다.
+        if (!taken.isEmpty()) {
+            plugin.getTradeLogger().blackmarketLootAll(player.getUniqueId(), player.getName(),
+                    chestBlock.getWorld().getName(), chestBlock.getX(), chestBlock.getY(), chestBlock.getZ(), taken);
+        }
         player.sendMessage(ChatColor.GOLD + "상자 안의 모든 아이템을 쓸어 담았습니다.");
     }
 

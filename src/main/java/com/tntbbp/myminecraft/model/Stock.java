@@ -195,8 +195,16 @@ public class Stock {
 
     /** 관리자가 작성한 뉴스에 따라 가격을 직접 변동시킨다 (%). */
     public void applyNewsImpact(double percent) {
-        previousPrice = price;
+        // 입력에서 막지만, 이미 저장돼 있던 뉴스까지 막으려고 여기서도 본다.
+        // NaN이면 Math.round(NaN)이 0이라 주가가 0이 되고(공짜 매수), Infinity면 주가가 폭주한다.
+        if (!Double.isFinite(percent)) {
+            return;
+        }
         double newPrice = price * (1 + percent / 100.0);
+        if (!Double.isFinite(newPrice)) {
+            return;
+        }
+        previousPrice = price;
         newPrice = Math.max(minPrice, newPrice);
         if (maxPrice > 0) {
             newPrice = Math.min(maxPrice, newPrice);

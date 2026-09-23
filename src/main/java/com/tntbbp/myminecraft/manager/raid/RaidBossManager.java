@@ -5,11 +5,13 @@ import com.tntbbp.myminecraft.raid.ApocalypseDragon;
 import com.tntbbp.myminecraft.raid.EternalKnight;
 import com.tntbbp.myminecraft.raid.OblivionEntity;
 import com.tntbbp.myminecraft.raid.RaidBoss;
+import org.bukkit.World;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -34,6 +36,7 @@ public class RaidBossManager {
 
     private final MyMinecraftPlugin plugin;
     private final NamespacedKey bossIdKey;
+    private final NamespacedKey fragmentKey;
     private final Map<UUID, RaidBoss> bossesByEntityId = new HashMap<>();
     private final Map<UUID, RaidBoss> bossesByAuxId = new HashMap<>();
 
@@ -45,9 +48,13 @@ public class RaidBossManager {
     public RaidBossManager(MyMinecraftPlugin plugin) {
         this.plugin = plugin;
         this.bossIdKey = new NamespacedKey(plugin, "raid_boss_id");
+        this.fragmentKey = new NamespacedKey(plugin, EternalKnight.FRAGMENT_KEY);
     }
 
     public void start() {
+        for (World world : plugin.getServer().getWorlds()) {
+            removeOrphans(world.getEntities());
+        }
         task = plugin.getServer().getScheduler().runTaskTimer(plugin, this::tick, TICK_INTERVAL, TICK_INTERVAL);
     }
 
@@ -126,6 +133,33 @@ public class RaidBossManager {
         bossesByEntityId.remove(boss.entity().getUniqueId());
         bossesByAuxId.values().removeIf(owner -> owner == boss);
         boss.remove(false);
+    }
+
+    /**
+     * 추적하지 않는데 월드에 남아 있는 보스·보조 엔티티를 치운다. 치운 수를 돌려준다.
+     *
+     * <p>보스는 월드에 저장되게({@code setPersistent(true)}) 소환된다. 서버가 정상 종료되면 {@link #despawnAll}이
+     * 치우지만, 서버가 튕기거나 종료할 때 보스가 있던 청크가 이미 내려가 있으면 그대로 남는다. 다시 켜면 그
+     * 보스는 추적 목록에 없어 기술·보스바·보상이 전부 없는 체력 덩어리가 되고(종말룡은 진짜 엔더드래곤이라
+     * 지상을 날아다닌다), 잡아도 아무것도 주지 않았다.
+     */
+    public int removeOrphans(Iterable<? extends Entity> entities) {
+        int removed = 0;
+        for (Entity entity : entities) {
+            PersistentDataContainer data = entity.getPersistentDataContainer();
+            boolean orphanBoss = data.has(bossIdKey, PersistentDataType.STRING)
+                    && !bossesByEntityId.containsKey(entity.getUniqueId());
+            boolean orphanAux = data.has(fragmentKey, PersistentDataType.BYTE)
+                    && !bossesByAuxId.containsKey(entity.getUniqueId());
+            if (orphanBoss || orphanAux) {
+                entity.remove();
+                removed++;
+            }
+        }
+        if (removed > 0) {
+            plugin.getLogger().info("추적하지 않는 레이드 보스 잔재 " + removed + "개를 치웠습니다.");
+        }
+        return removed;
     }
 
     /** 서버 종료/명령어로 살아있는 보스를 전부 제거한다. */

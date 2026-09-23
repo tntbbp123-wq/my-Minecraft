@@ -57,6 +57,10 @@ public class FangtianJiListener implements Listener {
         if (!manager.isFangtianJi(attacker.getInventory().getItemInMainHand())) {
             return;
         }
+        // 쓸어버리기·패왕의 일격이 입힌 피해는 평타가 아니다. 여기서 또 쓸어버리면 연쇄로 번진다.
+        if (manager.isDealingNonBasic(attacker.getUniqueId())) {
+            return;
+        }
 
         if (event.isCritical()) {
             event.setDamage(manager.critDamage());
@@ -69,7 +73,7 @@ public class FangtianJiListener implements Listener {
         double radius = manager.sweepRadius() * (manager.isEnraged(attacker) ? 2.0 : 1.0);
         manager.spawnSweepArc(attacker, hit, radius);
         for (LivingEntity nearby : manager.sweepTargets(attacker, hit)) {
-            nearby.damage(sweepDamage, attacker);
+            manager.dealNonBasic(attacker, nearby, sweepDamage);
         }
     }
 }

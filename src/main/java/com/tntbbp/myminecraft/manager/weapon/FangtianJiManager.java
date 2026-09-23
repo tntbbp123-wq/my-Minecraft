@@ -24,6 +24,7 @@ import org.bukkit.util.Vector;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,6 +42,14 @@ public class FangtianJiManager {
     private final MyMinecraftPlugin plugin;
     private final NamespacedKey itemKey;
     private final Map<UUID, Long> strikeCooldowns = new ConcurrentHashMap<>();
+    /**
+     * 평타가 아닌 피해(쓸어버리기·패왕의 일격)를 입히고 있는 사람.
+     *
+     * <p>{@code target.damage(x, attacker)}는 피해 이벤트를 <b>다시</b> 일으키므로, 이걸 표시하지 않으면
+     * 쓸어버리기에 맞은 적이 또 평타로 취급돼 그 주변을 다시 쓸어버린다. 몹이 모여 있으면 범위를 넘어
+     * 연쇄로 번졌고, 패왕의 일격에 맞은 적마다 쓸어버리기도 따로 터졌다.
+     */
+    private final Set<UUID> dealingNonBasic = ConcurrentHashMap.newKeySet();
 
     public FangtianJiManager(MyMinecraftPlugin plugin) {
         this.plugin = plugin;
@@ -156,6 +165,23 @@ public class FangtianJiManager {
         player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 40, amplifier, true, false, false));
     }
 
+    /** 지금 들어오는 피해 이벤트가 평타가 아니라 이 무기의 쓸어버리기·기술에서 나온 것인지. */
+    public boolean isDealingNonBasic(UUID attacker) {
+        return dealingNonBasic.contains(attacker);
+    }
+
+    /** 평타가 아닌 피해를 입힌다. 이 피해로 다시 쓸어버리기가 터지지 않는다. */
+    public void dealNonBasic(Player attacker, LivingEntity target, double amount) {
+        boolean outermost = dealingNonBasic.add(attacker.getUniqueId());
+        try {
+            target.damage(amount, attacker);
+        } finally {
+            if (outermost) {
+                dealingNonBasic.remove(attacker.getUniqueId());
+            }
+        }
+    }
+
     /** 평타가 함께 베는 주변 적들. 분노 상태면 반경이 두 배다. */
     public List<LivingEntity> sweepTargets(Player attacker, LivingEntity hit) {
         double radius = sweepRadius() * (isEnraged(attacker) ? 2.0 : 1.0);
@@ -201,7 +227,7 @@ public class FangtianJiManager {
 
         for (LivingEntity target : SkillTargets.inCone(world, eye, direction,
                 strikeRange(), strikeConeAngle(), caster)) {
-            target.damage(strikeDamage(), caster);
+            dealNonBasic(caster, target, strikeDamage());
             target.setVelocity(target.getVelocity().add(direction.clone().multiply(0.6).setY(0.35)));
         }
         return true;
