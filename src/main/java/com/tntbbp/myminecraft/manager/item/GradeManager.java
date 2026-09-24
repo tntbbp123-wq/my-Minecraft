@@ -24,7 +24,9 @@ public class GradeManager {
         ANCIENT("고대", "6"),
         // 전설은 노란색(e)이다. 황금색(6)은 이미 고대가 쓰고 있어 겹치면 구분이 안 된다.
         LEGEND("전설", "e"),
-        MASTER("신화", "d");
+        MASTER("신화", "d"),
+        /** 신화 위의 마지막 등급. 레이드 보스 부산물과 (앞으로 만들) 세상에 하나뿐인 종언급 장비에 붙는다. */
+        FINALE("종언", "4");
 
         private final String displayName;
         private final String colorCode;
