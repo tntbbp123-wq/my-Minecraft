@@ -29,15 +29,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   <li>항상 검사: 카탈로그 형식, 같은 키 두 번, config.yml에 없는 키(이름이 바뀌었거나 지운 키),
  *       비밀 같은 키의 {@code secret: true}, 묶음 값의 {@code editable: false}.</li>
  *   <li>{@link #everyConfigKeyHasCatalogEntry}: config.yml의 모든 말단 키가 카탈로그에 있는지.
- *       카탈로그를 아직 채우는 중이라 기본은 빠진 목록만 출력하고 건너뛴다.
- *       {@code mvn test -Dgn.catalog.strict=true} 로 돌리면 실패로 처리한다.
- *       카탈로그를 다 채우면 {@link #ENFORCE_COVERAGE_BY_DEFAULT}를 {@code true}로 바꾼다.</li>
+ *       카탈로그를 다 채웠으므로 기본으로 강제한다({@link #ENFORCE_COVERAGE_BY_DEFAULT}) — config.yml 에 키만 추가하고
+ *       카탈로그를 안 고치면 평소 빌드가 실패한다. 잠깐 목록만 보고 싶으면 {@code -Dgn.catalog.strict=false}.</li>
  * </ul>
  */
 class AdminSettingsCatalogTest {
 
-    /** 카탈로그를 다 채운 뒤 true 로 바꾼다. 그 뒤로는 config.yml 에 키만 추가하면 빌드가 실패한다. */
-    private static final boolean ENFORCE_COVERAGE_BY_DEFAULT = false;
+    /** 카탈로그를 다 채워서 true(기본 강제). config.yml 에 키만 추가하고 카탈로그를 안 고치면 빌드가 실패한다. */
+    private static final boolean ENFORCE_COVERAGE_BY_DEFAULT = true;
 
     private static final String FILE_ID = "plugin:MyMinecraft/config.yml";
     private static final Set<String> TYPES = Set.of("string", "int", "float", "bool", "enum", "list", "secret");
@@ -158,7 +157,7 @@ class AdminSettingsCatalogTest {
         assertNoProblems("묶음 값 editable 누락", problems);
     }
 
-    // ---------------------------------------------------------------- 채우기 검사(지금은 기본 건너뜀)
+    // ---------------------------------------------------------------- 채우기 검사(기본 강제, -Dgn.catalog.strict=false 면 목록만 출력)
 
     @Test
     void everyConfigKeyHasCatalogEntry() {
@@ -183,7 +182,7 @@ class AdminSettingsCatalogTest {
         }
         if (!strict) {
             System.out.println("[설정 카탈로그] " + report);
-            Assumptions.abort("카탈로그 채우기 검사는 아직 강제하지 않아요(-Dgn.catalog.strict=true 로 강제). 빠진 키 "
+            Assumptions.abort("카탈로그 채우기 검사를 -Dgn.catalog.strict=false 로 껐어요. 빠진 키 "
                     + missing.size() + "개");
         }
         throw new AssertionError(report);

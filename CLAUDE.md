@@ -107,5 +107,5 @@ git fetch gitea --prune --tags
 **검사**: `mvn -B test -Dtest=AdminSettingsCatalogTest -Dgn.catalog.strict=true`
 
 - 형식 오류, config.yml에 없는 카탈로그 키(이름 변경·삭제 뒤 남은 항목), 비밀 같은 키의 `secret` 누락, 묶음 값의 `editable: false` 누락은 **평소 빌드에서도 실패**한다.
-- `-Dgn.catalog.strict=true`를 붙이면 config.yml의 말단 키 중 카탈로그에 **빠진 키**도 실패로 알려 준다(카탈로그를 다 채우기 전까지는 평소 빌드에서는 목록만 출력하고 건너뜀). config.yml을 고쳤다면 이 명령으로 **내가 추가한 키가 빠진 목록에 없는지** 확인한다.
+- config.yml의 말단 키 중 카탈로그에 **빠진 키**도 평소 빌드에서 실패한다(카탈로그를 다 채워서 기본으로 강제함, `-Dgn.catalog.strict=false`면 목록만 출력하고 건너뜀). config.yml을 고쳤다면 위 명령으로 **내가 추가한 키가 빠진 목록에 없는지** 확인한다.
 - 병합 요청 본문에 "설정 카탈로그도 같이 고침(키 N개)"이라고 적는다.
