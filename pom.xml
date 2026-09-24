@@ -96,6 +96,17 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <excludes>
+                    <exclude>admin-settings-catalog.yml</exclude>
+                </excludes>
+            </resource>
+            <!-- 웹 관리 설정 카탈로그는 설명 글에 ${...}·@ 가 들어가도 바뀌지 않게 원문 그대로 넣는다. -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>admin-settings-catalog.yml</include>
+                </includes>
             </resource>
         </resources>
         <plugins>

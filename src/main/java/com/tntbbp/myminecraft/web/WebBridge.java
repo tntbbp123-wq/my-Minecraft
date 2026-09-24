@@ -12,6 +12,7 @@ import com.tntbbp.myminecraft.web.handler.NewsHandler;
 import com.tntbbp.myminecraft.web.handler.PlayerHandler;
 import com.tntbbp.myminecraft.web.handler.PluginHandler;
 import com.tntbbp.myminecraft.web.handler.ServerHandler;
+import com.tntbbp.myminecraft.web.handler.SettingsCatalogHandler;
 import com.tntbbp.myminecraft.web.handler.StockHandler;
 import com.tntbbp.myminecraft.web.profile.PlayerDataRegistry;
 import com.sun.net.httpserver.HttpExchange;
@@ -175,6 +176,7 @@ public class WebBridge {
         StockHandler stocks = new StockHandler(this);
         NewsHandler news = new NewsHandler(this);
         PluginHandler plugins = new PluginHandler(this);
+        SettingsCatalogHandler settingsCatalog = new SettingsCatalogHandler(this);
 
         // P1 — 상태·플레이어·명령·서버 제어·카탈로그
         routes.add("GET", "/health", false, health::health);
@@ -193,6 +195,7 @@ public class WebBridge {
         routes.add("GET", "/commands/executions/{id}", false, commands::execution);
         routes.add("GET", "/catalog/{kind}", false, catalog::catalog);
         routes.add("GET", "/plugins/runtime", false, plugins::runtime);
+        routes.add("GET", "/settings-catalog", false, settingsCatalog::catalog);
 
         // P2 — 우편 (MailHandler 스텁)
         routes.add("POST", "/mail", false, mail::send);
