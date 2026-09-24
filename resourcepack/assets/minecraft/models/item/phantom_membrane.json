@@ -9,6 +9,12 @@
         "custom_model_data": 500110
       },
       "model": "item/void_leather"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 500120
+      },
+      "model": "item/apocalypse_dragon_scale"
     }
   ]
 }

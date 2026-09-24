@@ -9,6 +9,12 @@
         "custom_model_data": 500112
       },
       "model": "item/titans_pulsing_heartstone"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 500119
+      },
+      "model": "item/endless_conviction"
     }
   ]
 }
