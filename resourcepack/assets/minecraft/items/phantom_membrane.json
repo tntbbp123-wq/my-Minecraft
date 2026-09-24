@@ -14,6 +14,13 @@
           "type": "minecraft:model",
           "model": "minecraft:item/void_leather"
         }
+      },
+      {
+        "threshold": 500120,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/apocalypse_dragon_scale"
+        }
       }
     ]
   }

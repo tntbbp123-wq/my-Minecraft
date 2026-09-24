@@ -9,6 +9,12 @@
         "custom_model_data": 500106
       },
       "model": "item/beasts_sharp_claw"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 500121
+      },
+      "model": "item/apocalypse_dragon_claw"
     }
   ]
 }

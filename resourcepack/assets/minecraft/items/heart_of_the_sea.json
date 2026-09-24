@@ -14,6 +14,13 @@
           "type": "minecraft:model",
           "model": "minecraft:item/titans_pulsing_heartstone"
         }
+      },
+      {
+        "threshold": 500119,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/endless_conviction"
+        }
       }
     ]
   }

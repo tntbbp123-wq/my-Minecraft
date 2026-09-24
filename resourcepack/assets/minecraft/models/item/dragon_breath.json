@@ -9,6 +9,12 @@
         "custom_model_data": 500114
       },
       "model": "item/condensed_titan_gravity_fluid"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 500122
+      },
+      "model": "item/apocalypse_dragon_blood"
     }
   ]
 }

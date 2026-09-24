@@ -14,6 +14,13 @@
           "type": "minecraft:model",
           "model": "minecraft:item/beasts_sharp_claw"
         }
+      },
+      {
+        "threshold": 500121,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/apocalypse_dragon_claw"
+        }
       }
     ]
   }
