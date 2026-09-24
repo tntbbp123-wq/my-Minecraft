@@ -51,3 +51,61 @@ git fetch gitea --prune --tags
 - 새 종류면 `plugin.getTradeLogger().record("종류_이름", actor, data)`로 남긴다. `data`에는 기존 종류와 같은 필드 이름을 쓴다: 플레이어 `uuid`·`name`, 금액 `amount`(단가·합계는 `unit_price`·`total`), 아이템 `item_name`·`count`. 그리고 두 사람 사이 거래면 양쪽 uuid를 모두 넣는다. 새 종류 이름과 필드는 병합 요청 본문에 적는다(웹 화면 표시 이름을 맞추기 위해).
 - 기록은 돈·아이템이 **실제로 옮겨진 뒤**에 한 번만 남긴다(실패·취소는 남기지 않는다).
 - 플레이어에게 아이템·G를 보내는 보상은 직접 인벤토리에 넣지 말고 우편 `plugin.getMailManager().send(...)`를 쓰면 기록과 인벤토리 가득 참 처리가 같이 된다.
+
+## 7. config.yml 에 설정을 추가·이름 변경·삭제할 때 (웹 관리자 설정 카탈로그)
+
+웹 관리자(`/_admin`)의 "서버 설정" 화면은 `config.yml`의 키마다 한국어 이름·설명을 붙여 보여 준다. 그 설명은 **`src/main/resources/admin-settings-catalog.yml`**(jar에 들어가고, 관리 사이트가 연결 통로 `GET /v1/settings-catalog`로 받아 감)에 있다. 카탈로그에 없는 키는 화면에 영어 키 이름 그대로 나온다. 그래서 `src/main/resources/config.yml`을 고치면 **같은 커밋에서 카탈로그도 같이 고친다.**
+
+- **추가**: 새 말단 키마다 카탈로그 `keys:` 목록에 항목을 하나 추가한다. 같은 섹션 항목들 근처에 둔다.
+- **이름 변경·이동**: 카탈로그 항목의 `key`도 새 경로로 바꾼다(설명은 그대로 둬도 됨).
+- **삭제**: 카탈로그 항목도 지운다.
+- **기본값·범위 변경**: 카탈로그의 `default`·`min`·`max`·`values`도 맞춘다.
+
+**키 단위(말단 키)**: 맵은 점(`.`)으로 이어 펼친다(`economy.starting-balance`). 목록·빈 맵·글자·숫자·참거짓은 그 키 하나가 한 항목이다. 키 이름 안에 점이 있으면 `\.`로 적는다. 맵 자체(`economy`)에는 항목을 만들지 않는다.
+
+**항목 필드** (형식 원본: gn-admin `docs/api-p5-plugins-settings.md` §7.1)
+
+| 필드 | 필수 | 설명 |
+|---|---|---|
+| `key` | 필수 | 말단 키의 점 경로. config.yml과 글자 하나까지 같아야 한다. |
+| `label` | 필수 | 화면에 나오는 짧은 한국어 이름(예: "시작 잔액"). |
+| `desc` | 필수 | 한두 문장 설명. **쉬운 해요체 한국어**로, 게임을 모르는 관리자도 알게 쓴다. 숫자면 **단위를 꼭 적는다**(초·틱(1초=20틱)·G·%·블록·개·밀리초). 0이나 -1 같은 특별한 값이 있으면 그 뜻도 적는다. |
+| `type` | 필수 | `string`·`int`·`float`·`bool`·`enum`·`list`·`secret` 중 하나. config.yml 값이 `1000.0`이면 `float`, `5`면 `int`. 글자 목록은 `list`. |
+| `values` | enum일 때 필수 | 고를 수 있는 값 목록. |
+| `min`·`max`·`step` | 선택 | 숫자 범위. 음수가 말이 안 되면 `min: 0`. |
+| `max_len`·`pattern` | 선택 | 글자 길이 상한·정규식. |
+| `default` | 선택(권장) | config.yml에 적힌 기본값과 같게. 비밀값은 `""`, 묶음 값(`editable: false`)에는 적지 않는다. |
+| `restart` | 선택(기본 `true`) | 바꾼 뒤 서버 재시작이 필요하면 `true`. 이 플러그인은 대부분 시작할 때 읽으니 확실히 즉시 반영되는 게 아니면 `true`. |
+| `live_command` | 선택 | `restart: false`인 enum·bool·int·float에만. 즉시 적용 명령(`{value}`·`{on_off}` 치환). 보통 쓰지 않는다. |
+| `secret` | 선택(기본 `false`) | **토큰·비밀번호·API 키·웹훅 주소·`env:` 값은 반드시 `true`**(화면에서 값이 안 보이고 쓰기만 됨). `default`는 빈 글자(`""`)로 두고 실제 값을 적지 않는다. |
+| `risk` | 선택(기본 `low`) | `low`·`medium`·`high`. 경제 균형이 크게 흔들리거나(시작 잔액·보상 배율) 잘못 넣으면 기능이 멈추는 값은 `medium`, 연결 통로·디스코드 연결처럼 서버 운영이 끊길 수 있는 값은 `high`. |
+| `editable` | 선택(기본 `true`) | **맵·객체(맵) 목록 같은 묶음 값은 `false`**(화면에서 보기만 하고, 고칠 때는 원문 편집을 쓴다). 사람이 손대면 안 되는 값(`config-version` 등)도 `false`. |
+| `verify` | 선택(기본 `false`) | 실제 서버에서 동작을 확인 못 했으면 `true`. |
+| `note` | 선택 | 관리자용 짧은 메모(주의점 등). |
+
+**예시** — config.yml에 `mail.max-per-player: 50`과 `mail.rewards`(아이템·개수 객체의 목록, 예: `- {item: 강화석, count: 3}`)를 추가했다면:
+
+```yaml
+      - key: mail.max-per-player
+        label: "우편함 최대 개수"
+        desc: "한 플레이어 우편함에 쌓일 수 있는 일반 우편 수(개)예요. 가득 차면 새 우편은 보류돼요. 관리자 우편은 세지 않아요."
+        type: int
+        min: 1
+        max: 500
+        default: 50
+        restart: true
+        risk: low
+
+      - key: mail.rewards
+        label: "우편 보상 목록"
+        desc: "우편으로 보낼 보상 아이템과 개수 목록이에요. 여러 값이 묶여 있어 화면에서는 볼 수만 있고, 고칠 때는 원문 편집을 써요."
+        type: list
+        restart: true
+        editable: false
+```
+
+**검사**: `mvn -B test -Dtest=AdminSettingsCatalogTest -Dgn.catalog.strict=true`
+
+- 형식 오류, config.yml에 없는 카탈로그 키(이름 변경·삭제 뒤 남은 항목), 비밀 같은 키의 `secret` 누락, 묶음 값의 `editable: false` 누락은 **평소 빌드에서도 실패**한다.
+- config.yml의 말단 키 중 카탈로그에 **빠진 키**도 평소 빌드에서 실패한다(카탈로그를 다 채워서 기본으로 강제함, `-Dgn.catalog.strict=false`면 목록만 출력하고 건너뜀). config.yml을 고쳤다면 위 명령으로 **내가 추가한 키가 빠진 목록에 없는지** 확인한다.
+- 병합 요청 본문에 "설정 카탈로그도 같이 고침(키 N개)"이라고 적는다.

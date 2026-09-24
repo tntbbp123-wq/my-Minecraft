@@ -1,0 +1,5490 @@
+# 웹 관리 사이트(/_admin) "서버 설정" 화면용 설정 카탈로그 — config.yml 각 키의 한국어 이름·설명·형식.
+# 이 파일은 jar 안에 들어가고, 관리 사이트가 연결 통로(GET /v1/settings-catalog)로 받아 가요.
+# config.yml 에 키를 추가·이름 변경·삭제하면 이 파일도 같은 키로 같이 고쳐야 해요(CLAUDE.md 7절).
+# 형식: gn-admin docs/api-p5-plugins-settings.md §7.1. 검사: mvn -Dtest=AdminSettingsCatalogTest test
+version: 1
+files:
+  - id: "plugin:MyMinecraft/config.yml"
+    path: plugins/MyMinecraft/config.yml
+    format: yaml
+    kind: plugin
+    plugin: MyMinecraft
+    label: "마이마인크래프트 설정"
+    keys:
+      - key: config-version
+        label: "설정 구조 버전"
+        desc: "플러그인이 새 버전으로 올라갈 때 이 설정 파일을 자동으로 고치는 데 쓰는 번호예요. 직접 바꾸지 마세요."
+        type: int
+        min: 1
+        default: 2
+        restart: true
+        secret: false
+        risk: high
+        verify: false
+        editable: false
+        note: "잘못 바꾸면 다음 업데이트 때 설정이 엉뚱하게 옮겨질 수 있어요."
+
+      - key: economy.starting-balance
+        label: "시작 잔액"
+        desc: "새로 접속한 플레이어가 처음 갖고 시작하는 돈이에요."
+        type: "float"
+        min: 0
+        default: 1000.0
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: economy.currency-name
+        label: "화폐 단위"
+        desc: "돈 옆에 붙는 단위 글자예요(예: G)."
+        type: "string"
+        max_len: 16
+        default: "G"
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: web-bridge.enabled
+        label: "관리자 사이트 연결 사용"
+        desc: "게임 서버와 웹 관리자(gn-admin)를 잇는 통로를 켤지 정해요."
+        type: "bool"
+        default: true
+        restart: true
+        secret: false
+        risk: "high"
+        verify: false
+        note: "바꾸면 관리자 사이트 연결이 끊길 수 있어요."
+
+      - key: web-bridge.host
+        label: "관리자 사이트 연결 주소"
+        desc: "통로가 열리는 네트워크 주소예요. 보안상 127.0.0.1(이 서버 안)로만 둬야 해요."
+        type: "string"
+        max_len: 64
+        default: "127.0.0.1"
+        restart: true
+        secret: false
+        risk: "high"
+        verify: false
+        note: "바꾸면 관리자 사이트 연결이 끊길 수 있어요."
+
+      - key: web-bridge.port
+        label: "관리자 사이트 연결 포트"
+        desc: "통로가 열리는 포트 번호예요."
+        type: "int"
+        min: 1
+        max: 65535
+        default: 25590
+        restart: true
+        secret: false
+        risk: "high"
+        verify: false
+        note: "바꾸면 관리자 사이트 연결이 끊길 수 있어요."
+
+      - key: web-bridge.token
+        label: "관리자 사이트 연결 토큰"
+        desc: "웹 백엔드가 이 통로에 접속할 때 쓰는 비밀 값이에요."
+        type: "secret"
+        default: ""
+        restart: true
+        secret: true
+        risk: "high"
+        verify: false
+        note: "바꾸면 관리자 사이트 연결이 끊길 수 있어요."
+
+      - key: web-bridge.threads
+        label: "관리자 사이트 동시 처리 수"
+        desc: "관리자 사이트에서 오는 요청을 한꺼번에 몇 개까지 처리할지 정해요. 1보다 작게 적으면 1로 처리돼요."
+        type: int
+        min: 1
+        default: 2
+        restart: true
+        secret: false
+        risk: medium
+        verify: false
+
+      - key: web-bridge.max-body-bytes
+        label: "관리자 사이트 요청 최대 크기"
+        desc: "관리자 사이트가 한 번에 보낼 수 있는 요청 내용의 최대 크기(바이트)예요. 1024보다 작게 적으면 1024로 처리돼요."
+        type: int
+        min: 1024
+        default: 65536
+        restart: true
+        secret: false
+        risk: medium
+        verify: false
+
+      - key: web-bridge.sync-timeout-ms
+        label: "요청 처리 시작 제한 시간"
+        desc: "게임 서버가 이 시간(밀리초, 1000=1초) 안에 관리자 사이트 요청을 처리하기 시작하지 못하면 실행하지 않고 거절해요. 100보다 작게 적으면 100으로 처리돼요."
+        type: int
+        min: 100
+        default: 5000
+        restart: true
+        secret: false
+        risk: medium
+        verify: false
+
+      - key: web-bridge.save-timeout-ms
+        label: "월드 저장 제한 시간"
+        desc: "관리자 사이트에서 서버 저장(접속자·월드 저장)을 실행할 때 기다려 주는 최대 시간(밀리초, 1000=1초)이에요. 위 '요청 처리 시작 제한 시간'보다 짧게 적으면 그 값으로 처리돼요."
+        type: int
+        min: 100
+        default: 30000
+        restart: true
+        secret: false
+        risk: medium
+        verify: false
+
+      - key: web-bridge.idempotency-ttl-seconds
+        label: "중복 요청 방지 기억 시간"
+        desc: "관리자 사이트가 같은 요청을 다시 보내도 두 번 실행되지 않도록 결과를 기억해 두는 시간(초)이에요. 1보다 작게 적으면 1로 처리돼요."
+        type: int
+        min: 1
+        default: 600
+        restart: true
+        secret: false
+        risk: medium
+        verify: false
+
+      - key: activity-log.enabled
+        label: "활동 기록 사용"
+        desc: "접속·퇴장·채팅·명령어·사망 기록을 남길지 정해요. 거래·관리 기록은 이 값과 상관없이 항상 남아요."
+        type: "bool"
+        default: true
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: activity-log.chat
+        label: "채팅 기록"
+        desc: "플레이어 채팅 내용을 활동 기록에 남길지 정해요. '활동 기록 사용'이 꺼져 있으면 이 값과 상관없이 안 남아요."
+        type: bool
+        default: true
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: activity-log.commands
+        label: "명령어 기록"
+        desc: "플레이어가 쓴 명령어와 관리자 사이트에서 실행한 명령어를 활동 기록에 남길지 정해요. '활동 기록 사용'이 꺼져 있으면 안 남아요."
+        type: bool
+        default: true
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: activity-log.redact-commands
+        label: "기록에서 가릴 명령어"
+        desc: "여기 적은 명령어(맨 앞 단어, / 없이)는 기록에 남길 때 뒤에 붙은 내용을 ***로 가려요. 인증 코드처럼 남기면 안 되는 값이 있는 명령어를 적어요."
+        type: list
+        default: ["디스코드연동확인", "디스코드연동"]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: activity-log.queue-limit
+        label: "활동 기록 대기열 최대치"
+        desc: "한 번에 기록 대기시킬 수 있는 최대 개수예요. 넘치면 서버가 멈추지 않도록 그냥 버려요."
+        type: "int"
+        min: 1
+        default: 10000
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: activity-log.retention-days
+        label: "활동 기록 보관 기간"
+        desc: "이 기간(일)보다 오래된 활동 기록 파일은 자동으로 지워져요. 0 이하면 안 지워요."
+        type: "int"
+        min: 0
+        default: 90
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: home.max-homes
+        label: "최대 홈 개수"
+        desc: "한 플레이어가 등록할 수 있는 홈(순간이동 지점) 최대 개수예요."
+        type: "int"
+        min: 0
+        max: 100
+        default: 5
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: mail.regular-retention-days
+        label: "일반 우편 보관 기간"
+        desc: "시스템·퀘스트 우편이 자동 삭제되기까지 보관되는 기간(일)이에요."
+        type: "int"
+        min: 1
+        default: 7
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: mail.regular-max-count
+        label: "일반 우편함 최대 개수"
+        desc: "한 플레이어의 일반 우편함에 쌓일 수 있는 최대 우편 개수예요. 가득 차면 새 우편이 보류돼요."
+        type: "int"
+        min: 1
+        default: 50
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: mail.admin-retention-days
+        label: "관리자 우편 보관 기간"
+        desc: "웹에서 보낸 관리자 우편이 자동 삭제되기까지 보관되는 기간(일)이에요."
+        type: "int"
+        min: 1
+        default: 30
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: mail.admin-max-count
+        label: "관리자 우편 최대 개수"
+        desc: "관리자(웹) 우편이 한 사람 우편함에 쌓일 수 있는 최대 개수예요(받지 않은 우편 전체 기준). 0이면 제한이 없어요."
+        type: int
+        min: 0
+        default: 0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: mail.send-batch-delay-ticks
+        label: "우편 발송 대기열 간격"
+        desc: "퀘스트 보상 같은 예약 발송 우편을 처리하는 간격(틱, 20틱=1초)이에요. 웹에서 바로 보내는 우편에는 영향 없어요."
+        type: "int"
+        min: 1
+        default: 60
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: tpa.request-timeout-seconds
+        label: "TPA 요청 유효 시간"
+        desc: "순간이동 요청(TPA)이 자동으로 취소되기까지 걸리는 시간(초)이에요."
+        type: "int"
+        min: 1
+        default: 30
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: combat.tag-seconds
+        label: "전투 태그 지속 시간"
+        desc: "공격하거나 맞으면 이 시간(초) 동안 '전투 중' 상태가 돼요. 전투 중에는 대부분 명령어를 못 써요."
+        type: "int"
+        min: 0
+        default: 45
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: combat.music.enabled
+        label: "전투 음악 사용"
+        desc: "전투 중에 전투 음악을 재생할지 정해요. 리소스팩에 음원을 넣어야 실제로 소리가 나요."
+        type: "bool"
+        default: false
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: combat.music.sound
+        label: "전투 음악 소리 이름"
+        desc: "리소스팩(sounds.json)에 등록한 전투 음악의 소리 이름이에요. 리소스팩에 적은 이름과 똑같아야 소리가 나요."
+        type: string
+        max_len: 128
+        default: "myminecraft:music.combat"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: combat.music.track-length-seconds
+        label: "전투 음악 길이"
+        desc: "전투 음악 한 곡의 길이(초)예요. 전투가 이보다 길어지면 처음부터 다시 틀어서 끊기지 않게 해요."
+        type: int
+        min: 1
+        default: 142
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: combat.music.volume
+        label: "전투 음악 크기"
+        desc: "전투 음악 소리 크기예요. 1이 원래 크기이고 0에 가까울수록 작아져요. 플레이어 게임 설정의 '음악' 음량도 함께 적용돼요."
+        type: float
+        min: 0
+        max: 1
+        step: 0.05
+        default: 0.7
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: randomtp.max-radius
+        label: "랜덤 이동 최대 반경"
+        desc: "월드 스폰 중심에서 랜덤 이동이 가능한 최대 거리(블록)예요."
+        type: "int"
+        min: 1
+        default: 5000
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: randomtp.exclude-size
+        label: "랜덤 이동 제외 구역 크기"
+        desc: "스폰 중심 주변 이 크기(블록)만큼은 랜덤 이동 대상에서 빠져요."
+        type: "int"
+        min: 0
+        default: 500
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: randomtp.cooldown-seconds
+        label: "랜덤 이동 재사용 대기시간"
+        desc: "랜덤 이동을 다시 쓸 수 있을 때까지 기다려야 하는 시간(초)이에요."
+        type: "int"
+        min: 0
+        default: 30
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: randomtp.max-attempts
+        label: "랜덤 이동 위치 찾기 횟수"
+        desc: "안전하게 내릴 수 있는 곳을 찾을 때 최대 몇 번까지 다시 뽑아볼지 정해요. 이 안에 못 찾으면 이동이 취소돼요."
+        type: int
+        min: 1
+        default: 30
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: currency.coins
+        label: "동전 종류 목록"
+        desc: "주식 거래소에서 포인트와 바꿀 수 있는 실물 동전(1G·10G·100G·1000G·10000G 동전)의 종류·금액·이름·모양 목록이에요. 여러 값이 묶여 있어서 여기서는 볼 수만 있어요."
+        type: list
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+        editable: false
+
+      - key: stock.update-interval-seconds
+        label: "주식 가격 갱신 주기"
+        desc: "주식 가격이 새로 계산되는 주기(초)예요."
+        type: "int"
+        min: 1
+        default: 3600
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: stock.list
+        label: "처음 옮겨 담을 기본 종목"
+        desc: "예전 방식의 기본 주식 종목 목록이에요. 서버를 켤 때 한 번만 주식 데이터로 옮겨지고, 그 뒤로는 게임 안 명령어나 관리자 사이트의 주식 메뉴에서 관리해요. 여러 값이 묶여 있어서 여기서는 볼 수만 있어요."
+        type: list
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+        editable: false
+
+      - key: news.reveal-delay-seconds
+        label: "뉴스 공개까지 시간"
+        desc: "뉴스를 작성한 뒤 거래소 화면에 보이기 시작하기까지 걸리는 시간(초)이에요."
+        type: "int"
+        min: 0
+        default: 3600
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: news.apply-delay-seconds
+        label: "뉴스 가격 반영까지 시간"
+        desc: "뉴스를 작성한 뒤 실제로 주가에 반영되기까지 걸리는 시간(초)이에요."
+        type: "int"
+        min: 0
+        default: 7200
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: news.ai-min-magnitude-percent
+        label: "AI 뉴스 최소 변동폭"
+        desc: "'AI:주제'로 뉴스를 쓸 때 AI가 정하는 주가 변동폭(%)의 최솟값이에요. AI가 이보다 작게 정하면 이 값으로 맞춰요."
+        type: float
+        min: 0
+        max: 100
+        default: 1.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: news.ai-max-magnitude-percent
+        label: "AI 뉴스 최대 변동폭"
+        desc: "'AI:주제'로 뉴스를 쓸 때 AI가 정하는 주가 변동폭(%)의 최댓값이에요. AI가 이보다 크게 정하면 이 값으로 맞춰요."
+        type: float
+        min: 0
+        max: 100
+        default: 10.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: ai.enabled
+        label: "AI 뉴스 생성 사용"
+        desc: "'AI:주제' 형식으로 뉴스를 작성하면 AI가 기사 본문을 자동으로 써주는 기능을 켜요."
+        type: "bool"
+        default: false
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: ai.provider
+        label: "AI 서비스 종류"
+        desc: "어떤 AI 서비스를 쓸지 적는 칸이에요. 지금 플러그인은 이 값을 읽지 않고 항상 Gemini를 써요."
+        type: string
+        max_len: 32
+        default: "gemini"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: ai.api-key
+        label: "AI API 키"
+        desc: "뉴스 자동 작성에 쓰는 AI 서비스 열쇠(키)예요."
+        type: "secret"
+        default: ""
+        restart: true
+        secret: true
+        risk: "medium"
+        verify: false
+        note: "요금이 나올 수 있는 키예요. 유출되면 바로 새로 발급받으세요."
+
+      - key: ai.model
+        label: "AI 모델 이름"
+        desc: "뉴스 자동 작성에 쓸 AI 모델 이름이에요."
+        type: "string"
+        max_len: 64
+        default: "gemini-2.5-flash"
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: enhance.material
+        label: "강화석 아이콘 재질"
+        desc: "강화석 아이템의 기본 모양이에요. 마인크래프트 아이템 이름(영문, 예: AMETHYST_SHARD)으로 적어요. 잘못 적으면 기본값(AMETHYST_SHARD)으로 보여요."
+        type: string
+        max_len: 64
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "AMETHYST_SHARD"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: enhance.model-data
+        label: "강화석 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 0이면 번호를 붙이지 않고, 리소스팩이 없으면 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500001
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: enhance.progress-model-data-base
+        label: "강화 진행 표시 모델 시작 번호"
+        desc: "강화 화면의 진행 표시(0→+1 ~ 9→+10) 그림에 쓰는 번호의 시작값이에요. 이 번호부터 10개를 차례로 써요. 리소스팩이 없으면 기본 화살표로 보여요."
+        type: int
+        min: 0
+        default: 500040
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: enhance.scrolls
+        label: "확률 강화 두루마리 등급 목록"
+        desc: "일반·레어·에픽·레전더리 두루마리의 이름·모양·추가 성공 확률(%) 목록이에요. 여러 값이 묶여 있어서 여기서는 볼 수만 있어요."
+        type: list
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+        editable: false
+
+      - key: enhance.base-success-percent
+        label: "강화 기본 성공 확률"
+        desc: "'확정 성공 강화 단계'까지 적용되는 성공 확률(%)이에요. 그 뒤 단계 확률도 이 값에서 시작해 줄어들어요."
+        type: float
+        min: 0
+        max: 100
+        default: 100.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: enhance.guaranteed-level
+        label: "확정 성공 강화 단계"
+        desc: "현재 강화 단계가 이 값 이하일 때는 기본 성공 확률이 그대로 적용돼요(기본 4 → 0강~4강에서 시도할 때 100%)."
+        type: int
+        min: 0
+        default: 4
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: enhance.decay-multiplier
+        label: "강화 확률 감소 배율"
+        desc: "확정 성공 단계를 넘으면 한 단계 오를 때마다 직전 확률에 이 값을 곱해요(0.8이면 80%씩 줄어요). 1에 가까울수록 덜 줄어요."
+        type: float
+        min: 0
+        max: 1
+        step: 0.01
+        default: 0.8
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: enhance.min-success-percent
+        label: "강화 최저 성공 확률"
+        desc: "계산한 성공 확률이 이 값(%)보다 낮아지면 이 값으로 고정해요. 두루마리 추가 확률은 이 위에 더해져요."
+        type: float
+        min: 0
+        max: 100
+        default: 0.001
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: enhance.max-level
+        label: "기본 강화 한계"
+        desc: "초월하지 않은 장비를 최대 몇 강까지 강화할 수 있는지 정해요."
+        type: int
+        min: 0
+        default: 20
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: enhance.transcended-max-level
+        label: "초월 장비 강화 한계"
+        desc: "<초월의 제단>에서 초월한 장비를 최대 몇 강까지 강화할 수 있는지 정해요."
+        type: int
+        min: 0
+        default: 30
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: enhance.attack-damage-per-level
+        label: "강화 1단계당 공격력"
+        desc: "무기(검·도끼·삼지창·활·철퇴 등)를 1강 올릴 때마다 더해지는 공격력이에요."
+        type: float
+        min: 0
+        default: 0.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: enhance.attack-speed-per-level
+        label: "강화 1단계당 공격 속도"
+        desc: "무기를 1강 올릴 때마다 더해지는 공격 속도 수치예요."
+        type: float
+        min: 0
+        default: 0.02
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: starforce.material
+        label: "별가루 아이콘 재질"
+        desc: "별가루 아이템의 기본 모양이에요. 마인크래프트 아이템 이름(영문, 예: GLOWSTONE_DUST)으로 적어요. 잘못 적으면 기본값(GLOWSTONE_DUST)으로 보여요."
+        type: string
+        max_len: 64
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "GLOWSTONE_DUST"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: starforce.model-data
+        label: "별가루 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 0이면 번호를 붙이지 않고, 리소스팩이 없으면 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500003
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: starforce.stardust-per-star
+        label: "별 1개당 별가루 소모량"
+        desc: "스타포스로 무기에 별(성) 1개를 붙일 때마다 쓰는 별가루 개수예요."
+        type: int
+        min: 1
+        default: 1
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: starforce.max-stars
+        label: "스타포스 최대 별 개수"
+        desc: "무기 하나에 붙일 수 있는 별(성)의 최대 개수예요."
+        type: int
+        min: 0
+        default: 10
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: starforce.defense-penetration-per-star
+        label: "별 1개당 방어관통"
+        desc: "별(성) 1개마다 오르는 방어관통 수치(%)예요. 최대 별 개수를 곱한 값이 상한이에요."
+        type: float
+        min: 0
+        max: 100
+        default: 3.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: transcend-altar.material
+        label: "초월의 제단 표시 재질"
+        desc: "세계에 세운 <초월의 제단>이 보여주는 아이템 모양이에요. 마인크래프트 아이템 이름(영문, 예: END_CRYSTAL)으로 적어요. 잘못 적으면 기본값(END_CRYSTAL)으로 보여요."
+        type: string
+        max_len: 64
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "END_CRYSTAL"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: transcend-altar.model-data
+        label: "초월의 제단 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 0이면 번호를 붙이지 않고, 리소스팩이 없으면 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500030
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: transcend-altar.scale
+        label: "초월의 제단 표시 크기"
+        desc: "세계에 세운 <초월의 제단> 모습의 크기 배율이에요(1이면 원래 크기). 바꾼 값은 새로 설치하는 제단부터 적용돼요."
+        type: float
+        min: 0.1
+        default: 1.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.loot-all-scroll.material
+        label: "일괄약탈주문서 아이콘 재질"
+        desc: "일괄약탈주문서 아이템의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문, 예: PAPER). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "PAPER"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.loot-all-scroll.model-data
+        label: "일괄약탈주문서 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500050
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.trap-kit.material
+        label: "함정설치키트 아이콘 재질"
+        desc: "함정설치키트 아이템의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문, 예: TRIPWIRE_HOOK). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "TRIPWIRE_HOOK"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.trap-kit.model-data
+        label: "함정설치키트 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500051
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.trap-kit.mode
+        label: "함정설치키트 발동 방식"
+        desc: "설치한 함정이 발동했을 때 어떤 일이 일어나는지 정해요. DEBUFF면 상자를 연 사람에게 강한 독+위더 효과가 걸리고, TNT면 그 자리에서 강한 폭발이 즉시 일어나요."
+        type: enum
+        values: ["DEBUFF", "TNT"]
+        default: "DEBUFF"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.trap-kit.poison-duration-seconds
+        label: "함정설치키트 독 효과 지속시간"
+        desc: "발동 방식이 DEBUFF일 때, 함정을 연 사람에게 걸리는 독 효과가 지속되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 10
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.trap-kit.wither-duration-seconds
+        label: "함정설치키트 위더 효과 지속시간"
+        desc: "발동 방식이 DEBUFF일 때, 함정을 연 사람에게 걸리는 위더 효과가 지속되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 10
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.molotov.material
+        label: "화염병 아이콘 재질"
+        desc: "화염병 아이템의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문, 예: SPLASH_POTION). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "SPLASH_POTION"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.molotov.model-data
+        label: "화염병 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500052
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.molotov.radius
+        label: "화염병 발화 범위"
+        desc: "화염병이 착탄한 지점 주변에서 생물에게 불이 붙는 범위(블록)예요."
+        type: float
+        min: 0
+        default: 3.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.molotov.entity-fire-ticks
+        label: "화염병 화상 지속시간"
+        desc: "화염병 범위 안의 생물에게 붙는 불이 지속되는 시간(틱, 20틱=1초)이에요."
+        type: int
+        min: 0
+        default: 100
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.smoke-bomb.material
+        label: "연막탄 아이콘 재질"
+        desc: "연막탄 아이템의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문, 예: SPLASH_POTION). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "SPLASH_POTION"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.smoke-bomb.model-data
+        label: "연막탄 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500053
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.smoke-bomb.radius
+        label: "연막탄 연막 범위"
+        desc: "연막탄이 착탄한 지점에서 실명 효과가 적용되는 범위(블록)예요."
+        type: float
+        min: 0
+        default: 4.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.smoke-bomb.duration-ticks
+        label: "연막탄 지속시간"
+        desc: "연막(실명 효과)이 남아 있는 시간(틱, 20틱=1초)이에요."
+        type: int
+        min: 0
+        default: 100
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.density-compass.material
+        label: "밀도나침반 아이콘 재질"
+        desc: "밀도나침반 아이템의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문, 예: COMPASS). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "COMPASS"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.density-compass.model-data
+        label: "밀도나침반 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500054
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.density-compass.radius
+        label: "밀도나침반 탐지 범위"
+        desc: "밀도나침반을 쓸 때 주변에서 상자·화로류를 찾는 범위(블록)예요. 로드되어 있는 청크 안만 검사해요."
+        type: int
+        min: 0
+        default: 64
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.density-compass.cooldown-seconds
+        label: "밀도나침반 재사용 대기시간"
+        desc: "밀도나침반을 다시 쓸 수 있을 때까지 기다려야 하는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 30
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.footprint-tracker.material
+        label: "발자국추적기 아이콘 재질"
+        desc: "발자국추적기 아이템의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문, 예: ARROW). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "ARROW"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.footprint-tracker.model-data
+        label: "발자국추적기 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500055
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.footprint-tracker.duration-ticks
+        label: "발자국추적기 흔적 지속시간"
+        desc: "발자국추적기에 맞은 플레이어가 지나간 자리에 흔적 파티클이 남아 있는 시간(틱, 20틱=1초)이에요."
+        type: int
+        min: 0
+        default: 3600
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.blood-compass.material
+        label: "혈흔나침반 아이콘 재질"
+        desc: "혈흔나침반 아이템의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문, 예: COMPASS). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "COMPASS"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.blood-compass.model-data
+        label: "혈흔나침반 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500056
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.blood-compass.jitter-radius
+        label: "혈흔나침반 위치 오차 범위"
+        desc: "혈흔나침반이 가리키는 방향이 상대의 실제 위치에서 무작위로 어긋나는 범위(블록)예요. '대략적인' 위치만 알려주기 위한 값이에요."
+        type: float
+        min: 0
+        default: 20.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.silence-potion.material
+        label: "소음차단포션 아이콘 재질"
+        desc: "소음차단포션 아이템의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문, 예: POTION). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "POTION"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.silence-potion.model-data
+        label: "소음차단포션 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500057
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: blackmarket.silence-potion.duration-ticks
+        label: "소음차단포션 효과 지속시간"
+        desc: "마신 뒤 블록을 부수거나 상자를 열 때 나는 소리·모습이 다른 사람에게 들키지 않는 시간(틱, 20틱=1초)이에요."
+        type: int
+        min: 0
+        default: 600
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: discord.bot-token
+        label: "디스코드 봇 토큰"
+        desc: "디스코드 침입 알림 봇을 로그인시키는 열쇠(토큰)예요. 비워두면 디스코드 알림 기능 전체가 꺼져요."
+        type: "secret"
+        default: ""
+        restart: true
+        secret: true
+        risk: "medium"
+        verify: false
+
+      - key: discord.verification-expiry-seconds
+        label: "디스코드 인증 코드 유효 시간"
+        desc: "/디스코드연동 으로 받은 인증 코드를 쓸 수 있는 시간(초)이에요. 지나면 다시 받아야 해요."
+        type: int
+        min: 1
+        default: 300
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: discord.alert-radius
+        label: "디스코드 알림 감지 반경"
+        desc: "등록한 홈에서 이 거리(블록) 안의 블록 파괴·상자 열기를 감지해서 알려줘요."
+        type: "float"
+        min: 0
+        default: 30.0
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: discord.alert-cooldown-seconds
+        label: "디스코드 알림 간격"
+        desc: "같은 플레이어에게 연속으로 알림을 보내지 않는 최소 간격(초)이에요."
+        type: "int"
+        min: 0
+        default: 60
+        restart: true
+        secret: false
+        risk: "low"
+        verify: false
+
+      - key: combat-stance.toggle-cooldown-millis
+        label: "전투모드 전환 최소 간격"
+        desc: "전투모드(웅크리기+L)를 켜고 끄는 사이의 최소 간격(밀리초, 1000=1초)이에요. 한 번 누른 게 두 번 처리되는 걸 막는 안전장치예요."
+        type: int
+        min: 0
+        default: 500
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: combat-stance.skills
+        label: "전투모드 스킬 아이템 목록"
+        desc: "전투모드에 들어가면 1~4번 칸에 들어가는 스킬 아이템의 이름·모양 목록이에요. 여러 값이 묶여 있어서 여기서는 볼 수만 있어요."
+        type: list
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+        editable: false
+
+      - key: laevateinn.model-data
+        label: "레바테인 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요. 0으로 두면 번호를 아예 붙이지 않아요."
+        type: int
+        min: 0
+        default: 500020
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.bettermodel-name
+        label: "레바테인 3D 모델 이름"
+        desc: "BetterModel 플러그인이 설치되어 있을 때, 레바테인을 든 플레이어에게 덧씌우는 3D 검 모델의 이름이에요. BetterModel이 없으면 이 값은 쓰이지 않아요."
+        type: string
+        max_len: 256
+        default: "shadowflame"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+        note: "BetterModel 쪽 리소스팩의 모델 이름과 정확히 같아야 해요."
+
+      - key: laevateinn.attack-damage
+        label: "레바테인 공격력"
+        desc: "레바테인의 기본 공격력이에요. 무기를 들면 이 값이 공격력 능력치로 그대로 적용돼요."
+        type: float
+        min: 0
+        default: 12.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.heal-reduction-percent
+        label: "레바테인 화상 중 회복량 감소"
+        desc: "지옥의 화상(레바테인 관련 화상 전부)에 걸린 대상이 회복하는 양을 이 비율(%)만큼 줄여요. 50이면 회복량이 절반이 돼요."
+        type: float
+        min: 0
+        max: 100
+        default: 50.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.water-extinguish-ticks
+        label: "레바테인 화상 물로 끄는 시간"
+        desc: "물에 젖은 시간이 이만큼(틱, 20틱=1초) 쌓이면 지옥의 화상이 꺼져요. 라그나로크로 붙는 영원불멸의 화염에는 적용되지 않아요(물로 안 꺼짐)."
+        type: int
+        min: 0
+        default: 60
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.karma.duration-seconds
+        label: "레바테인 업화 지속시간"
+        desc: "패시브 업화(붉은 나뭇가지의 지옥화) 한 겹이 유지되는 시간(초)이에요. 때릴 때마다 이 시간으로 다시 갱신돼요."
+        type: int
+        min: 0
+        default: 6
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.karma.damage-per-second-per-stack
+        label: "레바테인 업화 중첩당 초당 피해"
+        desc: "업화가 한 겹 쌓일 때마다 늘어나는 초당 방어무시 피해예요. 쌓인 중첩 수만큼 곱해져요."
+        type: float
+        min: 0
+        default: 1.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.karma.max-stacks
+        label: "레바테인 업화 최대 중첩"
+        desc: "업화가 쌓일 수 있는 최대 겹수예요. 다 차면 더는 안 쌓이고 지속시간만 갱신돼요."
+        type: int
+        min: 0
+        default: 5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ability.cooldown-seconds
+        label: "레바테인 수르트의 불길 재사용 대기시간"
+        desc: "[F] 수르트의 불길을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 120
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ability.range
+        label: "레바테인 수르트의 불길 사거리"
+        desc: "수르트의 불길이 앞으로 닿는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 8.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ability.cone-angle-degrees
+        label: "레바테인 수르트의 불길 범위 각도"
+        desc: "수르트의 불길이 앞으로 퍼지는 부채꼴의 각도(도)예요. 클수록 옆으로 더 넓게 맞아요."
+        type: float
+        min: 0
+        max: 360
+        default: 80.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ability.damage
+        label: "레바테인 수르트의 불길 피해"
+        desc: "수르트의 불길에 맞은 대상이 입는 피해량이에요."
+        type: float
+        min: 0
+        default: 20.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ability.launch-power
+        label: "레바테인 수르트의 불길 띄우는 힘"
+        desc: "수르트의 불길에 맞은 대상을 위로 띄우는 세기예요. 숫자가 클수록 더 높이 떠요."
+        type: float
+        min: 0
+        default: 1.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ability.burn-duration-seconds
+        label: "레바테인 수르트의 불길 화상 지속시간"
+        desc: "수르트의 불길에 맞았을 때 붙는 지옥의 화상이 유지되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 10
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ability.burn-damage-per-second
+        label: "레바테인 수르트의 불길 화상 초당 피해"
+        desc: "수르트의 불길로 붙은 화상이 초당 입히는 방어무시 피해예요."
+        type: float
+        min: 0
+        default: 4.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ability.magma-duration-seconds
+        label: "레바테인 수르트의 불길 마그마 유지시간"
+        desc: "수르트의 불길이 태운 바닥이 마그마 블록으로 남아 있는 시간(초)이에요. 지나면 원래 블록으로 되돌아가요."
+        type: int
+        min: 0
+        default: 8
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ability.heal-block-seconds
+        label: "레바테인 수르트의 불길 치유 차단시간"
+        desc: "수르트의 불길에 맞은 대상이 회복 효과를 아예 못 받는 시간(초)이에요. 위의 화상 회복량 감소와는 별개로, 이 시간 동안은 완전히 막혀요."
+        type: int
+        min: 0
+        default: 5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ragnarok.cooldown-seconds
+        label: "레바테인 라그나로크 재사용 대기시간"
+        desc: "[웅크리기+우클릭] 라그나로크를 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 120
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ragnarok.cast-ticks
+        label: "레바테인 라그나로크 시전 시간"
+        desc: "라그나로크를 쓴 뒤 실제로 터지기까지 걸리는 준비 시간(틱, 20틱=1초)이에요. 이 동안 시전자는 모든 상태 이상에 면역이에요."
+        type: int
+        min: 0
+        default: 20
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ragnarok.range
+        label: "레바테인 라그나로크 사거리"
+        desc: "라그나로크가 앞으로 닿는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 10.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ragnarok.cone-angle-degrees
+        label: "레바테인 라그나로크 범위 각도"
+        desc: "라그나로크가 앞으로 퍼지는 부채꼴의 각도(도)예요."
+        type: float
+        min: 0
+        max: 360
+        default: 150.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ragnarok.damage
+        label: "레바테인 라그나로크 피해"
+        desc: "라그나로크가 터질 때 대상에게 입히는 방어무시 고정 피해예요."
+        type: float
+        min: 0
+        default: 18.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ragnarok.burn-duration-seconds
+        label: "레바테인 라그나로크 화염 지속시간"
+        desc: "라그나로크로 붙는 영원불멸의 화염이 유지되는 시간(초)이에요. 물로도 꺼지지 않아요."
+        type: int
+        min: 0
+        default: 12
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: laevateinn.ragnarok.burn-damage-per-second
+        label: "레바테인 라그나로크 화염 초당 피해"
+        desc: "영원불멸의 화염이 초당 입히는 방어무시 피해예요."
+        type: float
+        min: 0
+        default: 5.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.model-data
+        label: "사인참사검 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요. 0이면 번호를 붙이지 않아요."
+        type: int
+        min: 0
+        default: 500023
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.attack-damage
+        label: "사인참사검 공격력"
+        desc: "사인참사검의 기본 공격력이에요."
+        type: float
+        min: 0
+        default: 13.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.aura.radius
+        label: "사인참사검 사기침노 범위"
+        desc: "패시브 사기침노가 적용되는 반경(블록)이에요. 이 범위 안의 적은 계속 이동속도·채굴 피로 효과를 받아요."
+        type: float
+        min: 0
+        default: 7.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.aura.slow-amplifier
+        label: "사인참사검 사기침노 둔화 단계"
+        desc: "사기침노로 거는 이동속도 감소 효과의 단계예요(0이면 1단계, 커질수록 더 느려져요)."
+        type: int
+        min: 0
+        default: 0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.aura.mining-fatigue-amplifier
+        label: "사인참사검 사기침노 채굴피로 단계"
+        desc: "사기침노로 거는 채굴 피로 효과의 단계예요(0이면 1단계)."
+        type: int
+        min: 0
+        default: 0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.slash.cooldown-seconds
+        label: "사인참사검 인시의 참격 재사용 대기시간"
+        desc: "[F] 인시의 참격을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 18
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.slash.range
+        label: "사인참사검 인시의 참격 사거리"
+        desc: "인시의 참격이 앞으로 닿는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 6.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.slash.cone-angle-degrees
+        label: "사인참사검 인시의 참격 범위 각도"
+        desc: "인시의 참격이 앞으로 퍼지는 부채꼴의 각도(도)예요."
+        type: float
+        min: 0
+        max: 360
+        default: 90.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.slash.damage
+        label: "사인참사검 인시의 참격 피해"
+        desc: "인시의 참격에 맞은 대상이 입는 피해량이에요."
+        type: float
+        min: 0
+        default: 14.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.slash.curse-duration-seconds
+        label: "사인참사검 벽사의 저주 지속시간"
+        desc: "인시의 참격에 맞았을 때 걸리는 벽사의 저주(방어력·회복량 감소)가 유지되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 8
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.slash.curse-defense-reduce-percent
+        label: "사인참사검 벽사의 저주 방어력 감소"
+        desc: "벽사의 저주에 걸린 대상의 방어력을 이 비율(%)만큼 깎아요."
+        type: float
+        min: 0
+        max: 100
+        default: 50.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.slash.curse-heal-reduce-percent
+        label: "사인참사검 벽사의 저주 회복량 감소"
+        desc: "벽사의 저주에 걸린 대상이 회복하는 양을 이 비율(%)만큼 줄여요."
+        type: float
+        min: 0
+        max: 100
+        default: 50.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.ultimate.cooldown-seconds
+        label: "사인참사검 칠성강림 재사용 대기시간"
+        desc: "[웅크리기+우클릭] 칠성강림을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 90
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.ultimate.strikes
+        label: "사인참사검 칠성강림 타격 횟수"
+        desc: "칠성강림이 연속으로 내리치는 횟수예요(기본 7연속)."
+        type: int
+        min: 0
+        default: 7
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.ultimate.strike-interval-ticks
+        label: "사인참사검 칠성강림 타격 간격"
+        desc: "칠성강림의 각 타격 사이 간격(틱, 20틱=1초)이에요."
+        type: int
+        min: 0
+        default: 8
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.ultimate.range
+        label: "사인참사검 칠성강림 사거리"
+        desc: "칠성강림 각 타격이 앞으로 닿는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 7.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.ultimate.cone-angle-degrees
+        label: "사인참사검 칠성강림 범위 각도"
+        desc: "칠성강림 각 타격이 앞으로 퍼지는 부채꼴의 각도(도)예요."
+        type: float
+        min: 0
+        max: 360
+        default: 70.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.ultimate.damage-per-strike
+        label: "사인참사검 칠성강림 타격당 피해"
+        desc: "칠성강림의 각 타격이 입히는 피해예요(마지막 타격 제외)."
+        type: float
+        min: 0
+        default: 6.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.ultimate.final-fixed-damage
+        label: "사인참사검 칠성강림 마지막 고정 피해"
+        desc: "칠성강림의 마지막 타격이 일반 피해에 더해 추가로 입히는 방어무시 고정 피해예요."
+        type: float
+        min: 0
+        default: 14.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.ultimate.final-silence-seconds
+        label: "사인참사검 칠성강림 침묵 시간"
+        desc: "칠성강림 마지막 타격에 맞으면 걸리는 침묵(스킬 봉인) 시간(초)이에요."
+        type: int
+        min: 0
+        default: 4
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: sainchamsagum.ultimate.final-stun-seconds
+        label: "사인참사검 칠성강림 제압 시간"
+        desc: "칠성강림 마지막 타격에 맞으면 걸리는 제압(행동 불가) 시간(초)이에요."
+        type: int
+        min: 0
+        default: 2
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.model-data
+        label: "발뭉 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요. 0이면 번호를 붙이지 않아요."
+        type: int
+        min: 0
+        default: 500024
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.attack-damage
+        label: "발뭉 공격력"
+        desc: "발뭉의 기본 공격력이에요."
+        type: float
+        min: 0
+        default: 14.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.pride.base-penetration-percent
+        label: "발뭉 용살의 긍지 기본 방어관통"
+        desc: "용살의 긍지 패시브가 기본으로 뚫는 방어 관통 비율(%)이에요. 상대 방어력이 없어도 항상 이만큼은 적용돼요."
+        type: float
+        min: 0
+        default: 10.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.pride.penetration-per-armor-point
+        label: "발뭉 용살의 긍지 방어력당 추가 관통"
+        desc: "상대 방어력 1당 추가로 뚫는 방어 관통 비율(%)이에요. 상대가 갑옷을 많이 입을수록 더 잘 뚫려요."
+        type: float
+        min: 0
+        default: 3.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.pride.max-penetration-percent
+        label: "발뭉 용살의 긍지 최대 방어관통"
+        desc: "기본 관통과 방어력 비례 관통을 더해도 실제로는 이 비율(%)을 넘지 않아요."
+        type: float
+        min: 0
+        max: 100
+        default: 70.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.pride.armor-durability-damage
+        label: "발뭉 용살의 긍지 갑옷 내구도 마모"
+        desc: "때릴 때마다 상대 갑옷 각 부위에 추가로 주는 내구도 피해예요. 0 이하로 두면 마모시키지 않아요."
+        type: int
+        min: 0
+        default: 3
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.gram.cooldown-seconds
+        label: "발뭉 그람의 참격 재사용 대기시간"
+        desc: "[F] 그람의 참격을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 20
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.gram.range
+        label: "발뭉 그람의 참격 사거리"
+        desc: "그람의 참격 검기가 앞으로 뻗어나가는 직선 거리(블록)예요."
+        type: float
+        min: 0
+        default: 14.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.gram.half-width
+        label: "발뭉 그람의 참격 판정 폭"
+        desc: "그람의 참격 직선 판정의 절반 폭(블록)이에요. 클수록 살짝 빗나가도 맞아요."
+        type: float
+        min: 0
+        default: 1.2
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.gram.damage
+        label: "발뭉 그람의 참격 피해"
+        desc: "그람의 참격에 맞은 대상이 입는 피해량이에요."
+        type: float
+        min: 0
+        default: 15.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.gram.curse-duration-seconds
+        label: "발뭉 파프니르의 저주 지속시간"
+        desc: "그람의 참격에 맞았을 때 걸리는 파프니르의 저주(이동속도 급감+치유 차단)가 유지되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 6
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.gram.curse-slow-amplifier
+        label: "발뭉 파프니르의 저주 둔화 단계"
+        desc: "파프니르의 저주로 거는 이동속도 감소 효과의 단계예요(0이면 1단계, 클수록 더 느려져요)."
+        type: int
+        min: 0
+        default: 2
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.doom.cooldown-seconds
+        label: "발뭉 발뭉의 종말 재사용 대기시간"
+        desc: "[웅크리기+우클릭] 발뭉의 종말을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 100
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.doom.cast-ticks
+        label: "발뭉 발뭉의 종말 시전 시간"
+        desc: "발뭉의 종말을 쓴 뒤 실제로 터지기까지 기운을 모으는 시간(틱, 20틱=1초)이에요. 이 동안 시전자는 모든 상태 이상에 면역이에요."
+        type: int
+        min: 0
+        default: 20
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.doom.range
+        label: "발뭉 발뭉의 종말 사거리"
+        desc: "발뭉의 종말이 앞으로 닿는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 9.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.doom.cone-angle-degrees
+        label: "발뭉 발뭉의 종말 범위 각도"
+        desc: "발뭉의 종말이 앞으로 퍼지는 부채꼴의 각도(도)예요."
+        type: float
+        min: 0
+        max: 360
+        default: 140.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.doom.damage
+        label: "발뭉 발뭉의 종말 피해"
+        desc: "발뭉의 종말 폭발에 맞은 대상이 입는 피해량이에요."
+        type: float
+        min: 0
+        default: 12.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.doom.fixed-damage
+        label: "발뭉 발뭉의 종말 고정 피해"
+        desc: "발뭉의 종말이 폭발 피해에 더해 따로 넣는 방어무시 고정 피해예요."
+        type: float
+        min: 0
+        default: 10.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: balmung.doom.stun-seconds
+        label: "발뭉 발뭉의 종말 제압 시간"
+        desc: "발뭉의 종말에 맞으면 걸리는 제압(행동 불가) 시간(초)이에요."
+        type: int
+        min: 0
+        default: 2
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: jaha-shingeom.model-data
+        label: "자하신검 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요. 0이면 번호를 붙이지 않아요."
+        type: int
+        min: 0
+        default: 500025
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: jaha-shingeom.attack-damage
+        label: "자하신검 공격력"
+        desc: "자하신검의 기본 공격력이에요."
+        type: float
+        min: 0
+        default: 12.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: jaha-shingeom.passive.movement-speed-percent
+        label: "자하신검 자하의 숨결 이동속도"
+        desc: "패시브 자하의 숨결로 늘어나는 이동속도 증가율(%)이에요. 무기를 손에 든 동안에만 적용돼요."
+        type: float
+        min: 0
+        default: 12.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: jaha-shingeom.passive.second-hit-multiplier
+        label: "자하신검 자하의 숨결 두 번째 타격 배율"
+        desc: "평타 한 번이 두 번 타격으로 판정될 때, 두 번째 타격 피해가 첫 타격 피해의 몇 배인지예요(1.0이면 100%, 즉 첫 타격과 같은 세기). 0으로 두면 두 번째 타격이 아예 안 나가요."
+        type: float
+        min: 0
+        default: 1.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: jaha-shingeom.passive.knockback-multiplier
+        label: "자하신검 자하의 숨결 넉백 배율"
+        desc: "평타로 상대를 밀어내는 넉백 세기의 배율이에요. 1.0이 바닐라와 같은 세기이고, 클수록 더 세게 밀려나요(1.0 이하면 추가 넉백이 없어요)."
+        type: float
+        min: 0
+        default: 1.25
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: jaha-shingeom.plum-rain.cooldown-seconds
+        label: "자하신검 낙매성우 재사용 대기시간"
+        desc: "[F 또는 웅크리기+우클릭] 낙매성우를 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 60
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: jaha-shingeom.plum-rain.window-seconds
+        label: "자하신검 낙매성우 준비 시간"
+        desc: "낙매성우를 시전한 뒤, 이 시간(초) 안에 적을 때려야 연타가 터져요. 넘기면 준비 상태가 풀려요."
+        type: int
+        min: 0
+        default: 3
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: jaha-shingeom.plum-rain.total-hits
+        label: "자하신검 낙매성우 총 타격 횟수"
+        desc: "낙매성우가 터졌을 때 들어가는 전체 타격 횟수예요(맨 처음 적중한 타격 포함)."
+        type: int
+        min: 0
+        default: 7
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: jaha-shingeom.plum-rain.extra-hit-multiplier
+        label: "자하신검 낙매성우 추가타 배율"
+        desc: "낙매성우에서 첫 타격을 뺀 나머지 추가 타격 하나하나가, 원래 평타 피해의 몇 배인지예요."
+        type: float
+        min: 0
+        default: 0.6
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: titan.model-data
+        label: "타이탄 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요. 0이면 번호를 붙이지 않아요."
+        type: int
+        min: 0
+        default: 0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: titan.attack-damage
+        label: "타이탄 공격력"
+        desc: "타이탄의 기본 공격력이에요."
+        type: float
+        min: 0
+        default: 17.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: titan.attack-speed
+        label: "타이탄 공격속도"
+        desc: "타이탄의 기본 공격속도 능력치예요. 숫자가 클수록 더 빨리 때려요."
+        type: float
+        min: 0
+        default: 0.7
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: titan.crit-damage
+        label: "타이탄 치명타 고정 피해"
+        desc: "타이탄으로 치명타가 터졌을 때 실제로 들어가는 피해량이에요. 바닐라 치명타(1.5배) 대신 이 값으로 고정돼요."
+        type: float
+        min: 0
+        default: 25.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: titan.passive.armor-ignore-percent
+        label: "타이탄 갑옷 분쇄 방어무시"
+        desc: "패시브 갑옷 분쇄가 상대 방어력과 방패 막기를 무시하는 비율(%)이에요."
+        type: float
+        min: 0
+        max: 100
+        default: 29.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: titan.passive.slow-seconds
+        label: "타이탄 갑옷 분쇄 둔화 지속시간"
+        desc: "타이탄에 맞았을 때 걸리는 이동속도 감소 효과가 유지되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 3
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: titan.passive.slow-percent
+        label: "타이탄 갑옷 분쇄 둔화 비율"
+        desc: "타이탄에 맞았을 때 이동속도가 줄어드는 비율(%)이에요. 바닐라 둔화는 단계당 15%씩 깎이는 식이라, 설정한 비율에 가장 가까운 단계로 자동 변환돼서 적용돼요(정확히 그 %로 맞아떨어지지 않을 수 있어요)."
+        type: float
+        min: 0
+        max: 100
+        default: 40.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+        note: "15% 단위로만 실제 적용되니, 예를 들어 40을 넣으면 실제로는 45%(3단계)로 반올림돼요."
+
+      - key: titan.quake.cooldown-seconds
+        label: "타이탄 지진타 재사용 대기시간"
+        desc: "[F] 지진타를 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 16
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: titan.quake.radius
+        label: "타이탄 지진타 범위"
+        desc: "지진타가 내리꽂힐 때 피해를 주는 반경(블록)이에요."
+        type: float
+        min: 0
+        default: 5.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: titan.quake.damage
+        label: "타이탄 지진타 피해"
+        desc: "지진타에 맞은 대상이 입는 피해량이에요."
+        type: float
+        min: 0
+        default: 12.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: titan.crash.cooldown-seconds
+        label: "타이탄 타이탄 크래시 재사용 대기시간"
+        desc: "[웅크리기+F] 타이탄 크래시를 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 20
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: titan.crash.radius
+        label: "타이탄 타이탄 크래시 범위"
+        desc: "타이탄 크래시가 떨어질 때 피해를 주는 반경(블록)이에요."
+        type: float
+        min: 0
+        default: 7.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: titan.crash.damage
+        label: "타이탄 타이탄 크래시 피해"
+        desc: "타이탄 크래시에 맞은 대상이 입는 피해량이에요."
+        type: float
+        min: 0
+        default: 20.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: fangtian-ji.model-data
+        label: "방천화극 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요. 0이면 번호를 붙이지 않아요."
+        type: int
+        min: 0
+        default: 0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: fangtian-ji.attack-damage
+        label: "방천화극 공격력"
+        desc: "방천화극의 기본 공격력이에요."
+        type: float
+        min: 0
+        default: 18.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: fangtian-ji.attack-speed
+        label: "방천화극 공격속도"
+        desc: "방천화극의 기본 공격속도 능력치예요."
+        type: float
+        min: 0
+        default: 0.8
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: fangtian-ji.crit-damage
+        label: "방천화극 치명타 고정 피해"
+        desc: "방천화극으로 치명타가 터졌을 때 실제로 들어가는 피해량이에요(바닐라 1.5배 대신 이 값으로 고정)."
+        type: float
+        min: 0
+        default: 26.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: fangtian-ji.rage.health-percent
+        label: "방천화극 투신의 분노 발동 체력"
+        desc: "체력이 최대 체력의 이 비율(%) 이하로 떨어지면 패시브 투신의 분노가 켜져요."
+        type: float
+        min: 0
+        max: 100
+        default: 50.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: fangtian-ji.rage.attack-speed-percent
+        label: "방천화극 투신의 분노 공격속도 증가"
+        desc: "분노 상태에서 늘어나는 공격속도 증가율(%)이에요."
+        type: float
+        min: 0
+        default: 20.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: fangtian-ji.rage.sweep-radius
+        label: "방천화극 쓸어버리기 범위"
+        desc: "평타를 넣을 때 함께 베는 주변 반경(블록)이에요. 분노 상태에서는 이 값의 2배가 돼요."
+        type: float
+        min: 0
+        default: 2.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: fangtian-ji.rage.sweep-damage-percent
+        label: "방천화극 쓸어버리기 피해 비율"
+        desc: "쓸어버리기로 주변 적에게 들어가는 피해가, 방금 넣은 평타 피해의 몇 %인지예요."
+        type: float
+        min: 0
+        default: 40.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: fangtian-ji.strike.cooldown-seconds
+        label: "방천화극 패왕의 일격 재사용 대기시간"
+        desc: "[F] 패왕의 일격을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 20
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: fangtian-ji.strike.range
+        label: "방천화극 패왕의 일격 사거리"
+        desc: "패왕의 일격이 앞으로 닿는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 7.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: fangtian-ji.strike.cone-angle-degrees
+        label: "방천화극 패왕의 일격 범위 각도"
+        desc: "패왕의 일격이 앞으로 퍼지는 부채꼴의 각도(도)예요."
+        type: float
+        min: 0
+        max: 360
+        default: 100.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: fangtian-ji.strike.damage
+        label: "방천화극 패왕의 일격 피해"
+        desc: "패왕의 일격에 맞은 대상이 입는 피해량이에요."
+        type: float
+        min: 0
+        default: 16.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.model-data
+        label: "볼트 세이버 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요. 0이면 번호를 붙이지 않아요."
+        type: int
+        min: 0
+        default: 0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.attack-damage
+        label: "볼트 세이버 공격력"
+        desc: "볼트 세이버의 기본 공격력이에요."
+        type: float
+        min: 0
+        default: 16.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.attack-speed
+        label: "볼트 세이버 공격속도"
+        desc: "볼트 세이버의 기본 공격속도 능력치예요."
+        type: float
+        min: 0
+        default: 1.6
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.crit-damage
+        label: "볼트 세이버 치명타 고정 피해"
+        desc: "볼트 세이버로 치명타가 터졌을 때 실제로 들어가는 피해량이에요(바닐라 1.5배 대신 이 값으로 고정)."
+        type: float
+        min: 0
+        default: 24.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.field.charge-distance
+        label: "볼트 세이버 일렉트릭 필드 충전 거리"
+        desc: "전하가 가득 찰 때까지 움직여야 하는 누적 거리(블록)예요. 다 채우면 다음 평타에 번개 피해가 추가돼요."
+        type: float
+        min: 0
+        default: 12.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.field.bolt-damage
+        label: "볼트 세이버 일렉트릭 필드 번개 피해"
+        desc: "전하가 가득 찬 상태로 평타를 넣을 때 추가로 들어가는 방어무시 번개 피해예요."
+        type: float
+        min: 0
+        default: 2.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.lance.cooldown-seconds
+        label: "볼트 세이버 소닉 랜스 재사용 대기시간"
+        desc: "[F] 소닉 랜스를 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 12
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.lance.distance
+        label: "볼트 세이버 소닉 랜스 돌진 거리"
+        desc: "소닉 랜스로 앞으로 돌진하는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 8.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.lance.width
+        label: "볼트 세이버 소닉 랜스 판정 폭"
+        desc: "소닉 랜스 돌진 경로에서 적으로 판정하는 폭(블록)이에요."
+        type: float
+        min: 0
+        default: 2.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.lance.damage
+        label: "볼트 세이버 소닉 랜스 피해"
+        desc: "소닉 랜스 경로에 있는 적이 입는 피해량이에요."
+        type: float
+        min: 0
+        default: 14.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.lance.stun-seconds
+        label: "볼트 세이버 소닉 랜스 기절 시간"
+        desc: "소닉 랜스에 맞은 대상이 기절하는 시간(초)이에요. 20을 곱해 틱으로 바꾼 뒤 다시 20으로 나눠 정수 초로 계산하기 때문에, 1초보다 작은 값을 넣어도 실제로는 최소 1초로 적용돼요."
+        type: float
+        min: 0
+        default: 0.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+        note: "1초 미만으로 설정해도 실제 게임에서는 최소 1초로 적용돼요."
+
+      - key: volt-saber.aura.cooldown-seconds
+        label: "볼트 세이버 라이트닝 오라 재사용 대기시간"
+        desc: "[웅크리기+F] 라이트닝 오라를 다시 두를 수 있을 때까지 걸리는 시간(초)이에요. 오라를 두른 순간부터 이 쿨타임이 돌기 시작해요."
+        type: int
+        min: 0
+        default: 30
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.aura.duration-seconds
+        label: "볼트 세이버 라이트닝 오라 지속시간"
+        desc: "라이트닝 오라를 두른 상태가 유지되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 10
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.aura.damage-percent
+        label: "볼트 세이버 라이트닝 오라 피해 증가"
+        desc: "오라를 두른 동안 평타 피해가 늘어나는 비율(%)이에요."
+        type: float
+        min: 0
+        default: 40.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.aura.discharge-strikes
+        label: "볼트 세이버 전기 방출 번개 횟수"
+        desc: "오라를 두른 상태에서 다시 발동(전기 방출)했을 때 주변에 떨어지는 번개 횟수예요."
+        type: int
+        min: 0
+        default: 30
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.aura.discharge-radius
+        label: "볼트 세이버 전기 방출 범위"
+        desc: "전기 방출로 번개가 떨어지는 반경(블록)이에요."
+        type: float
+        min: 0
+        default: 7.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: volt-saber.aura.discharge-damage-per-strike
+        label: "볼트 세이버 전기 방출 번개 1회 피해"
+        desc: "전기 방출로 떨어지는 번개 한 발이 입히는 피해예요. 시전자는 맞지 않아요."
+        type: float
+        min: 0
+        default: 3.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.enabled
+        label: "아르테미스 세트 기능 사용"
+        desc: "꺼두면 아르테미스 세트를 제작할 수 없고, 세트 효과(여신의 회피)와 월광 공명도 켜지지 않아요."
+        type: bool
+        default: true
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.enchant-level
+        label: "아르테미스 세트 보호 인챈트 레벨"
+        desc: "완성된 아르테미스 방어구 네 부위에 붙는 보호/화염 보호/폭발 보호/발사체 보호 인챈트의 레벨이에요."
+        type: int
+        min: 1
+        default: 5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.recipe-enchant-level
+        label: "아르테미스 세트 제작 재료 최소 인챈트 레벨"
+        desc: "제작대에 넣는 방어구 각각에 필요한 최소 인챈트 레벨이에요. 이보다 낮은 인챈트가 걸린 재료로는 만들어지지 않아요."
+        type: int
+        min: 1
+        default: 4
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.armor-multiplier
+        label: "아르테미스 세트 방어력 배율"
+        desc: "완성된 방어구의 기본 방어력을 네더라이트 방어구 기준 몇 배로 고정할지 정해요."
+        type: float
+        min: 0
+        default: 1.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.model-data.helmet
+        label: "아르테미스 투구 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않아요."
+        type: int
+        min: 0
+        default: 0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.model-data.chestplate
+        label: "아르테미스 흉갑 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않아요."
+        type: int
+        min: 0
+        default: 0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.model-data.leggings
+        label: "아르테미스 각반 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않아요."
+        type: int
+        min: 0
+        default: 0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.model-data.boots
+        label: "아르테미스 장화 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않아요."
+        type: int
+        min: 0
+        default: 0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.set.evade-base-percent
+        label: "아르테미스 세트 회피 확률(평상시)"
+        desc: "세트 4부위를 모두 입었을 때, 밤이 아니거나 달이 그믐에 가까울 때 적용되는 피격 완전 회피 확률(%)이에요."
+        type: float
+        min: 0
+        max: 100
+        default: 20.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.set.evade-full-moon-percent
+        label: "아르테미스 세트 회피 확률(보름달)"
+        desc: "달이 보름달에 가까워질수록 회피 확률이 이 값 쪽으로 올라가요. 위상이 멀어지면 평상시 확률 쪽으로 다시 내려가요."
+        type: float
+        min: 0
+        max: 100
+        default: 35.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.set.evade-swiftness-seconds
+        label: "아르테미스 세트 회피 후 신속 지속시간"
+        desc: "피격을 완전히 흘려냈을 때 붙는 신속 효과(3단계)가 지속되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 2
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.moon.speed-percent
+        label: "아르테미스 월광 공명 이동·공격속도 보너스"
+        desc: "세트를 모두 입고 보름달에 가까울수록 오르는 이동속도·공격속도 보너스(%)의 최댓값이에요. 실제로는 신속/성급함 효과의 단계로 적용되기 때문에 정확히 이 %가 아니라 가장 가까운 단계로 반영돼요."
+        type: float
+        min: 0
+        default: 25.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: artemis.moon.bow-damage-multiplier
+        label: "아르테미스 월광 공명 활 피해 배율"
+        desc: "세트를 모두 입고 보름달일 때 활·쇠뇌로 주는 피해에 곱해지는 배율이에요. 그믐에 가까우면 배율이 1배 쪽으로 내려가요."
+        type: float
+        min: 1
+        default: 1.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.hard_stone_fragment.name
+        label: "재료 '단단한 돌 조각' 이름"
+        desc: "재료 '단단한 돌 조각'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "단단한 돌 조각"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.hard_stone_fragment.grade
+        label: "재료 '단단한 돌 조각' 등급"
+        desc: "재료 '단단한 돌 조각'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "COMMON"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.hard_stone_fragment.material
+        label: "재료 '단단한 돌 조각' 아이콘 재질"
+        desc: "재료 '단단한 돌 조각'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "FLINT"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.hard_stone_fragment.model-data
+        label: "재료 '단단한 돌 조각' 모델 번호"
+        desc: "재료 '단단한 돌 조각'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500100
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.hard_stone_fragment.description
+        label: "재료 '단단한 돌 조각' 설명"
+        desc: "재료 '단단한 돌 조각' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["흔하게 구할 수 있는 밀도 높은 회색 돌덩이.", "가장 기초적인 장비의 뼈대를 잡는 데 쓰입니다."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rough_twig.name
+        label: "재료 '거친 나뭇가지' 이름"
+        desc: "재료 '거친 나뭇가지'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "거친 나뭇가지"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rough_twig.grade
+        label: "재료 '거친 나뭇가지' 등급"
+        desc: "재료 '거친 나뭇가지'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "COMMON"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rough_twig.material
+        label: "재료 '거친 나뭇가지' 아이콘 재질"
+        desc: "재료 '거친 나뭇가지'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "STICK"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rough_twig.model-data
+        label: "재료 '거친 나뭇가지' 모델 번호"
+        desc: "재료 '거친 나뭇가지'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500101
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rough_twig.description
+        label: "재료 '거친 나뭇가지' 설명"
+        desc: "재료 '거친 나뭇가지' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["숲에서 쉽게 채집할 수 있는 질기고 단단한 나무 줄기.", "도구와 자루의 손잡이 재료로 쓰입니다."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rusted_iron_scrap.name
+        label: "재료 '녹슨 철광석 조각' 이름"
+        desc: "재료 '녹슨 철광석 조각'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "녹슨 철광석 조각"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rusted_iron_scrap.grade
+        label: "재료 '녹슨 철광석 조각' 등급"
+        desc: "재료 '녹슨 철광석 조각'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "COMMON"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rusted_iron_scrap.material
+        label: "재료 '녹슨 철광석 조각' 아이콘 재질"
+        desc: "재료 '녹슨 철광석 조각'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "RAW_IRON"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rusted_iron_scrap.model-data
+        label: "재료 '녹슨 철광석 조각' 모델 번호"
+        desc: "재료 '녹슨 철광석 조각'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500102
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rusted_iron_scrap.description
+        label: "재료 '녹슨 철광석 조각' 설명"
+        desc: "재료 '녹슨 철광석 조각' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["오랜 시간 방치되어 산화된 철 부스러기.", "불순물이 많아 가공이 필요합니다."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.tough_leather_strap.name
+        label: "재료 '질긴 가죽 끈' 이름"
+        desc: "재료 '질긴 가죽 끈'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "질긴 가죽 끈"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.tough_leather_strap.grade
+        label: "재료 '질긴 가죽 끈' 등급"
+        desc: "재료 '질긴 가죽 끈'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "COMMON"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.tough_leather_strap.material
+        label: "재료 '질긴 가죽 끈' 아이콘 재질"
+        desc: "재료 '질긴 가죽 끈'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "LEATHER"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.tough_leather_strap.model-data
+        label: "재료 '질긴 가죽 끈' 모델 번호"
+        desc: "재료 '질긴 가죽 끈'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500103
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.tough_leather_strap.description
+        label: "재료 '질긴 가죽 끈' 설명"
+        desc: "재료 '질긴 가죽 끈' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["야생 동물의 가죽을 얇게 저며 엮어 만든 튼튼한 결합용 끈."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.common_charcoal_powder.name
+        label: "재료 '평범한 숯 가루' 이름"
+        desc: "재료 '평범한 숯 가루'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "평범한 숯 가루"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.common_charcoal_powder.grade
+        label: "재료 '평범한 숯 가루' 등급"
+        desc: "재료 '평범한 숯 가루'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "COMMON"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.common_charcoal_powder.material
+        label: "재료 '평범한 숯 가루' 아이콘 재질"
+        desc: "재료 '평범한 숯 가루'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "CHARCOAL"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.common_charcoal_powder.model-data
+        label: "재료 '평범한 숯 가루' 모델 번호"
+        desc: "재료 '평범한 숯 가루'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500104
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.common_charcoal_powder.description
+        label: "재료 '평범한 숯 가루' 설명"
+        desc: "재료 '평범한 숯 가루' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["화덕에서 흔히 얻어지는 탄소 가루.", "기초적인 제련 및 코팅에 쓰입니다."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.refined_iron_ingot.name
+        label: "재료 '정제된 무쇠 주괴' 이름"
+        desc: "재료 '정제된 무쇠 주괴'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "정제된 무쇠 주괴"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.refined_iron_ingot.grade
+        label: "재료 '정제된 무쇠 주괴' 등급"
+        desc: "재료 '정제된 무쇠 주괴'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "RARE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.refined_iron_ingot.material
+        label: "재료 '정제된 무쇠 주괴' 아이콘 재질"
+        desc: "재료 '정제된 무쇠 주괴'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "IRON_INGOT"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.refined_iron_ingot.model-data
+        label: "재료 '정제된 무쇠 주괴' 모델 번호"
+        desc: "재료 '정제된 무쇠 주괴'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500105
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.refined_iron_ingot.description
+        label: "재료 '정제된 무쇠 주괴' 설명"
+        desc: "재료 '정제된 무쇠 주괴' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["불순물을 말끔히 제거하고 단단하게 단조해 낸 고품질의 철 주괴."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.beasts_sharp_claw.name
+        label: "재료 '야수의 날카로운 발톱' 이름"
+        desc: "재료 '야수의 날카로운 발톱'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "야수의 날카로운 발톱"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.beasts_sharp_claw.grade
+        label: "재료 '야수의 날카로운 발톱' 등급"
+        desc: "재료 '야수의 날카로운 발톱'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "RARE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.beasts_sharp_claw.material
+        label: "재료 '야수의 날카로운 발톱' 아이콘 재질"
+        desc: "재료 '야수의 날카로운 발톱'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "PRISMARINE_SHARD"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.beasts_sharp_claw.model-data
+        label: "재료 '야수의 날카로운 발톱' 모델 번호"
+        desc: "재료 '야수의 날카로운 발톱'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500106
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.beasts_sharp_claw.description
+        label: "재료 '야수의 날카로운 발톱' 설명"
+        desc: "재료 '야수의 날카로운 발톱' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["강력한 몬스터의 사냥에서 얻은 예리한 발톱.", "날붙이의 절단력을 높여줍니다."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.imbued_mana_essence.name
+        label: "재료 '마력이 스민 정수' 이름"
+        desc: "재료 '마력이 스민 정수'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "마력이 스민 정수"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.imbued_mana_essence.grade
+        label: "재료 '마력이 스민 정수' 등급"
+        desc: "재료 '마력이 스민 정수'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "RARE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.imbued_mana_essence.material
+        label: "재료 '마력이 스민 정수' 아이콘 재질"
+        desc: "재료 '마력이 스민 정수'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "EXPERIENCE_BOTTLE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.imbued_mana_essence.model-data
+        label: "재료 '마력이 스민 정수' 모델 번호"
+        desc: "재료 '마력이 스민 정수'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500107
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.imbued_mana_essence.description
+        label: "재료 '마력이 스민 정수' 설명"
+        desc: "재료 '마력이 스민 정수' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["주변의 미세한 마력이 응축되어", "은은한 빛을 뿜어내는 액상 물질."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.sturdy_oak_timber.name
+        label: "재료 '단단한 오크 원목' 이름"
+        desc: "재료 '단단한 오크 원목'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "단단한 오크 원목"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.sturdy_oak_timber.grade
+        label: "재료 '단단한 오크 원목' 등급"
+        desc: "재료 '단단한 오크 원목'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "RARE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.sturdy_oak_timber.material
+        label: "재료 '단단한 오크 원목' 아이콘 재질"
+        desc: "재료 '단단한 오크 원목'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "STICK"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.sturdy_oak_timber.model-data
+        label: "재료 '단단한 오크 원목' 모델 번호"
+        desc: "재료 '단단한 오크 원목'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500108
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.sturdy_oak_timber.description
+        label: "재료 '단단한 오크 원목' 설명"
+        desc: "재료 '단단한 오크 원목' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["오랜 세월 자라난 참나무의 심재.", "쉽게 부러지지 않는 단단함을 자랑합니다."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.mithril_alloy_ore.name
+        label: "재료 '미스릴 합금 광석' 이름"
+        desc: "재료 '미스릴 합금 광석'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "미스릴 합금 광석"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.mithril_alloy_ore.grade
+        label: "재료 '미스릴 합금 광석' 등급"
+        desc: "재료 '미스릴 합금 광석'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "UNIQUE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.mithril_alloy_ore.material
+        label: "재료 '미스릴 합금 광석' 아이콘 재질"
+        desc: "재료 '미스릴 합금 광석'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "LAPIS_LAZULI"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.mithril_alloy_ore.model-data
+        label: "재료 '미스릴 합금 광석' 모델 번호"
+        desc: "재료 '미스릴 합금 광석'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500109
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.mithril_alloy_ore.description
+        label: "재료 '미스릴 합금 광석' 설명"
+        desc: "재료 '미스릴 합금 광석' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["가볍고도 강철보다 단단한 성질을 지닌", "희귀한 푸른빛 광석."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.void_leather.name
+        label: "재료 '공허의 가죽' 이름"
+        desc: "재료 '공허의 가죽'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "공허의 가죽"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.void_leather.grade
+        label: "재료 '공허의 가죽' 등급"
+        desc: "재료 '공허의 가죽'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "UNIQUE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.void_leather.material
+        label: "재료 '공허의 가죽' 아이콘 재질"
+        desc: "재료 '공허의 가죽'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "PHANTOM_MEMBRANE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.void_leather.model-data
+        label: "재료 '공허의 가죽' 모델 번호"
+        desc: "재료 '공허의 가죽'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500110
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.void_leather.description
+        label: "재료 '공허의 가죽' 설명"
+        desc: "재료 '공허의 가죽' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["이계의 기운이 감도는 심연의 괴수로부터 벗겨낸", "질기고 기묘한 촉감의 가죽."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.blazing_fire_crystal.name
+        label: "재료 '타오르는 화염의 결정' 이름"
+        desc: "재료 '타오르는 화염의 결정'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "타오르는 화염의 결정"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.blazing_fire_crystal.grade
+        label: "재료 '타오르는 화염의 결정' 등급"
+        desc: "재료 '타오르는 화염의 결정'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "UNIQUE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.blazing_fire_crystal.material
+        label: "재료 '타오르는 화염의 결정' 아이콘 재질"
+        desc: "재료 '타오르는 화염의 결정'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "BLAZE_POWDER"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.blazing_fire_crystal.model-data
+        label: "재료 '타오르는 화염의 결정' 모델 번호"
+        desc: "재료 '타오르는 화염의 결정'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500111
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.blazing_fire_crystal.description
+        label: "재료 '타오르는 화염의 결정' 설명"
+        desc: "재료 '타오르는 화염의 결정' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["내부에서 영원히 사그라들지 않는", "고열의 화염 에너지를 품고 있는 붉은 결정체."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.titans_pulsing_heartstone.name
+        label: "재료 '거신의 맥동하는 심장석' 이름"
+        desc: "재료 '거신의 맥동하는 심장석'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "거신의 맥동하는 심장석"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.titans_pulsing_heartstone.grade
+        label: "재료 '거신의 맥동하는 심장석' 등급"
+        desc: "재료 '거신의 맥동하는 심장석'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "ANCIENT"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.titans_pulsing_heartstone.material
+        label: "재료 '거신의 맥동하는 심장석' 아이콘 재질"
+        desc: "재료 '거신의 맥동하는 심장석'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "HEART_OF_THE_SEA"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.titans_pulsing_heartstone.model-data
+        label: "재료 '거신의 맥동하는 심장석' 모델 번호"
+        desc: "재료 '거신의 맥동하는 심장석'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500112
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.titans_pulsing_heartstone.description
+        label: "재료 '거신의 맥동하는 심장석' 설명"
+        desc: "재료 '거신의 맥동하는 심장석' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["타이탄 소울 모닝스타의 헤드 내부에서", "영원히 식지 않는 열과 중력을 내뿜는", "심장 모양의 광물 파편."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.shattered_tectonic_shard.name
+        label: "재료 '부서진 지각의 파편' 이름"
+        desc: "재료 '부서진 지각의 파편'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "부서진 지각의 파편"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.shattered_tectonic_shard.grade
+        label: "재료 '부서진 지각의 파편' 등급"
+        desc: "재료 '부서진 지각의 파편'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "ANCIENT"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.shattered_tectonic_shard.material
+        label: "재료 '부서진 지각의 파편' 아이콘 재질"
+        desc: "재료 '부서진 지각의 파편'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "ECHO_SHARD"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.shattered_tectonic_shard.model-data
+        label: "재료 '부서진 지각의 파편' 모델 번호"
+        desc: "재료 '부서진 지각의 파편'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500113
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.shattered_tectonic_shard.description
+        label: "재료 '부서진 지각의 파편' 설명"
+        desc: "재료 '부서진 지각의 파편' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["타이탄의 일격이 대지에 부딪칠 때 사방으로 튀어나온,", "형언할 수 없는 고밀도의 암석 결정체."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.condensed_titan_gravity_fluid.name
+        label: "재료 '타이탄의 응축된 중력수' 이름"
+        desc: "재료 '타이탄의 응축된 중력수'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "타이탄의 응축된 중력수"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.condensed_titan_gravity_fluid.grade
+        label: "재료 '타이탄의 응축된 중력수' 등급"
+        desc: "재료 '타이탄의 응축된 중력수'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "ANCIENT"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.condensed_titan_gravity_fluid.material
+        label: "재료 '타이탄의 응축된 중력수' 아이콘 재질"
+        desc: "재료 '타이탄의 응축된 중력수'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "DRAGON_BREATH"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.condensed_titan_gravity_fluid.model-data
+        label: "재료 '타이탄의 응축된 중력수' 모델 번호"
+        desc: "재료 '타이탄의 응축된 중력수'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500114
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.condensed_titan_gravity_fluid.description
+        label: "재료 '타이탄의 응축된 중력수' 설명"
+        desc: "재료 '타이탄의 응축된 중력수' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["거신의 거대한 질량에서 뿜어져 나오는 중력장을", "액화시켜 특수 유리병에 담아낸 무거운 액체."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.sunstone_of_the_ancient_kingdom.name
+        label: "재료 '성스러운 태양석' 이름"
+        desc: "재료 '성스러운 태양석'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "성스러운 태양석"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.sunstone_of_the_ancient_kingdom.grade
+        label: "재료 '성스러운 태양석' 등급"
+        desc: "재료 '성스러운 태양석'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "LEGEND"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.sunstone_of_the_ancient_kingdom.material
+        label: "재료 '성스러운 태양석' 아이콘 재질"
+        desc: "재료 '성스러운 태양석'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "GOLD_INGOT"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.sunstone_of_the_ancient_kingdom.model-data
+        label: "재료 '성스러운 태양석' 모델 번호"
+        desc: "재료 '성스러운 태양석'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500115
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.sunstone_of_the_ancient_kingdom.description
+        label: "재료 '성스러운 태양석' 설명"
+        desc: "재료 '성스러운 태양석' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["태양의 빛을 영구적으로 가둬 둔 황금빛 보석.", "전설적인 신성 장비를 벼려낼 때 쓰는 핵심 촉매."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.dragons_scale.name
+        label: "재료 '드래곤의 비늘' 이름"
+        desc: "재료 '드래곤의 비늘'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "드래곤의 비늘"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.dragons_scale.grade
+        label: "재료 '드래곤의 비늘' 등급"
+        desc: "재료 '드래곤의 비늘'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "LEGEND"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.dragons_scale.material
+        label: "재료 '드래곤의 비늘' 아이콘 재질"
+        desc: "재료 '드래곤의 비늘'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "NETHERITE_SCRAP"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.dragons_scale.model-data
+        label: "재료 '드래곤의 비늘' 모델 번호"
+        desc: "재료 '드래곤의 비늘'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500116
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.dragons_scale.description
+        label: "재료 '드래곤의 비늘' 설명"
+        desc: "재료 '드래곤의 비늘' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["전설의 고대 드래곤의 심장부에서 떼어낸,", "어떠한 마법과 물리 공격도 튕겨내는 불멸의 비늘."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.boundary_stone_of_cosmos.name
+        label: "재료 '천공의 경계석' 이름"
+        desc: "재료 '천공의 경계석'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "천공의 경계석"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.boundary_stone_of_cosmos.grade
+        label: "재료 '천공의 경계석' 등급"
+        desc: "재료 '천공의 경계석'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "MASTER"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.boundary_stone_of_cosmos.material
+        label: "재료 '천공의 경계석' 아이콘 재질"
+        desc: "재료 '천공의 경계석'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "NETHER_STAR"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.boundary_stone_of_cosmos.model-data
+        label: "재료 '천공의 경계석' 모델 번호"
+        desc: "재료 '천공의 경계석'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500117
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.boundary_stone_of_cosmos.description
+        label: "재료 '천공의 경계석' 설명"
+        desc: "재료 '천공의 경계석' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["우주의 탄생과 소멸의 에너지가 응축되어", "차원의 균열 속에서만 발견되는", "절대적인 신화급 코어 재료."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rootless.name
+        label: "재료 '무근원' 이름"
+        desc: "재료 '무근원'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "무근원"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rootless.grade
+        label: "재료 '무근원' 등급"
+        desc: "재료 '무근원'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "FINALE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rootless.material
+        label: "재료 '무근원' 아이콘 재질"
+        desc: "재료 '무근원'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "ECHO_SHARD"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rootless.model-data
+        label: "재료 '무근원' 모델 번호"
+        desc: "재료 '무근원'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500118
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.rootless.description
+        label: "재료 '무근원' 설명"
+        desc: "재료 '무근원' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["기억할 수 없는 자가 흩어지며 남긴 조각.", "어디에서 왔는지 아무도 떠올리지 못한다."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.endless_conviction.name
+        label: "재료 '끝없는 신념' 이름"
+        desc: "재료 '끝없는 신념'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "끝없는 신념"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.endless_conviction.grade
+        label: "재료 '끝없는 신념' 등급"
+        desc: "재료 '끝없는 신념'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "FINALE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.endless_conviction.material
+        label: "재료 '끝없는 신념' 아이콘 재질"
+        desc: "재료 '끝없는 신념'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "HEART_OF_THE_SEA"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.endless_conviction.model-data
+        label: "재료 '끝없는 신념' 모델 번호"
+        desc: "재료 '끝없는 신념'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500119
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.endless_conviction.description
+        label: "재료 '끝없는 신념' 설명"
+        desc: "재료 '끝없는 신념' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["쓰러지고도 다시 일어서던 끝없는 기사의 심장.", "꺾이지 않는 의지가 아직도 뛰고 있다."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_scale.name
+        label: "재료 '종말룡의 비늘' 이름"
+        desc: "재료 '종말룡의 비늘'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "종말룡의 비늘"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_scale.grade
+        label: "재료 '종말룡의 비늘' 등급"
+        desc: "재료 '종말룡의 비늘'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "FINALE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_scale.material
+        label: "재료 '종말룡의 비늘' 아이콘 재질"
+        desc: "재료 '종말룡의 비늘'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "PHANTOM_MEMBRANE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_scale.model-data
+        label: "재료 '종말룡의 비늘' 모델 번호"
+        desc: "재료 '종말룡의 비늘'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500120
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_scale.description
+        label: "재료 '종말룡의 비늘' 설명"
+        desc: "재료 '종말룡의 비늘' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["종말룡 엔더드래곤의 몸에서 벗겨낸 비늘.", "세상의 끝을 견뎌낸 껍질."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_claw.name
+        label: "재료 '종말룡의 발톱' 이름"
+        desc: "재료 '종말룡의 발톱'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "종말룡의 발톱"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_claw.grade
+        label: "재료 '종말룡의 발톱' 등급"
+        desc: "재료 '종말룡의 발톱'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "FINALE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_claw.material
+        label: "재료 '종말룡의 발톱' 아이콘 재질"
+        desc: "재료 '종말룡의 발톱'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "PRISMARINE_SHARD"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_claw.model-data
+        label: "재료 '종말룡의 발톱' 모델 번호"
+        desc: "재료 '종말룡의 발톱'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500121
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_claw.description
+        label: "재료 '종말룡의 발톱' 설명"
+        desc: "재료 '종말룡의 발톱' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["종말룡 엔더드래곤이 대지를 찢던 발톱.", "쥐기만 해도 손끝이 저려 온다."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_blood.name
+        label: "재료 '종말룡의 피' 이름"
+        desc: "재료 '종말룡의 피'의 게임 안 표시 이름이에요. /특수아이템소환 등에서 쓰는 지급용 이름은 여기서 공백을 뺀 형태예요."
+        type: string
+        max_len: 256
+        default: "종말룡의 피"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_blood.grade
+        label: "재료 '종말룡의 피' 등급"
+        desc: "재료 '종말룡의 피'의 등급이에요. COMMON(일반)·RARE(레어)·UNIQUE(유니크)·ANCIENT(고대)·LEGEND(전설)·MASTER(신화)·FINALE(종언) 중 하나를 쓸 수 있어요. 이름 색과 등급 표시 줄, 그리고 ANCIENT 이상은 아이템이 빛나는 효과에 반영돼요."
+        type: enum
+        values: ["COMMON", "RARE", "UNIQUE", "ANCIENT", "LEGEND", "MASTER", "FINALE"]
+        default: "FINALE"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_blood.material
+        label: "재료 '종말룡의 피' 아이콘 재질"
+        desc: "재료 '종말룡의 피'의 기본 모양으로 쓰이는 마인크래프트 아이템 이름이에요(대문자 영문). 리소스팩이 없을 때 이 모양으로 보여요."
+        type: string
+        max_len: 256
+        pattern: "^[A-Za-z0-9_:]+$"
+        default: "DRAGON_BREATH"
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_blood.model-data
+        label: "재료 '종말룡의 피' 모델 번호"
+        desc: "재료 '종말룡의 피'의 리소스팩 전용 그림과 연결되는 번호예요. 0이면 전용 그림을 연결하지 않고 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500122
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: materials.list.apocalypse_dragon_blood.description
+        label: "재료 '종말룡의 피' 설명"
+        desc: "재료 '종말룡의 피' 아이템 설명(로어)에 그대로 표시되는 문구 줄들이에요."
+        type: list
+        default: ["종말룡 엔더드래곤이 흘린 검붉은 피.", "식지 않고 병 속에서 계속 끓어오른다."]
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: finale-byproducts.oblivion
+        label: "기억할 수 없는 자 종언급 부산물 목록"
+        desc: "기억할 수 없는 자를 처치했을 때 마지막 일격을 넣은 사람(없으면 근처 30블록 안 무작위 플레이어)에게 우편으로 보내는 재료 목록이에요. 목록의 각 항목은 materials.list 재료 id, 나올 확률(%), 개수로 이루어져 있어요."
+        type: list
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+        editable: false
+
+      - key: finale-byproducts.eternal-knight
+        label: "끝없는 기사 종언급 부산물 목록"
+        desc: "끝없는 기사를 처치했을 때 마지막 일격을 넣은 사람(없으면 근처 30블록 안 무작위 플레이어)에게 우편으로 보내는 재료 목록이에요. 목록의 각 항목은 materials.list 재료 id, 나올 확률(%), 개수로 이루어져 있어요."
+        type: list
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+        editable: false
+
+      - key: finale-byproducts.apocalypse-dragon
+        label: "종말룡 엔더드래곤 종언급 부산물 목록"
+        desc: "종말룡 엔더드래곤을 처치했을 때 마지막 일격을 넣은 사람(없으면 근처 30블록 안 무작위 플레이어)에게 우편으로 보내는 재료 목록이에요. 목록의 각 항목은 materials.list 재료 id, 나올 확률(%), 개수로 이루어져 있어요."
+        type: list
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+        editable: false
+
+      - key: malyongdo.model-data
+        label: "말룡도 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요. 0이면 번호를 붙이지 않아요."
+        type: int
+        min: 0
+        default: 0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.attack-damage
+        label: "말룡도 공격력"
+        desc: "말룡도의 기본 공격력이에요."
+        type: float
+        min: 0
+        default: 12.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.drop-chance-percent
+        label: "말룡도 드롭 확률"
+        desc: "엔더 드래곤을 잡았을 때 말룡도가 떨어질 확률(%)이에요."
+        type: float
+        min: 0
+        max: 100
+        default: 10.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.combo-window-seconds
+        label: "말룡도 2초식 연계 유지시간"
+        desc: "1초식이 적중한 뒤 2초식을 쓸 수 있는 시간(초)이에요. 이 시간이 지나면 다시 1초식부터 밟아야 해요."
+        type: int
+        min: 0
+        default: 25
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.second-combo-window-seconds
+        label: "말룡도 3초식 연계 유지시간"
+        desc: "2초식을 쓴 뒤 3초식을 쓸 수 있는 시간(초)이에요. 2초식이 말을 전부 소모하기 때문에 2초식보다 길게 잡는 게 보통이에요."
+        type: int
+        min: 0
+        default: 40
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.stack.max
+        label: "말룡도 말 최대 스택"
+        desc: "말(자원) 스택이 쌓일 수 있는 최댓값이에요."
+        type: int
+        min: 1
+        default: 100
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.stack.per-hit
+        label: "말룡도 타격당 말 획득량"
+        desc: "말룡도로 때릴 때마다 쌓이는 말 스택 양이에요."
+        type: float
+        min: 0
+        default: 1.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.stack.per-second
+        label: "말룡도 초당 말 획득량"
+        desc: "말룡도를 들고만 있어도 초당 자동으로 쌓이는 말 스택 양이에요."
+        type: float
+        min: 0
+        default: 0.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.first.cooldown-seconds
+        label: "말룡도 1초식 말 재사용 대기시간"
+        desc: "[F] 1초식 말을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 6
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.first.stack-cost
+        label: "말룡도 1초식 말 소모량"
+        desc: "1초식 말을 쓸 때 소모하는 말 스택 양이에요. 이 이상 쌓여 있어야 쓸 수 있어요."
+        type: int
+        min: 0
+        default: 20
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.first.damage
+        label: "말룡도 1초식 말 피해"
+        desc: "1초식 말에 맞은 대상이 입는 피해량이에요."
+        type: float
+        min: 0
+        default: 12.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.first.range
+        label: "말룡도 1초식 말 사거리"
+        desc: "1초식 말이 앞으로 닿는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 5.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.first.cone-angle-degrees
+        label: "말룡도 1초식 말 범위 각도"
+        desc: "1초식 말이 앞으로 퍼지는 부채꼴의 각도(도)예요."
+        type: float
+        min: 0
+        max: 360
+        default: 80.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.second.cooldown-seconds
+        label: "말룡도 2초식 말룡 재사용 대기시간"
+        desc: "[웅크리기+F] 2초식 말룡을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요. 1초식이 적중해야 쓸 수 있어요."
+        type: int
+        min: 0
+        default: 20
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.second.damage-per-stack
+        label: "말룡도 2초식 말룡 스택당 피해"
+        desc: "2초식 말룡이 소모한 말 1개당 입히는 피해예요. 그동안 쌓아둔 말을 전부 소모해서 한 번에 터뜨려요."
+        type: float
+        min: 0
+        default: 0.35
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.second.max-penetration-percent
+        label: "말룡도 2초식 말룡 최대 방어관통"
+        desc: "말을 최대치까지 채워서 썼을 때 적용되는 최대 방어 관통 비율(%)이에요. 소모한 말이 적으면 이 비율도 그만큼 낮아져요."
+        type: float
+        min: 0
+        max: 100
+        default: 30.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.second.fire-ticks
+        label: "말룡도 2초식 말룡 발화시간"
+        desc: "2초식에 맞은 대상이 불붙는 시간(틱, 20틱=1초)이에요(바닐라 화염 피해)."
+        type: int
+        min: 0
+        default: 60
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.second.range
+        label: "말룡도 2초식 말룡 사거리"
+        desc: "2초식 말룡이 앞으로 닿는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 9.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.second.cone-angle-degrees
+        label: "말룡도 2초식 말룡 범위 각도"
+        desc: "2초식 말룡이 앞으로 퍼지는 부채꼴의 각도(도)예요."
+        type: float
+        min: 0
+        max: 360
+        default: 60.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.third.cooldown-seconds
+        label: "말룡도 3초식 종말룡 재사용 대기시간"
+        desc: "[웅크리기+우클릭] 3초식 종말룡을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요. 2초식을 써야 쓸 수 있어요."
+        type: int
+        min: 0
+        default: 90
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.third.min-stacks
+        label: "말룡도 3초식 종말룡 최소 말 요구량"
+        desc: "3초식을 쓰려면 2초식에서 이어받은 말과 지금 가진 말을 합쳐 이 값 이상이어야 해요."
+        type: int
+        min: 0
+        default: 50
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.third.avatar-seconds
+        label: "말룡도 3초식 종말의 화신 지속시간"
+        desc: "3초식을 쓰면 들어가는 종말의 화신 상태가 유지되는 시간(초)이에요. 이 동안 상태 이상 면역이고, 입힌 피해가 파괴력으로 쌓여요."
+        type: int
+        min: 0
+        default: 5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.third.power-per-stack
+        label: "말룡도 3초식 스택당 시작 파괴력"
+        desc: "3초식을 쓸 때 소모한 말 1개당 얻는 시작 파괴력이에요. 여기에 종말의 화신 상태 동안 입힌 피해가 더 쌓여요."
+        type: float
+        min: 0
+        default: 0.4
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.third.power-ratio
+        label: "말룡도 3초식 파괴력 축적 비율"
+        desc: "종말의 화신 상태에서 입힌 피해 중 파괴력으로 쌓이는 비율이에요(1.0이면 입힌 피해가 그대로 다 쌓여요)."
+        type: float
+        min: 0
+        default: 1.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.third.fire-ticks
+        label: "말룡도 3초식 종말룡 발화시간"
+        desc: "3초식이 끝나며 쏟아내는 일격에 맞은 대상이 불붙는 시간(틱, 20틱=1초)이에요."
+        type: int
+        min: 0
+        default: 100
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.third.range
+        label: "말룡도 3초식 종말룡 사거리"
+        desc: "3초식이 끝나며 쏟아내는 일격이 앞으로 닿는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 12.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: malyongdo.third.cone-angle-degrees
+        label: "말룡도 3초식 종말룡 범위 각도"
+        desc: "3초식이 끝나며 쏟아내는 일격이 앞으로 퍼지는 부채꼴의 각도(도)예요."
+        type: float
+        min: 0
+        max: 360
+        default: 70.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: bounty.enabled
+        label: "현상금 표식 기능 사용"
+        desc: "꺼두면 현상금 표식을 찍을 수 없고, 이미 찍힌 표식의 피해 증가 효과도 적용되지 않아요."
+        type: bool
+        default: true
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: bounty.damage-taken-percent-per-mark
+        label: "현상금 표식 받는 피해 증가율"
+        desc: "현상금 표식을 받은 사람이, 자신을 찍은 사람 1명당 더 받게 되는 피해 증가율(%)이에요."
+        type: float
+        min: 0
+        default: 0.4
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: bounty.damage-dealt-percent-per-mark
+        label: "현상금 표식 주는 피해 증가율"
+        desc: "현상금 표식을 받은 사람이, 자신을 찍은 사람 1명당 상대에게 더 주게 되는 피해 증가율(%)이에요."
+        type: float
+        min: 0
+        default: 0.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: bounty.change-cooldown-seconds
+        label: "현상금 표식 재설정 대기시간"
+        desc: "표식을 다른 사람에게 옮기고 나서, 다시 옮길 수 있을 때까지 기다려야 하는 시간(초)이에요. 0이면 제한 없이 바로 옮길 수 있어요."
+        type: int
+        min: 0
+        default: 3600
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.model-data
+        label: "드라켄피어스 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요. 0이면 번호를 붙이지 않아요."
+        type: int
+        min: 0
+        default: 500021
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.attack-damage
+        label: "드라켄피어스 공격력"
+        desc: "드라켄피어스의 기본 공격력이에요."
+        type: float
+        min: 0
+        default: 11.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.defense-penetration-percent
+        label: "드라켄피어스 방어관통"
+        desc: "드라켄피어스로 때릴 때 항상 적용되는 고정 방어 관통 비율(%)이에요. 실제로는 100%를 넘겨도 100%로만 적용돼요."
+        type: float
+        min: 0
+        max: 100
+        default: 45.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.shock.slow-amplifier
+        label: "드라켄피어스 감전 둔화 단계"
+        desc: "감전 상태인 대상에게 계속 걸리는 이동속도 감소 효과의 단계예요(0이면 1단계)."
+        type: int
+        min: 0
+        default: 1
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.lightning.cooldown-seconds
+        label: "드라켄피어스 드라켄 라이트닝 재사용 대기시간"
+        desc: "[F] 드라켄 라이트닝을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 20
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.lightning.range
+        label: "드라켄피어스 드라켄 라이트닝 사거리"
+        desc: "드라켄 라이트닝이 처음 대상을 찾는 앞쪽 거리(블록)예요."
+        type: float
+        min: 0
+        default: 10.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.lightning.cone-angle-degrees
+        label: "드라켄피어스 드라켄 라이트닝 범위 각도"
+        desc: "드라켄 라이트닝이 처음 대상을 찾는 부채꼴의 각도(도)예요."
+        type: float
+        min: 0
+        max: 360
+        default: 50.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.lightning.damage
+        label: "드라켄피어스 드라켄 라이트닝 피해"
+        desc: "드라켄 라이트닝이 첫 대상에게 입히는 피해예요."
+        type: float
+        min: 0
+        default: 9.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.lightning.chain-count
+        label: "드라켄피어스 드라켄 라이트닝 연쇄 횟수"
+        desc: "첫 대상을 맞춘 뒤 번개가 몇 번 더 다른 대상에게 옮겨붙는지예요."
+        type: int
+        min: 0
+        default: 3
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.lightning.chain-radius
+        label: "드라켄피어스 드라켄 라이트닝 연쇄 범위"
+        desc: "번개가 다음으로 옮겨붙을 대상을 찾는 반경(블록)이에요."
+        type: float
+        min: 0
+        default: 4.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.lightning.chain-damage-multiplier
+        label: "드라켄피어스 드라켄 라이트닝 연쇄 피해 배율"
+        desc: "연쇄로 옮겨붙은 번개가 첫 피해의 몇 배로 들어가는지예요(1.0 미만이면 갈수록 약해져요)."
+        type: float
+        min: 0
+        default: 0.6
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.lightning.shock-duration-seconds
+        label: "드라켄피어스 드라켄 라이트닝 감전 지속시간"
+        desc: "드라켄 라이트닝에 맞았을 때 걸리는 감전이 유지되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.lightning.shock-damage-per-second
+        label: "드라켄피어스 드라켄 라이트닝 감전 초당 피해"
+        desc: "감전 상태에서 초당 입는 방어무시 피해예요."
+        type: float
+        min: 0
+        default: 2.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.metamorphosis.cooldown-seconds
+        label: "드라켄피어스 드라코닉 팽 재사용 대기시간"
+        desc: "[웅크리기+F] 드라코닉 팽을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 25
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.metamorphosis.duration-seconds
+        label: "드라켄피어스 드라코닉 팽 변형 지속시간"
+        desc: "드라코닉 팽을 쓴 뒤 쌍단검으로 변형된 상태가 유지되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 7
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.metamorphosis.model-data
+        label: "드라켄피어스 드라코닉 팽 변형 모델 번호"
+        desc: "변형 중에 바뀌는 무기 겉모습의 리소스팩 모델 번호예요. 0이면 변형 중에도 모델을 따로 바꾸지 않아요."
+        type: int
+        min: 0
+        default: 500022
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.metamorphosis.burst-range
+        label: "드라켄피어스 드라코닉 팽 폭발 사거리"
+        desc: "드라코닉 팽 변형 시 터지는 번개 폭발이 앞으로 닿는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 4.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.metamorphosis.burst-cone-angle-degrees
+        label: "드라켄피어스 드라코닉 팽 폭발 범위 각도"
+        desc: "드라코닉 팽 폭발이 앞으로 퍼지는 부채꼴의 각도(도)예요."
+        type: float
+        min: 0
+        max: 360
+        default: 140.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.metamorphosis.burst-damage
+        label: "드라켄피어스 드라코닉 팽 폭발 피해"
+        desc: "드라코닉 팽 폭발에 맞은 대상이 입는 피해량이에요."
+        type: float
+        min: 0
+        default: 6.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.metamorphosis.shock-duration-seconds
+        label: "드라켄피어스 드라코닉 팽 감전 지속시간"
+        desc: "드라코닉 팽 폭발에 맞았을 때 걸리는 감전이 유지되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 4
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.metamorphosis.shock-damage-per-second
+        label: "드라켄피어스 드라코닉 팽 감전 초당 피해"
+        desc: "드라코닉 팽으로 건 감전 상태에서 초당 입는 방어무시 피해예요."
+        type: float
+        min: 0
+        default: 2.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.metamorphosis.speed-amplifier
+        label: "드라켄피어스 드라코닉 팽 이동속도 단계"
+        desc: "변형 중 붙는 이동속도 증가 효과의 단계예요(0이면 1단계)."
+        type: int
+        min: 0
+        default: 2
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: draken-pierce.metamorphosis.attack-speed-bonus
+        label: "드라켄피어스 드라코닉 팽 공격속도 보너스"
+        desc: "변형 중 추가로 붙는 공격속도 수치예요. 공격속도 능력치에 그대로 더해져요."
+        type: float
+        min: 0
+        default: 0.6
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.max-health
+        label: "끝없는 기사 최대 체력"
+        desc: "끝없는 기사가 가진 최대 체력이에요."
+        type: float
+        min: 1
+        default: 600.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.engage-range
+        label: "끝없는 기사 탐색 범위"
+        desc: "끝없는 기사가 패턴을 쓸 대상을 찾는 범위(블록)예요."
+        type: float
+        min: 0
+        default: 24.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.will.base-movement-speed
+        label: "끝없는 기사 불멸의 의지 기본 이동속도"
+        desc: "체력을 하나도 잃지 않았고 한 번도 부활하지 않았을 때의 기본 이동속도 수치예요(마인크래프트 이동속도 능력치, 바닐라 플레이어 기본값은 0.1이고 클수록 빨라요)."
+        type: float
+        min: 0
+        default: 0.28
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.will.movement-speed-per-lost-ratio
+        label: "끝없는 기사 불멸의 의지 체력 비례 이동속도 증가"
+        desc: "잃은 체력 비율(0~1)에 곱해서 이동속도에 더하는 값이에요. 체력을 다 잃으면(비율 1) 이 값만큼 최대로 더해져요."
+        type: float
+        min: 0
+        default: 0.12
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.will.movement-speed-per-knockdown
+        label: "끝없는 기사 불멸의 의지 부활 횟수당 이동속도 증가"
+        desc: "지금까지 쓰러졌다가 부활한 횟수 1회당 이동속도에 더하는 값이에요."
+        type: float
+        min: 0
+        default: 0.03
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.will.base-attack-damage
+        label: "끝없는 기사 불멸의 의지 기본 공격력"
+        desc: "체력을 하나도 잃지 않았고 한 번도 부활하지 않았을 때의 기본 근접 공격력이에요."
+        type: float
+        min: 0
+        default: 9.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.will.attack-damage-per-lost-ratio
+        label: "끝없는 기사 불멸의 의지 체력 비례 공격력 증가"
+        desc: "잃은 체력 비율(0~1)에 곱해서 공격력에 더하는 값이에요."
+        type: float
+        min: 0
+        default: 6.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.will.attack-damage-per-knockdown
+        label: "끝없는 기사 불멸의 의지 부활 횟수당 공격력 증가"
+        desc: "지금까지 쓰러졌다가 부활한 횟수 1회당 공격력에 더하는 값이에요."
+        type: float
+        min: 0
+        default: 2.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.combo.cooldown-seconds
+        label: "끝없는 기사 연속 참격 재사용 대기시간"
+        desc: "연속 참격 패턴을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 8
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.combo.strike-count
+        label: "끝없는 기사 연속 참격 타수"
+        desc: "연속 참격 한 번에 휘두르는 횟수예요."
+        type: int
+        min: 1
+        default: 5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.combo.strike-interval-ticks
+        label: "끝없는 기사 연속 참격 타격 간격"
+        desc: "연속 참격에서 한 번 벨 때마다 다음 타격까지 걸리는 시간(틱, 20틱=1초)이에요."
+        type: int
+        min: 1
+        default: 5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.combo.range
+        label: "끝없는 기사 연속 참격 사거리"
+        desc: "연속 참격이 닿는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 4.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.combo.cone-angle-degrees
+        label: "끝없는 기사 연속 참격 판정 각도"
+        desc: "연속 참격이 앞쪽으로 맞는 부채꼴의 각도(도)예요. 클수록 옆으로 비켜도 맞아요."
+        type: float
+        min: 0
+        max: 360
+        default: 100.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.combo.damage-per-strike
+        label: "끝없는 기사 연속 참격 타격당 피해"
+        desc: "연속 참격 한 번이 주는 피해량이에요."
+        type: float
+        min: 0
+        default: 5.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.counter.cooldown-seconds
+        label: "끝없는 기사 반격 태세 재사용 대기시간"
+        desc: "반격 태세를 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 18
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.counter.duration-seconds
+        label: "끝없는 기사 반격 태세 지속시간"
+        desc: "반격 태세를 유지하는 시간(초)이에요. 이 동안 근접 공격을 하면 반격당해요."
+        type: int
+        min: 0
+        default: 4
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.counter.damage
+        label: "끝없는 기사 반격 태세 반격 피해"
+        desc: "반격 태세 중 근접 공격을 한 사람이 되돌려받는 피해량이에요."
+        type: float
+        min: 0
+        default: 14.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.counter.stun-seconds
+        label: "끝없는 기사 반격 태세 스턴 지속시간"
+        desc: "반격을 당한 사람이 사실상 움직일 수 없게 되는 시간(초)이에요(강한 둔화+실명 효과로 구현돼요)."
+        type: int
+        min: 0
+        default: 2
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.charge.cooldown-seconds
+        label: "끝없는 기사 처형자의 돌진 재사용 대기시간"
+        desc: "처형자의 돌진을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 12
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.charge.speed
+        label: "끝없는 기사 처형자의 돌진 속도"
+        desc: "돌진할 때 보스에게 붙는 속도값이에요. 클수록 더 빠르게 튀어나가요."
+        type: float
+        min: 0
+        default: 1.6
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.charge.duration-ticks
+        label: "끝없는 기사 처형자의 돌진 지속시간"
+        desc: "돌진이 유지되는 시간(틱, 20틱=1초)이에요."
+        type: int
+        min: 0
+        default: 20
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.charge.hit-radius
+        label: "끝없는 기사 처형자의 돌진 판정 반경"
+        desc: "돌진 중 보스 주변 이 반경(블록) 안에 있으면 맞아요."
+        type: float
+        min: 0
+        default: 2.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.charge.damage
+        label: "끝없는 기사 처형자의 돌진 피해"
+        desc: "돌진에 맞았을 때 받는 피해량이에요."
+        type: float
+        min: 0
+        default: 12.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.charge.shield-disable-seconds
+        label: "끝없는 기사 처형자의 돌진 방패 봉인시간"
+        desc: "돌진에 맞은 사람이 방패를 쓸 수 없게 되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.knockdown.duration-seconds
+        label: "끝없는 기사 영혼의 파편 파괴 제한시간"
+        desc: "쓰러진 뒤 영혼의 파편을 모두 부숴야 하는 제한시간(초)이에요. 시간 안에 못 부수면 검기를 방출하며 체력을 모두 채우고 부활해요."
+        type: int
+        min: 0
+        default: 6
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.knockdown.fragment-count
+        label: "끝없는 기사 영혼의 파편 개수"
+        desc: "쓰러졌을 때 주변에 떨어지는 영혼의 파편 개수예요."
+        type: int
+        min: 1
+        default: 4
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.knockdown.fragment-radius
+        label: "끝없는 기사 영혼의 파편 배치 반경"
+        desc: "영혼의 파편들이 쓰러진 보스를 중심으로 놓이는 반경(블록)이에요."
+        type: float
+        min: 0
+        default: 4.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.knockdown.revive-wave-radius
+        label: "끝없는 기사 부활 충격파 범위"
+        desc: "제한시간 안에 파편을 못 부숴 부활할 때, 주변에 검기 피해를 주는 범위(블록)예요."
+        type: float
+        min: 0
+        default: 6.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.eternal-knight.knockdown.revive-wave-damage
+        label: "끝없는 기사 부활 충격파 피해"
+        desc: "부활할 때 범위 안에 있던 플레이어가 받는 피해량이에요."
+        type: float
+        min: 0
+        default: 16.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.max-health
+        label: "기억할 수 없는 자 최대 체력"
+        desc: "기억할 수 없는 자가 가진 최대 체력이에요."
+        type: float
+        min: 1
+        default: 700.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.attack-damage
+        label: "기억할 수 없는 자 공격력"
+        desc: "기억할 수 없는 자의 기본 근접 공격력이에요."
+        type: float
+        min: 0
+        default: 10.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.engage-range
+        label: "기억할 수 없는 자 탐색 범위"
+        desc: "기억할 수 없는 자가 패턴을 쓸 대상을 찾는 범위(블록)예요."
+        type: float
+        min: 0
+        default: 24.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.gaze.range
+        label: "기억할 수 없는 자 정신 붕괴의 응시 판정 거리"
+        desc: "이 거리(블록) 안에 있는 플레이어만 응시 판정을 받아요."
+        type: float
+        min: 0
+        default: 8.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.gaze.required-seconds
+        label: "기억할 수 없는 자 정신 붕괴의 응시 필요 시간"
+        desc: "이 시간(초) 이상 연속으로 정면에서 눈을 마주보면 사고 정지에 걸려요."
+        type: float
+        min: 0
+        default: 1.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.gaze.player-angle-degrees
+        label: "기억할 수 없는 자 정신 붕괴의 응시 플레이어 시야각"
+        desc: "플레이어의 시선이 보스를 향한 것으로 인정하는 각도(도)예요. 좁을수록 정확히 쳐다봐야 걸려요."
+        type: float
+        min: 0
+        max: 360
+        default: 40.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.gaze.boss-front-angle-degrees
+        label: "기억할 수 없는 자 정신 붕괴의 응시 정면 판정각"
+        desc: "보스의 정면으로 인정하는 각도(도)예요. 이 범위 밖(측면·후방)에 있으면 아무리 쳐다봐도 걸리지 않아요."
+        type: float
+        min: 0
+        max: 360
+        default: 120.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.gaze.mind-break-seconds
+        label: "기억할 수 없는 자 사고 정지 지속시간"
+        desc: "응시에 걸렸을 때 암전(실명+어둠)과 이동/명령어/채팅/스킬 차단이 유지되는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 3
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.gaze.damage-per-second
+        label: "기억할 수 없는 자 사고 정지 초당 피해"
+        desc: "사고 정지 상태인 동안 매초 받는 피해량이에요."
+        type: float
+        min: 0
+        default: 4.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.wave.cooldown-seconds
+        label: "기억할 수 없는 자 기억 소거의 파동 재사용 대기시간"
+        desc: "기억 소거의 파동을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 20
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.wave.radius
+        label: "기억할 수 없는 자 기억 소거의 파동 범위"
+        desc: "기억 소거의 파동이 적용되는 범위(블록)예요."
+        type: float
+        min: 0
+        default: 15.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.wave.seal-seconds
+        label: "기억할 수 없는 자 기억 소거의 파동 봉인시간"
+        desc: "범위 안 플레이어의 핫바 아이템을 쓸 수 없게 만드는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.ultimate.health-threshold
+        label: "기억할 수 없는 자 존재의 망각 발동 체력 비율"
+        desc: "체력이 이 비율(0~1) 이하로 떨어지면 존재의 망각이 발동해서 끝까지 유지돼요. 예를 들어 0.5면 체력 50% 이하에서 발동해요."
+        type: float
+        min: 0
+        max: 1
+        default: 0.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.ultimate.radius
+        label: "기억할 수 없는 자 존재의 망각 범위"
+        desc: "존재의 망각이 적용되는 범위(블록)예요. 이 안에 있는 플레이어는 어둠 효과를 받고 닉네임이 숨겨져요."
+        type: float
+        min: 0
+        default: 20.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.oblivion.ultimate.darkness-refresh-seconds
+        label: "기억할 수 없는 자 존재의 망각 암전 갱신 주기"
+        desc: "범위 안 플레이어에게 어둠 효과를 다시 걸어주는 주기(초)예요."
+        type: int
+        min: 0
+        default: 3
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.max-health
+        label: "종말룡 엔더드래곤 최대 체력"
+        desc: "종말룡 엔더드래곤이 가진 최대 체력이에요."
+        type: float
+        min: 1
+        default: 1200.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.attack-damage
+        label: "종말룡 엔더드래곤 공격력"
+        desc: "종말룡 엔더드래곤의 기본 근접 공격력이에요."
+        type: float
+        min: 0
+        default: 15.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.engage-range
+        label: "종말룡 엔더드래곤 탐색 범위"
+        desc: "종말룡 엔더드래곤이 패턴을 쓸 대상을 찾는 범위(블록)예요."
+        type: float
+        min: 0
+        default: 40.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.hover-height
+        label: "종말룡 엔더드래곤 비행 높이"
+        desc: "종말룡 엔더드래곤이 지면으로부터 떠 있는 높이(블록)예요."
+        type: float
+        min: 0
+        default: 7.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.move-speed
+        label: "종말룡 엔더드래곤 이동 속도"
+        desc: "0.5초마다 종말룡이 목표 쪽으로 이동하는 거리(블록)예요. 값이 클수록 더 빠르게 따라붙어요."
+        type: float
+        min: 0
+        default: 1.2
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.roar.radius
+        label: "종말룡 엔더드래곤 종말의 포효 범위"
+        desc: "종말의 포효(패시브)가 적용되는 범위(블록)예요."
+        type: float
+        min: 0
+        default: 20.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.roar.damage-per-tick
+        label: "종말룡 엔더드래곤 종말의 포효 틱당 피해"
+        desc: "종말의 포효 범위 안에 있으면 0.5초마다 받는 방어력 무시 피해예요."
+        type: float
+        min: 0
+        default: 1.5
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.roar.lift
+        label: "종말룡 엔더드래곤 종말의 포효 공중 부양력"
+        desc: "종말의 포효를 맞을 때마다 위로 밀려 올라가는 속도값이에요. 클수록 더 높이 떠올라요."
+        type: float
+        min: 0
+        default: 0.25
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.breath.cooldown-seconds
+        label: "종말룡 엔더드래곤 멸망의 브레스 재사용 대기시간"
+        desc: "멸망의 브레스를 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 15
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.breath.range
+        label: "종말룡 엔더드래곤 멸망의 브레스 사거리"
+        desc: "멸망의 브레스가 닿는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 18.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.breath.cone-angle-degrees
+        label: "종말룡 엔더드래곤 멸망의 브레스 판정 각도"
+        desc: "멸망의 브레스가 앞쪽으로 맞는 부채꼴의 각도(도)예요."
+        type: float
+        min: 0
+        max: 360
+        default: 70.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.breath.damage
+        label: "종말룡 엔더드래곤 멸망의 브레스 피해"
+        desc: "멸망의 브레스에 맞았을 때 받는 피해량이에요."
+        type: float
+        min: 0
+        default: 18.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.breath.fire-ticks
+        label: "종말룡 엔더드래곤 멸망의 브레스 화상 지속시간"
+        desc: "브레스에 맞았을 때 붙는 불이 지속되는 시간(틱, 20틱=1초)이에요."
+        type: int
+        min: 0
+        default: 120
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.breath.armor-damage
+        label: "종말룡 엔더드래곤 멸망의 브레스 방어구 내구도 피해"
+        desc: "브레스에 맞은 사람의 방어구 각 부위에 주는 내구도 피해량이에요. 방어구가 완전히 부서지지는 않고 내구도 1은 남아요."
+        type: int
+        min: 0
+        default: 200
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.dive.rise-height
+        label: "종말룡 엔더드래곤 천공의 추락 상승 높이"
+        desc: "천공의 추락을 시작할 때 종말룡이 먼저 솟아오르는 높이(블록)예요."
+        type: float
+        min: 0
+        default: 25.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.dive.telegraph-ticks
+        label: "종말룡 엔더드래곤 천공의 추락 예고 시간"
+        desc: "착지 지점을 미리 보여줘서 플레이어가 피할 시간을 주는 시간(틱, 20틱=1초)이에요."
+        type: int
+        min: 0
+        default: 40
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.dive.shockwave-radius
+        label: "종말룡 엔더드래곤 천공의 추락 충격파 범위"
+        desc: "착지할 때 충격파 피해가 미치는 범위(블록)예요."
+        type: float
+        min: 0
+        default: 8.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.dive.shockwave-damage
+        label: "종말룡 엔더드래곤 천공의 추락 충격파 피해"
+        desc: "착지 지점 한가운데서 받는 최대 피해량이에요. 중심에서 멀어질수록 피해가 줄어들어요."
+        type: float
+        min: 0
+        default: 30.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.dive.knock-up
+        label: "종말룡 엔더드래곤 천공의 추락 넉업 세기"
+        desc: "충격파에 맞았을 때 위로 튕겨 오르는 속도값이에요."
+        type: float
+        min: 0
+        default: 1.4
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.rift.health-threshold
+        label: "종말룡 엔더드래곤 공간 분할 발동 체력 비율"
+        desc: "체력이 이 비율(0~1) 이하로 떨어지면 공간 분할이 발동해요."
+        type: float
+        min: 0
+        max: 1
+        default: 0.3
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.rift.count
+        label: "종말룡 엔더드래곤 공간 분할 균열 개수"
+        desc: "공간 분할이 발동할 때 생기는 균열의 개수예요."
+        type: int
+        min: 1
+        default: 8
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.rift.spread
+        label: "종말룡 엔더드래곤 공간 분할 균열 생성 범위"
+        desc: "균열들이 소환 지점을 중심으로 흩어져 생기는 범위(블록)예요."
+        type: float
+        min: 0
+        default: 25.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.rift.radius
+        label: "종말룡 엔더드래곤 공간 분할 균열 판정 반경"
+        desc: "균열 하나마다 피해를 주는 반경(블록)이에요."
+        type: float
+        min: 0
+        default: 3.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.rift.damage
+        label: "종말룡 엔더드래곤 공간 분할 균열 피해"
+        desc: "균열에 닿았을 때 받는 피해량이에요."
+        type: float
+        min: 0
+        default: 3.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: raid-boss.apocalypse-dragon.rift.heal-block-radius
+        label: "종말룡 엔더드래곤 공간 분할 회복 차단 범위"
+        desc: "공간 분할이 열려 있는 동안, 이 거리(블록) 안에 있는 플레이어는 회복 효과가 통하지 않아요."
+        type: float
+        min: 0
+        default: 30.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: gleipnir.model-data
+        label: "글레이프니르 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 리소스팩이 없으면 기본 아이콘으로 보여요. 0이면 번호를 붙이지 않아요."
+        type: int
+        min: 0
+        default: 500023
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: gleipnir.range
+        label: "글레이프니르 대상 탐색 사거리"
+        desc: "봉인·속박을 쓸 때 바라보는 방향에서 대상을 찾는 거리(블록)예요."
+        type: float
+        min: 0
+        default: 12.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: gleipnir.cone-angle-degrees
+        label: "글레이프니르 대상 탐색 각도"
+        desc: "봉인·속박 대상을 찾는 시야각(도)이에요."
+        type: float
+        min: 0
+        max: 360
+        default: 40.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: gleipnir.seal.cooldown-seconds
+        label: "글레이프니르 봉인 재사용 대기시간"
+        desc: "[F] 봉인을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 120
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: gleipnir.seal.duration-seconds
+        label: "글레이프니르 봉인 지속시간"
+        desc: "봉인에 걸린 대상이 스킬과 특수능력을 못 쓰는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 20
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: gleipnir.bind.cooldown-seconds
+        label: "글레이프니르 속박 재사용 대기시간"
+        desc: "[Q] 속박을 다시 쓸 수 있을 때까지 걸리는 시간(초)이에요."
+        type: int
+        min: 0
+        default: 180
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: gleipnir.bind.base-seconds
+        label: "글레이프니르 속박 기본 시간"
+        desc: "속박 지속시간(초)의 기본값이에요. 대상 방어력이 0이어도 최소 이만큼은 묶여요."
+        type: float
+        min: 0
+        default: 3.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: gleipnir.bind.seconds-per-armor
+        label: "글레이프니르 속박 방어력당 추가 시간"
+        desc: "대상 방어력 1당 속박 시간에 더해지는 시간(초)이에요."
+        type: float
+        min: 0
+        default: 0.4
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: gleipnir.bind.max-seconds
+        label: "글레이프니르 속박 최대 시간"
+        desc: "기본 시간과 방어력 보너스를 더해도 이 값(초)을 넘지 않아요."
+        type: float
+        min: 0
+        default: 15.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: gleipnir.absolute-seal.enabled
+        label: "글레이프니르 절대봉인 사용 여부"
+        desc: "절대봉인([L], 대상을 서버에서 강제로 차단하는 기능)을 이 서버에서 쓸 수 있게 할지예요. 꺼두면 아이템을 써도 아무 일도 일어나지 않아요."
+        type: bool
+        default: true
+        restart: true
+        secret: false
+        risk: medium
+        verify: false
+        note: "플레이어를 서버에서 차단하는 기능을 켜고 끄는 항목이라 신중하게 정해야 해요."
+
+      - key: gleipnir.absolute-seal.ban-seconds
+        label: "글레이프니르 절대봉인 차단 시간"
+        desc: "절대봉인에 당한 대상이 서버에 다시 접속하지 못하는 시간(초)이에요. 실제로 플레이어를 서버에서 차단(밴)하는 시간이라 신중하게 정해야 해요."
+        type: int
+        min: 0
+        default: 600
+        restart: true
+        secret: false
+        risk: medium
+        verify: false
+        note: "서버 접속을 막는 시간이라 너무 길게 잡으면 분쟁 소지가 커요."
+
+      - key: core.model-data
+        label: "코어 모델 번호"
+        desc: "리소스팩의 전용 그림과 연결되는 번호예요. 0이면 번호를 붙이지 않고, 리소스팩이 없으면 기본 아이콘으로 보여요."
+        type: int
+        min: 0
+        default: 500040
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.강화석
+        label: "코어 상점 가격: 강화석"
+        desc: "코어 상점에서 '강화석' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 50.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.별가루
+        label: "코어 상점 가격: 별가루"
+        desc: "코어 상점에서 '별가루' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 80.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.일반두루마리
+        label: "코어 상점 가격: 일반등급 두루마리"
+        desc: "코어 상점에서 '일반등급 두루마리' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 100.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.레어두루마리
+        label: "코어 상점 가격: 레어등급 두루마리"
+        desc: "코어 상점에서 '레어등급 두루마리' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 250.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.에픽두루마리
+        label: "코어 상점 가격: 에픽등급 두루마리"
+        desc: "코어 상점에서 '에픽등급 두루마리' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 600.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.레전더리두루마리
+        label: "코어 상점 가격: 레전더리등급 두루마리"
+        desc: "코어 상점에서 '레전더리등급 두루마리' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 1500.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.일괄약탈주문서
+        label: "코어 암시장 가격: 일괄약탈주문서"
+        desc: "코어 암시장에서 '일괄약탈주문서' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 300.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.함정설치키트
+        label: "코어 암시장 가격: 함정설치키트"
+        desc: "코어 암시장에서 '함정설치키트' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 200.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.화염병
+        label: "코어 암시장 가격: 화염병"
+        desc: "코어 암시장에서 '화염병' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 80.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.연막탄
+        label: "코어 암시장 가격: 연막탄"
+        desc: "코어 암시장에서 '연막탄' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 60.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.밀도나침반
+        label: "코어 암시장 가격: 밀도나침반"
+        desc: "코어 암시장에서 '밀도나침반' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 150.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.발자국추적기
+        label: "코어 암시장 가격: 발자국추적기"
+        desc: "코어 암시장에서 '발자국추적기' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 150.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.혈흔나침반
+        label: "코어 암시장 가격: 혈흔나침반"
+        desc: "코어 암시장에서 '혈흔나침반' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 200.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
+
+      - key: core.shop.prices.소음차단포션
+        label: "코어 암시장 가격: 소음차단포션"
+        desc: "코어 암시장에서 '소음차단포션' 1개를 살 때 빠지는 돈(포인트)이에요. 이 줄을 지우면 가격이 9999가 돼요."
+        type: float
+        min: 0
+        default: 120.0
+        restart: true
+        secret: false
+        risk: low
+        verify: false
