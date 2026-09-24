@@ -1,6 +1,7 @@
 package com.tntbbp.myminecraft.listener.raid;
 
 import com.tntbbp.myminecraft.MyMinecraftPlugin;
+import com.tntbbp.myminecraft.manager.item.MaterialManager;
 import com.tntbbp.myminecraft.manager.mail.MailSpec;
 import com.tntbbp.myminecraft.manager.raid.RaidBossManager;
 import com.tntbbp.myminecraft.manager.weapon.MalyongdoManager;
@@ -29,6 +30,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 /** 레이드 보스 본체와 보조 엔티티(영혼의 파편 등)에 대한 피해/사망을 해당 보스에게 전달한다. */
@@ -170,7 +172,9 @@ public class RaidBossListener implements Listener {
             return;
         }
         boss.onDeath();
-        dropMalyongdo(boss, event);
+        Player recipient = rewardRecipient(event);
+        dropMalyongdo(boss, recipient);
+        dropFinaleByproducts(boss, recipient);
         manager.cleanUp(boss);
     }
 
@@ -183,28 +187,75 @@ public class RaidBossListener implements Listener {
      * <p>받는 사람은 마지막 일격을 넣은 플레이어다. 보스가 환경 피해로 죽어 처치자가 없으면 근처
      * 플레이어 중 한 명에게 간다. 아무도 없으면 이번 판은 드랍 없이 넘어간다.
      */
-    private void dropMalyongdo(RaidBoss boss, EntityDeathEvent event) {
+    /**
+     * 보스 보상을 받을 사람. 마지막 일격을 넣은 사람이고, 보스가 환경 피해로 죽어 처치자가 없으면
+     * 근처(30블록) 플레이어 중 한 명이다. 아무도 없으면 null.
+     */
+    private Player rewardRecipient(EntityDeathEvent event) {
+        Player killer = event.getEntity().getKiller();
+        if (killer != null) {
+            return killer;
+        }
+        List<Player> nearby = new ArrayList<>();
+        for (Entity nearbyEntity : event.getEntity().getWorld().getNearbyEntities(
+                event.getEntity().getLocation(), 30, 30, 30)) {
+            if (nearbyEntity instanceof Player player && player.getGameMode() != GameMode.SPECTATOR) {
+                nearby.add(player);
+            }
+        }
+        return nearby.isEmpty() ? null : nearby.get(ThreadLocalRandom.current().nextInt(nearby.size()));
+    }
+
+    /**
+     * 종언급 부산물. 보스마다 {@code finale-byproducts.<보스ID>} 목록의 재료를 확률대로 모아 <b>우편 한 통</b>으로
+     * 보낸다. 우편으로 보내므로 인벤토리가 가득 차도 사라지지 않고, 받을 때 거래 기록도 남는다.
+     */
+    private void dropFinaleByproducts(RaidBoss boss, Player recipient) {
+        if (recipient == null) {
+            return;
+        }
+        MaterialManager materials = plugin.getMaterialManager();
+        List<MailSpec.Item> items = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+        for (Map<?, ?> entry : plugin.getConfig().getMapList("finale-byproducts." + boss.id())) {
+            String id = String.valueOf(entry.get("material"));
+            MaterialManager.MaterialDef def = materials.find(id);
+            if (def == null) {
+                plugin.getLogger().warning("finale-byproducts." + boss.id() + " 의 재료 '" + id
+                        + "' 를 materials.list 에서 찾지 못했습니다.");
+                continue;
+            }
+            double chance = entry.get("chance-percent") instanceof Number n ? n.doubleValue() : 100.0;
+            int amount = entry.get("amount") instanceof Number n ? Math.max(1, n.intValue()) : 1;
+            if (ThreadLocalRandom.current().nextDouble() * 100.0 >= chance) {
+                continue;
+            }
+            items.add(MailSpec.Item.special(def.shortName(), materials.createItem(def, amount), amount,
+                    def.displayName()));
+            names.add(def.displayName() + (amount > 1 ? " x" + amount : ""));
+        }
+        if (items.isEmpty()) {
+            return;
+        }
+
+        String bossName = boss.displayName();
+        MailSpec spec = MailSpec.of(MailSenderType.QUEST, "레이드 보상", bossName + " 토벌 부산물",
+                bossName + "을(를) 쓰러뜨리고 남은 종언급 부산물입니다.", items, 0);
+        plugin.getMailManager().send(spec, recipient.getUniqueId());
+
+        plugin.getServer().broadcastMessage(ChatColor.DARK_RED + "[레이드] " + ChatColor.GOLD
+                + recipient.getName() + ChatColor.WHITE + "님이 " + bossName + "에게서 "
+                + ChatColor.DARK_RED + String.join(", ", names) + ChatColor.WHITE + "을(를) 얻었습니다! "
+                + ChatColor.GRAY + "(우편함 확인)");
+    }
+
+    private void dropMalyongdo(RaidBoss boss, Player recipient) {
         MalyongdoManager malyongdo = plugin.getMalyongdoManager();
-        if (!"apocalypse-dragon".equals(boss.id())) {
+        if (!"apocalypse-dragon".equals(boss.id()) || recipient == null) {
             return;
         }
         if (ThreadLocalRandom.current().nextDouble() * 100.0 >= malyongdo.dropChancePercent()) {
             return;
-        }
-
-        Player recipient = event.getEntity().getKiller();
-        if (recipient == null) {
-            List<Player> nearby = new ArrayList<>();
-            for (Entity nearbyEntity : event.getEntity().getWorld().getNearbyEntities(
-                    event.getEntity().getLocation(), 30, 30, 30)) {
-                if (nearbyEntity instanceof Player player && player.getGameMode() != GameMode.SPECTATOR) {
-                    nearby.add(player);
-                }
-            }
-            if (nearby.isEmpty()) {
-                return;
-            }
-            recipient = nearby.get(ThreadLocalRandom.current().nextInt(nearby.size()));
         }
 
         ItemStack weapon = malyongdo.createItem();

@@ -709,6 +709,69 @@ materials:
         - "우주의 탄생과 소멸의 에너지가 응축되어"
         - "차원의 균열 속에서만 발견되는"
         - "절대적인 신화급 코어 재료."
+    # ----- 종언급 부산물 — 레이드 보스를 쓰러뜨리면 우편으로 받는다 (finale-byproducts 참고) -----
+    rootless:
+      name: "무근원"
+      grade: FINALE
+      material: ECHO_SHARD
+      model-data: 500118
+      description:
+        - "기억할 수 없는 자가 흩어지며 남긴 조각."
+        - "어디에서 왔는지 아무도 떠올리지 못한다."
+    endless_conviction:
+      name: "끝없는 신념"
+      grade: FINALE
+      material: HEART_OF_THE_SEA
+      model-data: 500119
+      description:
+        - "쓰러지고도 다시 일어서던 끝없는 기사의 심장."
+        - "꺾이지 않는 의지가 아직도 뛰고 있다."
+    apocalypse_dragon_scale:
+      name: "종말룡의 비늘"
+      grade: FINALE
+      material: PHANTOM_MEMBRANE
+      model-data: 500120
+      description:
+        - "종말룡 엔더드래곤의 몸에서 벗겨낸 비늘."
+        - "세상의 끝을 견뎌낸 껍질."
+    apocalypse_dragon_claw:
+      name: "종말룡의 발톱"
+      grade: FINALE
+      material: PRISMARINE_SHARD
+      model-data: 500121
+      description:
+        - "종말룡 엔더드래곤이 대지를 찢던 발톱."
+        - "쥐기만 해도 손끝이 저려 온다."
+    apocalypse_dragon_blood:
+      name: "종말룡의 피"
+      grade: FINALE
+      material: DRAGON_BREATH
+      model-data: 500122
+      description:
+        - "종말룡 엔더드래곤이 흘린 검붉은 피."
+        - "식지 않고 병 속에서 계속 끓어오른다."
+
+# 종언급 부산물 — 레이드 보스를 쓰러뜨리면 마지막 일격을 넣은 사람에게 우편으로 보낸다.
+# (처치자가 없으면 근처 30블록 안의 플레이어 중 한 명). material 은 위 materials.list 의 id.
+finale-byproducts:
+  oblivion:
+    - material: rootless
+      chance-percent: 100.0
+      amount: 1
+  eternal-knight:
+    - material: endless_conviction
+      chance-percent: 100.0
+      amount: 1
+  apocalypse-dragon:
+    - material: apocalypse_dragon_scale
+      chance-percent: 100.0
+      amount: 1
+    - material: apocalypse_dragon_claw
+      chance-percent: 100.0
+      amount: 1
+    - material: apocalypse_dragon_blood
+      chance-percent: 100.0
+      amount: 1
 
 # 전설 등급 무기 '말룡도(末龍刀)' — 종말룡 엔더드래곤을 잡으면 확률로 떨어진다.
 # 단계별 연계 무기라 1초식 적중 -> 2초식 -> 3초식 순서로만 쓸 수 있다.
